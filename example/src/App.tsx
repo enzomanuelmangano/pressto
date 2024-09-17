@@ -1,14 +1,16 @@
-import { PressableScale } from '@reactiive/pressables';
-import { StyleSheet, Text } from 'react-native';
+import { PressableScale, PressablesConfig } from '@reactiive/pressables';
+import { StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function App() {
   return (
-    <GestureHandlerRootView style={styles.container}>
-      <PressableScale>
-        <Text>Result</Text>
-      </PressableScale>
-    </GestureHandlerRootView>
+    <PressablesConfig animationType="spring">
+      <GestureHandlerRootView style={styles.container}>
+        <PressableScale onPress={() => console.log('pressed')}>
+          <View style={styles.box} />
+        </PressableScale>
+      </GestureHandlerRootView>
+    </PressablesConfig>
   );
 }
 
@@ -19,8 +21,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   box: {
-    width: 60,
-    height: 60,
-    marginVertical: 20,
+    width: 200,
+    height: 200,
+    backgroundColor: 'red',
   },
 });

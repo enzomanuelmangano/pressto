@@ -1,15 +1,16 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import type { SharedValue } from 'react-native-reanimated';
 import Animated, {
-  Easing,
   runOnJS,
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
+  withSpring,
   withTiming,
 } from 'react-native-reanimated';
+import { usePressablesConfig } from '../provider';
 
 export type BasePressableProps = {
   children: React.ReactNode;
@@ -28,14 +29,16 @@ const BasePressable: React.FC<BasePressableProps> = ({
   style,
   animatedStyle,
 }) => {
+  const { animationType, config } = usePressablesConfig();
   const active = useSharedValue(false);
 
+  const withAnimation = useMemo(() => {
+    return animationType === 'timing' ? withTiming : withSpring;
+  }, [animationType]);
+
   const progress = useDerivedValue(() => {
-    return withTiming(active.value ? 1 : 0, {
-      duration: 250,
-      easing: Easing.bezier(0.25, 0.1, 0.25, 1),
-    });
-  }, []);
+    return withAnimation(active.value ? 1 : 0, config);
+  }, [config, withAnimation]);
 
   const gesture = Gesture.Tap()
     .maxDuration(4000)
