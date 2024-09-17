@@ -5,13 +5,13 @@ import type { ViewStyle } from 'react-native';
 import type { BasePressableProps } from './base';
 import { BasePressable } from './base';
 
-export type PressableScaleProps = Omit<BasePressableProps, 'animatedStyle'>;
+export type CustomPressableProps = Omit<BasePressableProps, 'animatedStyle'>;
 
 const withAnimatedTapStyle = (
   WrappedComponent: React.ComponentType<BasePressableProps>,
   animatedStyle: (progress: SharedValue<number>) => ViewStyle
 ) => {
-  return (props: PressableScaleProps) => {
+  return (props: CustomPressableProps) => {
     return <WrappedComponent {...props} animatedStyle={animatedStyle} />;
   };
 };

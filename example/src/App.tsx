@@ -1,4 +1,5 @@
 import {
+  createAnimatedPressable,
   PressableOpacity,
   PressableScale,
   PressablesConfig,
@@ -6,16 +7,31 @@ import {
 import { StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+const PressableRotate = createAnimatedPressable((progress) => {
+  'worklet';
+  return {
+    transform: [{ rotate: `${(progress.value * Math.PI) / 4}rad` }],
+  };
+});
+
 export default function App() {
   return (
     <PressablesConfig animationType="spring">
       <GestureHandlerRootView style={styles.container}>
-        <PressableScale onPress={() => console.log('pressed')}>
+        <PressableScale
+          onPress={() => console.log('scale')}
+          config={{
+            duration: 100,
+          }}
+        >
           <View style={styles.box} />
         </PressableScale>
-        <PressableOpacity onPress={() => console.log('pressed')}>
+        <PressableOpacity onPress={() => console.log('opacity')}>
           <View style={[styles.box, styles.customBox]} />
         </PressableOpacity>
+        <PressableRotate onPress={() => console.log('rotate')}>
+          <View style={styles.box} />
+        </PressableRotate>
       </GestureHandlerRootView>
     </PressablesConfig>
   );

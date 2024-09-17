@@ -11,6 +11,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { usePressablesConfig } from '../provider';
+import type { PressableContextType } from '../provider/context';
 
 export type BasePressableProps = {
   children: React.ReactNode;
@@ -19,7 +20,7 @@ export type BasePressableProps = {
   onPressOut?: () => void;
   style?: StyleProp<ViewStyle>;
   animatedStyle?: (progress: SharedValue<number>) => ViewStyle;
-};
+} & Partial<PressableContextType<'timing' | 'spring'>>;
 
 const BasePressable: React.FC<BasePressableProps> = ({
   children,
@@ -28,8 +29,30 @@ const BasePressable: React.FC<BasePressableProps> = ({
   onPressOut,
   style,
   animatedStyle,
+  animationType: animationTypeProp,
+  config: configProp,
 }) => {
-  const { animationType, config } = usePressablesConfig();
+  const { animationType: animationTypeProvider, config: configPropProvider } =
+    usePressablesConfig();
+
+  const { animationType, config } = useMemo(() => {
+    if (animationTypeProp != null) {
+      return {
+        animationType: animationTypeProp,
+        config: configProp,
+      };
+    }
+    return {
+      animationType: animationTypeProvider,
+      config: configProp ?? configPropProvider,
+    };
+  }, [
+    animationTypeProp,
+    animationTypeProvider,
+    configProp,
+    configPropProvider,
+  ]);
+
   const active = useSharedValue(false);
 
   const withAnimation = useMemo(() => {

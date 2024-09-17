@@ -8,7 +8,7 @@ import { DefaultConfigs } from './constants';
 import { PressablesContext, type AnimationType } from './context';
 
 export type PressablesConfigProps<T extends AnimationType> = {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   animationType?: T;
   config?: T extends 'timing' ? WithTimingConfig : WithSpringConfig;
 };
