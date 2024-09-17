@@ -1,5 +1,5 @@
 import { interpolate } from 'react-native-reanimated';
-import { createAnimatedPressable } from './hoc';
+import { createAnimatedPressable } from '../hoc';
 
 export const PressableScale = createAnimatedPressable((progress) => {
   'worklet';
