@@ -1,6 +1,7 @@
 import React from 'react';
 import type { SharedValue } from 'react-native-reanimated';
 
+import type { ViewStyle } from 'react-native';
 import type { BasePressableProps } from './base';
 import { BasePressable } from './base';
 
@@ -8,7 +9,7 @@ export type PressableScaleProps = Omit<BasePressableProps, 'animatedStyle'>;
 
 const withAnimatedTapStyle = (
   WrappedComponent: React.ComponentType<BasePressableProps>,
-  animatedStyle: (progress: SharedValue<number>) => any
+  animatedStyle: (progress: SharedValue<number>) => ViewStyle
 ) => {
   return (props: PressableScaleProps) => {
     return <WrappedComponent {...props} animatedStyle={animatedStyle} />;
@@ -16,7 +17,7 @@ const withAnimatedTapStyle = (
 };
 
 export const createAnimatedPressable = (
-  animatedStyle: (progress: SharedValue<number>) => any
+  animatedStyle: (progress: SharedValue<number>) => ViewStyle
 ) => {
   return withAnimatedTapStyle(BasePressable, animatedStyle);
 };

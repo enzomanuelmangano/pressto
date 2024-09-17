@@ -15,16 +15,15 @@ export type PressablesConfigProps<T extends AnimationType> = {
 
 export const PressablesConfig = <T extends AnimationType>({
   children,
-  animationType: animationTypeProp,
+  animationType = 'timing' as T,
   config,
 }: PressablesConfigProps<T>) => {
   const value = useMemo(() => {
-    const animationType = animationTypeProp ?? 'timing';
     return {
-      animationType: animationType as T,
+      animationType,
       config: config ?? DefaultConfigs[animationType],
     };
-  }, [animationTypeProp, config]);
+  }, [animationType, config]);
 
   return (
     <PressablesContext.Provider value={value}>

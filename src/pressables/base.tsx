@@ -18,7 +18,7 @@ export type BasePressableProps = {
   onPressIn?: () => void;
   onPressOut?: () => void;
   style?: StyleProp<ViewStyle>;
-  animatedStyle?: (progress: SharedValue<number>) => any;
+  animatedStyle?: (progress: SharedValue<number>) => ViewStyle;
 };
 
 const BasePressable: React.FC<BasePressableProps> = ({
