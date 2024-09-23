@@ -1,5 +1,5 @@
 {
-  "name": "@reactiive/pressables-example",
+  "name": "pressto-example",
   "version": "1.0.0",
   "main": "expo/AppEntry.js",
   "scripts": {

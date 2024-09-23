@@ -1,5 +1,5 @@
 {
-  "name": "@reactiive/pressables",
+  "name": "pressto",
   "version": "0.1.0",
   "description": "Some custom react native touchables",
   "source": "./src/index.tsx",
@@ -36,7 +36,7 @@
     "!**/.*"
   ],
   "scripts": {
-    "example": "yarn workspace @reactiive/pressables-example",
+    "example": "yarn workspace pressto-example",
     "test": "jest",
     "typecheck": "tsc",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",

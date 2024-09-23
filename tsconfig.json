@@ -2,7 +2,7 @@
   "compilerOptions": {
     "rootDir": ".",
     "paths": {
-      "@reactiive/pressables": ["./src/index"]
+      "pressto": ["./src/index"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,

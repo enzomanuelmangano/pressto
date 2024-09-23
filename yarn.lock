@@ -3479,9 +3479,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@reactiive/pressables-example@workspace:example":
+"pressto-example@workspace:example":
   version: 0.0.0-use.local
-  resolution: "@reactiive/pressables-example@workspace:example"
+  resolution: "pressto-example@workspace:example"
   dependencies:
     "@babel/core": ^7.20.0
     "@expo/metro-runtime": ~3.2.3
@@ -3495,9 +3495,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@reactiive/pressables@workspace:.":
+"pressto@workspace:.":
   version: 0.0.0-use.local
-  resolution: "@reactiive/pressables@workspace:."
+  resolution: "pressto@workspace:."
   dependencies:
     "@commitlint/config-conventional": ^17.0.2
     "@evilmartians/lefthook": ^1.5.0

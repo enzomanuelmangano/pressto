@@ -1,24 +1,22 @@
-# @reactiive/pressables
+# pressto
 
 Some custom react native touchables
 
 ## Installation
 
 ```sh
-npm install @reactiive/pressables
+npm install pressto
 ```
 
 ## Usage
 
-
 ```js
-import { multiply } from '@reactiive/pressables';
+import { multiply } from 'pressto';
 
 // ...
 
 const result = await multiply(3, 7);
 ```
-
 
 ## Contributing
 
