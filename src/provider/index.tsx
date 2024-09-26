@@ -11,19 +11,28 @@ export type PressablesConfigProps<T extends AnimationType> = {
   children?: React.ReactNode;
   animationType?: T;
   config?: T extends 'timing' ? WithTimingConfig : WithSpringConfig;
+  onPressIn?: () => void;
+  onPress?: () => void;
+  onPressOut?: () => void;
 };
 
 export const PressablesConfig = <T extends AnimationType>({
   children,
   animationType = 'timing' as T,
   config,
+  onPressIn,
+  onPressOut,
+  onPress,
 }: PressablesConfigProps<T>) => {
   const value = useMemo(() => {
     return {
       animationType,
       config: config ?? DefaultConfigs[animationType],
+      onPressIn,
+      onPressOut,
+      onPress,
     };
-  }, [animationType, config]);
+  }, [animationType, config, onPressIn, onPressOut, onPress]);
 
   return (
     <PressablesContext.Provider value={value}>

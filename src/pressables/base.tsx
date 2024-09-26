@@ -34,8 +34,13 @@ const BasePressable: React.FC<BasePressableProps> = ({
   config: configProp,
   enabled = true,
 }) => {
-  const { animationType: animationTypeProvider, config: configPropProvider } =
-    usePressablesConfig();
+  const {
+    animationType: animationTypeProvider,
+    config: configPropProvider,
+    onPressIn: onPressInProvider,
+    onPressOut: onPressOutProvider,
+    onPress: onPressProvider,
+  } = usePressablesConfig();
 
   const { animationType, config } = useMemo(() => {
     if (animationTypeProp != null) {
@@ -70,13 +75,16 @@ const BasePressable: React.FC<BasePressableProps> = ({
     .maxDuration(4000)
     .onTouchesDown(() => {
       active.value = true;
+      if (onPressInProvider != null) runOnJS(onPressInProvider)();
       if (onPressIn != null) runOnJS(onPressIn)();
     })
     .onTouchesUp(() => {
+      if (onPressProvider != null) runOnJS(onPressProvider)();
       if (onPress != null) runOnJS(onPress)();
     })
     .onFinalize(() => {
       active.value = false;
+      if (onPressOutProvider != null) runOnJS(onPressOutProvider)();
       if (onPressOut != null) runOnJS(onPressOut)();
     });
 
