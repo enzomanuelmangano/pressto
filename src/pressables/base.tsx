@@ -12,6 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { usePressablesConfig } from '../provider';
 import type { PressableContextType } from '../provider/context';
+import { unwrapSharedValue } from './utils';
 
 export type BasePressableProps = {
   children: React.ReactNode;
@@ -20,7 +21,7 @@ export type BasePressableProps = {
   onPressOut?: () => void;
   style?: StyleProp<ViewStyle>;
   animatedStyle?: (progress: SharedValue<number>) => ViewStyle;
-  enabled?: boolean;
+  enabled?: boolean | SharedValue<boolean>;
 } & Partial<PressableContextType<'timing' | 'spring'>>;
 
 const BasePressable: React.FC<BasePressableProps> = ({
@@ -32,7 +33,7 @@ const BasePressable: React.FC<BasePressableProps> = ({
   animatedStyle,
   animationType: animationTypeProp,
   config: configProp,
-  enabled = true,
+  enabled: enabledProp,
 }) => {
   const {
     animationType: animationTypeProvider,
@@ -70,23 +71,33 @@ const BasePressable: React.FC<BasePressableProps> = ({
     return withAnimation(active.value ? 1 : 0, config);
   }, [config, withAnimation]);
 
+  const enabled = useDerivedValue(() => {
+    return unwrapSharedValue(enabledProp);
+  }, [enabledProp]);
+
   const gesture = Gesture.Tap()
-    .enabled(enabled)
     .maxDuration(4000)
     .onTouchesDown(() => {
+      if (!enabled.value) return;
       active.value = true;
       if (onPressInProvider != null) runOnJS(onPressInProvider)();
       if (onPressIn != null) runOnJS(onPressIn)();
     })
     .onTouchesUp(() => {
+      if (!enabled.value) return;
       if (onPressProvider != null) runOnJS(onPressProvider)();
       if (onPress != null) runOnJS(onPress)();
     })
     .onFinalize(() => {
+      if (!enabled.value) return;
       active.value = false;
       if (onPressOutProvider != null) runOnJS(onPressOutProvider)();
       if (onPressOut != null) runOnJS(onPressOut)();
     });
+
+  if (typeof enabledProp === 'boolean') {
+    gesture.enabled(enabledProp);
+  }
 
   const rAnimatedStyle = useAnimatedStyle(() => {
     return animatedStyle ? animatedStyle(progress) : {};
