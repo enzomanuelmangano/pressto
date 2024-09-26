@@ -20,6 +20,7 @@ export type BasePressableProps = {
   onPressOut?: () => void;
   style?: StyleProp<ViewStyle>;
   animatedStyle?: (progress: SharedValue<number>) => ViewStyle;
+  enabled?: boolean;
 } & Partial<PressableContextType<'timing' | 'spring'>>;
 
 const BasePressable: React.FC<BasePressableProps> = ({
@@ -31,6 +32,7 @@ const BasePressable: React.FC<BasePressableProps> = ({
   animatedStyle,
   animationType: animationTypeProp,
   config: configProp,
+  enabled = true,
 }) => {
   const { animationType: animationTypeProvider, config: configPropProvider } =
     usePressablesConfig();
@@ -64,6 +66,7 @@ const BasePressable: React.FC<BasePressableProps> = ({
   }, [config, withAnimation]);
 
   const gesture = Gesture.Tap()
+    .enabled(enabled)
     .maxDuration(4000)
     .onTouchesDown(() => {
       active.value = true;
