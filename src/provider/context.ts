@@ -10,9 +10,11 @@ export type AnimationType = 'timing' | 'spring';
 export type PressableContextType<T extends AnimationType> = {
   animationType: T;
   config: T extends 'timing' ? WithTimingConfig : WithSpringConfig;
-  onPressIn?: () => void;
-  onPressOut?: () => void;
-  onPress?: () => void;
+  globalHandlers?: {
+    onPressIn?: () => void;
+    onPressOut?: () => void;
+    onPress?: () => void;
+  };
 };
 
 export const PressablesContext = createContext<

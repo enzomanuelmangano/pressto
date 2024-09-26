@@ -33,15 +33,18 @@ const BasePressable: React.FC<BasePressableProps> = ({
   animatedStyle,
   animationType: animationTypeProp,
   config: configProp,
-  enabled: enabledProp,
+  enabled: enabledProp = true,
 }) => {
   const {
     animationType: animationTypeProvider,
     config: configPropProvider,
+    globalHandlers,
+  } = usePressablesConfig();
+  const {
     onPressIn: onPressInProvider,
     onPressOut: onPressOutProvider,
     onPress: onPressProvider,
-  } = usePressablesConfig();
+  } = globalHandlers ?? {};
 
   const { animationType, config } = useMemo(() => {
     if (animationTypeProp != null) {
