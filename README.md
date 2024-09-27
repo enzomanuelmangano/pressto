@@ -1,6 +1,9 @@
-# pressto 💥
+https://github.com/user-attachments/assets/c857eb8d-3ce7-4afe-b2dd-e974560684d8
 
-Pressto is a React Native library that provides customizable and animated pressable components. Built on top of [react-native-reanimated](https://docs.swmansion.com/react-native-reanimated/) and [react-native-gesture-handler](https://docs.swmansion.com/react-native-gesture-handler/), pressto makes it easy to create engaging and interactive touchable elements in your React Native applications.
+The fastest way to improve your React Native app is by using tap gestures.
+That's why I've created **pressto**, a super-simple package to help you get started.
+
+The package is built on top of the Tap Gesture from [react-native-gesture-handler](https://docs.swmansion.com/react-native-gesture-handler/) to handle the resulting gestures and animations on the main thread. It aims to replace your “TouchableOpacity”.
 
 ## Installation
 
