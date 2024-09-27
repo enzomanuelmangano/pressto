@@ -4,39 +4,51 @@ import {
   PressableScale,
   PressablesConfig,
 } from 'pressto';
-import { StatusBar, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { gestureHandlerRootHOC } from 'react-native-gesture-handler';
-import { interpolate } from 'react-native-reanimated';
+import { interpolate, interpolateColor } from 'react-native-reanimated';
 
-const PressableRotateScale = createAnimatedPressable((progress) => {
+const PressableRotate = createAnimatedPressable((progress) => {
   'worklet';
   return {
     transform: [
       { rotate: `${(progress.value * Math.PI) / 4}rad` },
       { scale: interpolate(progress.value, [0, 1], [1, 0.9]) },
     ],
+    backgroundColor: interpolateColor(
+      progress.value,
+      [0, 1],
+      ['#e4e4e4', '#ffffff']
+    ),
+    shadowColor: '#ffffff',
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: interpolate(progress.value, [0, 1], [0, 1]),
+    shadowRadius: interpolate(progress.value, [0, 1], [0, 150]),
   };
 });
 
 function App() {
   return (
     <View style={styles.container}>
-      <PressableRotateScale
+      <PressableRotate
         style={styles.box}
         onPress={() => {
-          console.log('Tapping Rotate Scale');
+          console.log('tap rotate :)');
         }}
       />
       <PressableScale
         style={styles.box}
         onPress={() => {
-          console.log('Tapping Scale');
+          console.log('tap scale :)');
         }}
       />
       <PressableOpacity
         style={styles.box}
         onPress={() => {
-          console.log('Tapping Opacity');
+          console.log('tap opacity :)');
         }}
       />
     </View>
@@ -54,7 +66,7 @@ const styles = StyleSheet.create({
   box: {
     width: 120,
     height: 120,
-    backgroundColor: '#0062ff',
+    backgroundColor: '#cbcbcb',
     borderRadius: 35,
     borderCurve: 'continuous',
   },
@@ -62,8 +74,17 @@ const styles = StyleSheet.create({
 
 const AppProvider = () => {
   return (
-    <PressablesConfig>
-      <StatusBar barStyle="light-content" />
+    <PressablesConfig
+      animationType="spring"
+      config={{
+        mass: 2,
+      }}
+      globalHandlers={{
+        onPress: () => {
+          console.log('use haptics!');
+        },
+      }}
+    >
       <App />
     </PressablesConfig>
   );

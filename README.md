@@ -1,4 +1,4 @@
-# pressto
+# pressto 💥
 
 Pressto is a React Native library that provides customizable and animated pressable components. Built on top of [react-native-reanimated](https://docs.swmansion.com/react-native-reanimated/) and [react-native-gesture-handler](https://docs.swmansion.com/react-native-gesture-handler/), pressto makes it easy to create engaging and interactive touchable elements in your React Native applications.
 
@@ -8,62 +8,84 @@ Pressto is a React Native library that provides customizable and animated pressa
 yarn add pressto react-native-reanimated react-native-gesture-handler
 ```
 
-Make sure to follow the installation instructions for [react-native-reanimated](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/installation) and [react-native-gesture-handler](https://docs.swmansion.com/react-native-gesture-handler/docs/installation) as well.
+Or with Expo
+
+```sh
+npx expo install pressto react-native-reanimated react-native-gesture-handler
+```
 
 ## Features
 
 - Pre-built animated pressable components: `PressableScale` and `PressableOpacity`
 - Easy creation of custom animated pressables with `createAnimatedPressable`
 - Configurable animation types and durations
-- Seamless integration with React Native's existing components
 
 ## Usage
 
-Here's a quick example of how to use pressto in your React Native app:
+### Use basic Pressables: PressableScale and PressableOpacity
 
 ```jsx
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import {
-  createAnimatedPressable,
-  PressableOpacity,
-  PressableScale,
-  PressablesConfig,
-} from 'pressto';
+import { PressableOpacity, PressableScale } from 'pressto';
 
-// Create a custom animated pressable
-const PressableRotate = createAnimatedPressable((progress) => {
-  'worklet';
-  return {
-    transform: [{ rotate: `${(progress.value * Math.PI) / 4}rad` }],
-  };
-});
-
-export default function App() {
+function BasicPressablesExample() {
   return (
-    <PressablesConfig animationType="spring">
-      <GestureHandlerRootView style={styles.container}>
-        <PressableScale
-          onPress={() => console.log('scale')}
-          config={{ duration: 100 }}
-        >
-          <View style={styles.box} />
-        </PressableScale>
-        <PressableOpacity onPress={() => console.log('opacity')}>
-          <View style={[styles.box, styles.customBox]} />
-        </PressableOpacity>
-        <PressableRotate onPress={() => console.log('rotate')}>
-          <View style={styles.box} />
-        </PressableRotate>
-      </GestureHandlerRootView>
-    </PressablesConfig>
+    <View style={styles.container}>
+      <PressableScale style={styles.box} onPress={() => console.log('scale')} />
+      <PressableOpacity style={styles.box} onPress={() => console.log('opacity')} />
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  // ... (styles omitted for brevity)
-});
+```
+
+### Create a custom Pressable with createAnimatedPressable
+
+```jsx
+import { createAnimatedPressable } from 'pressto';
+
+const PressableRotate = createAnimatedPressable((progress) => ({
+  transform: [
+    { rotate: `${progress.value * Math.PI / 4}rad` },
+  ],
+}));
+
+function CustomPressableExample() {
+  return (
+    <View style={styles.container}>
+      <PressableRotate style={styles.box} onPress={() => console.log('rotate')} />
+    </View>
+  );
+}
+```
+
+### Use the PressablesConfig
+
+```jsx
+import React from 'react';
+import { gestureHandlerRootHOC } from 'react-native-gesture-handler';
+import { PressablesConfig } from 'pressto';
+
+function App() {
+  return (
+    <View style={styles.container}>
+      <PressableRotate style={styles.box} onPress={() => console.log('rotate')} />
+      <PressableScale style={styles.box} onPress={() => console.log('scale')} />
+      <PressableOpacity style={styles.box} onPress={() => console.log('opacity')} />
+    </View>
+  );
+}
+
+export default () => (
+  <PressablesConfig animationType="spring" config={{ mass: 2 }} globalHandlers={{
+    onPress: () => {
+      console.log('you can call haptics here');
+    }
+  }}>
+    <App />
+  </PressablesConfig>
+)
 ```
 
 ## API
