@@ -52,14 +52,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/enzomanuelmangano/reactiive-pressables.git"
+    "url": "git+https://github.com/enzomanuelmangano/pressto.git"
   },
   "author": "Enzo Manuel Mangano <enzomanuelmangano@gmail.com> (https://github.com/enzomanuelmangano)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/enzomanuelmangano/reactiive-pressables/issues"
+    "url": "https://github.com/enzomanuelmangano/pressto/issues"
   },
-  "homepage": "https://github.com/enzomanuelmangano/reactiive-pressables#readme",
+  "homepage": "https://github.com/enzomanuelmangano/pressto#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
@@ -80,6 +80,8 @@
     "react": "18.2.0",
     "react-native": "0.74.5",
     "react-native-builder-bob": "^0.30.2",
+    "react-native-gesture-handler": "~2.16.1",
+    "react-native-reanimated": "~3.10.1",
     "release-it": "^15.0.0",
     "typescript": "^5.2.2"
   },
@@ -88,7 +90,9 @@
   },
   "peerDependencies": {
     "react": "*",
-    "react-native": "*"
+    "react-native": "*",
+    "react-native-gesture-handler": "*",
+    "react-native-reanimated": "*"
   },
   "workspaces": [
     "example"

@@ -5,35 +5,53 @@ import {
   PressablesConfig,
 } from 'pressto';
 import { StyleSheet, View } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { gestureHandlerRootHOC } from 'react-native-gesture-handler';
+import { interpolate, interpolateColor } from 'react-native-reanimated';
 
 const PressableRotate = createAnimatedPressable((progress) => {
   'worklet';
   return {
-    transform: [{ rotate: `${(progress.value * Math.PI) / 4}rad` }],
+    transform: [
+      { rotate: `${(progress.value * Math.PI) / 4}rad` },
+      { scale: interpolate(progress.value, [0, 1], [1, 0.9]) },
+    ],
+    backgroundColor: interpolateColor(
+      progress.value,
+      [0, 1],
+      ['#e4e4e4', '#ffffff']
+    ),
+    shadowColor: '#ffffff',
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: interpolate(progress.value, [0, 1], [0, 1]),
+    shadowRadius: interpolate(progress.value, [0, 1], [0, 150]),
   };
 });
 
-export default function App() {
+function App() {
   return (
-    <PressablesConfig animationType="spring">
-      <GestureHandlerRootView style={styles.container}>
-        <PressableScale
-          onPress={() => console.log('scale')}
-          config={{
-            duration: 100,
-          }}
-        >
-          <View style={styles.box} />
-        </PressableScale>
-        <PressableOpacity onPress={() => console.log('opacity')}>
-          <View style={[styles.box, styles.customBox]} />
-        </PressableOpacity>
-        <PressableRotate onPress={() => console.log('rotate')}>
-          <View style={styles.box} />
-        </PressableRotate>
-      </GestureHandlerRootView>
-    </PressablesConfig>
+    <View style={styles.container}>
+      <PressableRotate
+        style={styles.box}
+        onPress={() => {
+          console.log('tap rotate :)');
+        }}
+      />
+      <PressableScale
+        style={styles.box}
+        onPress={() => {
+          console.log('tap scale :)');
+        }}
+      />
+      <PressableOpacity
+        style={styles.box}
+        onPress={() => {
+          console.log('tap opacity :)');
+        }}
+      />
+    </View>
   );
 }
 
@@ -42,13 +60,34 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#000000',
+    gap: 25,
   },
   box: {
-    width: 200,
-    height: 200,
-    backgroundColor: 'red',
-  },
-  customBox: {
-    backgroundColor: 'blue',
+    width: 120,
+    height: 120,
+    backgroundColor: '#cbcbcb',
+    borderRadius: 35,
+    borderCurve: 'continuous',
   },
 });
+
+const AppProvider = () => {
+  return (
+    <PressablesConfig
+      animationType="spring"
+      config={{
+        mass: 2,
+      }}
+      globalHandlers={{
+        onPress: () => {
+          console.log('use haptics!');
+        },
+      }}
+    >
+      <App />
+    </PressablesConfig>
+  );
+};
+
+export default gestureHandlerRootHOC(AppProvider);

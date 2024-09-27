@@ -15,7 +15,7 @@ import type { PressableContextType } from '../provider/context';
 import { unwrapSharedValue } from './utils';
 
 export type BasePressableProps = {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   onPress?: () => void;
   onPressIn?: () => void;
   onPressOut?: () => void;
