@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
-import type { StyleProp, ViewStyle } from 'react-native';
+import type { ViewProps, ViewStyle } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import type { SharedValue } from 'react-native-reanimated';
+import type { AnimateProps, SharedValue } from 'react-native-reanimated';
 import Animated, {
   runOnJS,
   useAnimatedStyle,
@@ -14,26 +14,28 @@ import { usePressablesConfig } from '../provider';
 import type { PressableContextType } from '../provider/context';
 import { unwrapSharedValue } from './utils';
 
+type AnimatedViewProps = AnimateProps<ViewProps>;
+
 export type BasePressableProps = {
   children?: React.ReactNode;
   onPress?: () => void;
   onPressIn?: () => void;
   onPressOut?: () => void;
-  style?: StyleProp<ViewStyle>;
   animatedStyle?: (progress: SharedValue<number>) => ViewStyle;
   enabled?: boolean | SharedValue<boolean>;
-} & Partial<PressableContextType<'timing' | 'spring'>>;
+} & Partial<PressableContextType<'timing' | 'spring'>> &
+  AnimatedViewProps;
 
 const BasePressable: React.FC<BasePressableProps> = ({
   children,
   onPress,
   onPressIn,
   onPressOut,
-  style,
   animatedStyle,
   animationType: animationTypeProp,
   config: configProp,
   enabled: enabledProp = true,
+  ...rest
 }) => {
   const {
     animationType: animationTypeProvider,
@@ -108,7 +110,9 @@ const BasePressable: React.FC<BasePressableProps> = ({
 
   return (
     <GestureDetector gesture={gesture}>
-      <Animated.View style={[style, rAnimatedStyle]}>{children}</Animated.View>
+      <Animated.View {...rest} style={[rest?.style ?? {}, rAnimatedStyle]}>
+        {children}
+      </Animated.View>
     </GestureDetector>
   );
 };
