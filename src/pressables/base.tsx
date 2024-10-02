@@ -12,6 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { usePressablesConfig } from '../provider';
 import type { PressableContextType } from '../provider/context';
+import { useIsInInternalScrollContext } from './render-scroll';
 import { unwrapSharedValue } from './utils';
 
 type AnimatedViewProps = AnimateProps<ViewProps>;
@@ -80,10 +81,13 @@ const BasePressable: React.FC<BasePressableProps> = ({
     return unwrapSharedValue(enabledProp);
   }, [enabledProp]);
 
+  const isInScrollContext = useIsInInternalScrollContext();
+
   const gesture = Gesture.Tap()
     .maxDuration(4000)
     .onTouchesDown(() => {
       if (!enabled.value) return;
+      if (isInScrollContext) return;
       active.value = true;
       if (onPressInProvider != null) runOnJS(onPressInProvider)();
       if (onPressIn != null) runOnJS(onPressIn)();

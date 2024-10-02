@@ -1,21 +1,32 @@
-import { createContext, useContext } from 'react';
-import { ScrollView, type ScrollViewProps } from 'react-native';
+import { createContext, forwardRef, useContext } from 'react';
+import type { ScrollViewProps } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import { makeMutable } from 'react-native-reanimated';
 
 export const isScrolling = makeMutable(false);
 
-const InternalScrollContext = createContext(false);
+const InternalScrollableContext = createContext(false);
 
-export const useScrollContext = () => {
-  return useContext(InternalScrollContext);
+export const useIsInInternalScrollContext = () => {
+  return useContext(InternalScrollableContext);
 };
+
+const InternalScrollView = forwardRef<ScrollView, ScrollViewProps>(
+  (props, ref) => {
+    return (
+      <InternalScrollableContext.Provider value={true}>
+        <ScrollView {...(props as any)} ref={ref} />
+      </InternalScrollableContext.Provider>
+    );
+  }
+);
 
 export const renderScrollComponent = ({
   children,
   ...props
 }: ScrollViewProps) => {
   return (
-    <ScrollView
+    <InternalScrollView
       {...props}
       onScrollBeginDrag={(event) => {
         isScrolling.value = true;
@@ -26,9 +37,7 @@ export const renderScrollComponent = ({
         return props.onScrollEndDrag?.(event);
       }}
     >
-      <InternalScrollContext.Provider value={true}>
-        {children}
-      </InternalScrollContext.Provider>
-    </ScrollView>
+      {children}
+    </InternalScrollView>
   );
 };
