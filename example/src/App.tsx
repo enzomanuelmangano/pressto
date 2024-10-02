@@ -1,10 +1,9 @@
 import {
   createAnimatedPressable,
-  PressableOpacity,
-  PressableScale,
   PressablesConfig,
+  renderScrollComponent,
 } from 'pressto';
-import { StyleSheet, View } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
 import { gestureHandlerRootHOC } from 'react-native-gesture-handler';
 import { interpolate, interpolateColor } from 'react-native-reanimated';
 
@@ -18,7 +17,7 @@ const PressableRotate = createAnimatedPressable((progress) => {
     backgroundColor: interpolateColor(
       progress.value,
       [0, 1],
-      ['#e4e4e4', '#ffffff']
+      ['#474747', '#000000']
     ),
     shadowColor: '#ffffff',
     shadowOffset: {
@@ -33,22 +32,12 @@ const PressableRotate = createAnimatedPressable((progress) => {
 function App() {
   return (
     <View style={styles.container}>
-      <PressableRotate
-        style={styles.box}
-        onPress={() => {
-          console.log('tap rotate :)');
-        }}
-      />
-      <PressableScale
-        style={styles.box}
-        onPress={() => {
-          console.log('tap scale :)');
-        }}
-      />
-      <PressableOpacity
-        style={styles.box}
-        onPress={() => {
-          console.log('tap opacity :)');
+      <FlatList
+        contentContainerStyle={styles.container}
+        data={new Array(10).fill(0)}
+        renderScrollComponent={renderScrollComponent}
+        renderItem={() => {
+          return <PressableRotate style={styles.box} />;
         }}
       />
     </View>
@@ -57,18 +46,16 @@ function App() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#000000',
-    gap: 25,
+    // flex: 1,
+    backgroundColor: '#fff',
   },
   box: {
     width: 120,
     height: 120,
-    backgroundColor: '#cbcbcb',
+    backgroundColor: 'gray',
     borderRadius: 35,
     borderCurve: 'continuous',
+    alignSelf: 'center',
   },
 });
 
