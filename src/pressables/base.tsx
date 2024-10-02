@@ -86,6 +86,7 @@ const BasePressable: React.FC<BasePressableProps> = ({
   }, [enabledProp]);
 
   const isInScrollContext = useIsInInternalScrollContext();
+  const isTapped = useSharedValue(false);
 
   const onBegin = useCallback(() => {
     'worklet';
@@ -95,8 +96,6 @@ const BasePressable: React.FC<BasePressableProps> = ({
     if (onPressInProvider != null) runOnJS(onPressInProvider)();
     if (onPressIn != null) runOnJS(onPressIn)();
   }, [active, enabled.value, onPressIn, onPressInProvider]);
-
-  const isTapped = useSharedValue(false);
 
   useAnimatedReaction(
     () => {
@@ -117,26 +116,40 @@ const BasePressable: React.FC<BasePressableProps> = ({
     }
   );
 
-  const gesture = Gesture.Tap()
-    .maxDuration(4000)
-    .onTouchesDown(() => {
-      isTapped.value = true;
-      if (!isInScrollContext) {
-        return onBegin();
-      }
-    })
-    .onTouchesUp(() => {
-      if (!enabled.value || !active.value) return;
-      if (onPressProvider != null) runOnJS(onPressProvider)();
-      if (onPress != null) runOnJS(onPress)();
-    })
-    .onFinalize(() => {
-      isTapped.value = false;
-      if (!enabled.value || !active.value) return;
-      active.value = false;
-      if (onPressOutProvider != null) runOnJS(onPressOutProvider)();
-      if (onPressOut != null) runOnJS(onPressOut)();
-    });
+  const gesture = useMemo(
+    () =>
+      Gesture.Tap()
+        .maxDuration(4000)
+        .onTouchesDown(() => {
+          isTapped.value = true;
+          if (!isInScrollContext) {
+            return onBegin();
+          }
+        })
+        .onTouchesUp(() => {
+          if (!enabled.value || !active.value) return;
+          if (onPressProvider != null) runOnJS(onPressProvider)();
+          if (onPress != null) runOnJS(onPress)();
+        })
+        .onFinalize(() => {
+          isTapped.value = false;
+          if (!enabled.value || !active.value) return;
+          active.value = false;
+          if (onPressOutProvider != null) runOnJS(onPressOutProvider)();
+          if (onPressOut != null) runOnJS(onPressOut)();
+        }),
+    [
+      active,
+      enabled.value,
+      isInScrollContext,
+      isTapped,
+      onBegin,
+      onPress,
+      onPressOut,
+      onPressOutProvider,
+      onPressProvider,
+    ]
+  );
 
   if (typeof enabledProp === 'boolean') {
     gesture.enabled(enabledProp);
