@@ -3,7 +3,10 @@ import type { ScrollViewProps } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { makeMutable } from 'react-native-reanimated';
 
-export const isScrolling = makeMutable(false);
+export const scrollableInfoShared = makeMutable({
+  activatedTap: false,
+  isScrolling: false,
+});
 
 const InternalScrollableContext = createContext(false);
 
@@ -21,6 +24,43 @@ const InternalScrollView = forwardRef<ScrollView, ScrollViewProps>(
   }
 );
 
+let timeout: NodeJS.Timeout | null = null;
+
+const callbacks = {
+  onTouchStart: () => {
+    timeout = setTimeout(() => {
+      scrollableInfoShared.value = {
+        ...scrollableInfoShared.value,
+        activatedTap: true,
+      };
+    }, 75);
+  },
+  onScrollBeginDrag: () => {
+    if (timeout != null) {
+      clearTimeout(timeout);
+    }
+    scrollableInfoShared.value = {
+      ...scrollableInfoShared.value,
+      isScrolling: true,
+    };
+  },
+  onScrollEndDrag: () => {
+    scrollableInfoShared.value = {
+      ...scrollableInfoShared.value,
+      isScrolling: false,
+    };
+  },
+  onTouchEnd: () => {
+    if (timeout != null) {
+      clearTimeout(timeout);
+    }
+    scrollableInfoShared.value = {
+      ...scrollableInfoShared.value,
+      activatedTap: false,
+    };
+  },
+};
+
 export const renderScrollComponent = ({
   children,
   ...props
@@ -28,14 +68,10 @@ export const renderScrollComponent = ({
   return (
     <InternalScrollView
       {...props}
-      onScrollBeginDrag={(event) => {
-        isScrolling.value = true;
-        return props.onScrollBeginDrag?.(event);
-      }}
-      onScrollEndDrag={(event) => {
-        isScrolling.value = false;
-        return props.onScrollEndDrag?.(event);
-      }}
+      onTouchStart={callbacks.onTouchStart}
+      onScrollBeginDrag={callbacks.onScrollBeginDrag}
+      onScrollEndDrag={callbacks.onScrollEndDrag}
+      onTouchEnd={callbacks.onTouchEnd}
     >
       {children}
     </InternalScrollView>
