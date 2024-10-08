@@ -155,3 +155,4 @@ function App() {
 ```
 
 The `renderScrollComponent` function wraps the scroll view with additional functionality in order to allow smoother interactions between scrolling and pressable components, preventing unwanted activations during scroll gestures.
+Applying the renderScrollComponent from `pressto` means that the tap gesture will be delayed for a short amount of time to understand if the tap gesture is a scroll or a tap gesture.
