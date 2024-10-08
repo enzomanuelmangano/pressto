@@ -28,6 +28,10 @@ let timeout: NodeJS.Timeout | null = null;
 
 const callbacks = {
   onTouchStart: () => {
+    scrollableInfoShared.value = {
+      ...scrollableInfoShared.value,
+      activatedTap: false,
+    };
     timeout = setTimeout(() => {
       scrollableInfoShared.value = {
         ...scrollableInfoShared.value,
