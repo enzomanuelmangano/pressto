@@ -116,44 +116,45 @@ const BasePressable: React.FC<BasePressableProps> = ({
     }
   );
 
-  const gesture = useMemo(
-    () =>
-      Gesture.Tap()
-        .maxDuration(4000)
-        .onTouchesDown(() => {
-          isTapped.value = true;
-          if (!isInScrollContext) {
-            return onBegin();
-          }
-        })
-        .onTouchesUp(() => {
-          if (!enabled.value || !active.value) return;
-          if (onPressProvider != null) runOnJS(onPressProvider)();
-          if (onPress != null) runOnJS(onPress)();
-        })
-        .onFinalize(() => {
-          isTapped.value = false;
-          if (!enabled.value || !active.value) return;
-          active.value = false;
-          if (onPressOutProvider != null) runOnJS(onPressOutProvider)();
-          if (onPressOut != null) runOnJS(onPressOut)();
-        }),
-    [
-      active,
-      enabled.value,
-      isInScrollContext,
-      isTapped,
-      onBegin,
-      onPress,
-      onPressOut,
-      onPressOutProvider,
-      onPressProvider,
-    ]
-  );
+  const gesture = useMemo(() => {
+    const tapGesture = Gesture.Tap()
+      .maxDuration(4000)
+      // check if enabledProp is a boolean
+      // if it's a boolean, use it to enable/disable the gesture
+      // if it's not a boolean, use the value of the enabled shared value (in each callback)
+      .enabled(typeof enabledProp === 'boolean' ? enabledProp : true)
+      .onTouchesDown(() => {
+        isTapped.value = true;
+        if (!isInScrollContext) {
+          return onBegin();
+        }
+      })
+      .onTouchesUp(() => {
+        if (!enabled.value || !active.value) return;
+        if (onPressProvider != null) runOnJS(onPressProvider)();
+        if (onPress != null) runOnJS(onPress)();
+      })
+      .onFinalize(() => {
+        isTapped.value = false;
+        if (!enabled.value || !active.value) return;
+        active.value = false;
+        if (onPressOutProvider != null) runOnJS(onPressOutProvider)();
+        if (onPressOut != null) runOnJS(onPressOut)();
+      });
 
-  if (typeof enabledProp === 'boolean') {
-    gesture.enabled(enabledProp);
-  }
+    return tapGesture;
+  }, [
+    active,
+    enabled.value,
+    enabledProp,
+    isInScrollContext,
+    isTapped,
+    onBegin,
+    onPress,
+    onPressOut,
+    onPressOutProvider,
+    onPressProvider,
+  ]);
 
   const rAnimatedStyle = useAnimatedStyle(() => {
     return animatedStyle ? animatedStyle(progress) : {};
