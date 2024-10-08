@@ -36,11 +36,13 @@ function BasicPressablesExample() {
   return (
     <View style={styles.container}>
       <PressableScale style={styles.box} onPress={() => console.log('scale')} />
-      <PressableOpacity style={styles.box} onPress={() => console.log('opacity')} />
+      <PressableOpacity
+        style={styles.box}
+        onPress={() => console.log('opacity')}
+      />
     </View>
   );
 }
-
 ```
 
 ### Create a custom Pressable with createAnimatedPressable
@@ -49,15 +51,16 @@ function BasicPressablesExample() {
 import { createAnimatedPressable } from 'pressto';
 
 const PressableRotate = createAnimatedPressable((progress) => ({
-  transform: [
-    { rotate: `${progress.value * Math.PI / 4}rad` },
-  ],
+  transform: [{ rotate: `${(progress.value * Math.PI) / 4}rad` }],
 }));
 
 function CustomPressableExample() {
   return (
     <View style={styles.container}>
-      <PressableRotate style={styles.box} onPress={() => console.log('rotate')} />
+      <PressableRotate
+        style={styles.box}
+        onPress={() => console.log('rotate')}
+      />
     </View>
   );
 }
@@ -73,22 +76,32 @@ import { PressablesConfig } from 'pressto';
 function App() {
   return (
     <View style={styles.container}>
-      <PressableRotate style={styles.box} onPress={() => console.log('rotate')} />
+      <PressableRotate
+        style={styles.box}
+        onPress={() => console.log('rotate')}
+      />
       <PressableScale style={styles.box} onPress={() => console.log('scale')} />
-      <PressableOpacity style={styles.box} onPress={() => console.log('opacity')} />
+      <PressableOpacity
+        style={styles.box}
+        onPress={() => console.log('opacity')}
+      />
     </View>
   );
 }
 
 export default () => (
-  <PressablesConfig animationType="spring" config={{ mass: 2 }} globalHandlers={{
-    onPress: () => {
-      console.log('you can call haptics here');
-    }
-  }}>
+  <PressablesConfig
+    animationType="spring"
+    config={{ mass: 2 }}
+    globalHandlers={{
+      onPress: () => {
+        console.log('you can call haptics here');
+      },
+    }}
+  >
     <App />
   </PressablesConfig>
-)
+);
 ```
 
 ## API
@@ -120,3 +133,25 @@ MIT
 ---
 
 Made with ❤️ using [create-react-native-library](https://github.com/callstack/react-native-builder-bob)
+
+### Use with ScrollView and FlatList
+
+`pressto` provides a custom scroll component that enhances the scrolling experience when used with pressable components.
+
+```jsx
+import { renderScrollComponent } from 'pressto';
+import { FlatList } from 'react-native';
+
+function App() {
+  return (
+    // This works with all the lists that support the renderScrollComponent prop
+    <FlatList
+      renderScrollComponent={renderScrollComponent}
+      data={data}
+      renderItem={({ item }) => <PressableRotate style={styles.box} />}
+    />
+  );
+}
+```
+
+The `renderScrollComponent` function wraps the scroll view with additional functionality in order to allow smoother interactions between scrolling and pressable components, preventing unwanted activations during scroll gestures.
