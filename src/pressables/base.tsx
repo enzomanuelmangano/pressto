@@ -1,9 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { ViewProps, ViewStyle } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import type { AnimateProps, SharedValue } from 'react-native-reanimated';
 import Animated, {
   runOnJS,
+  useAnimatedReaction,
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
@@ -12,6 +13,10 @@ import Animated, {
 } from 'react-native-reanimated';
 import { usePressablesConfig } from '../provider';
 import type { PressableContextType } from '../provider/context';
+import {
+  scrollableInfoShared,
+  useIsInInternalScrollContext,
+} from './render-scroll';
 import { unwrapSharedValue } from './utils';
 
 type AnimatedViewProps = AnimateProps<ViewProps>;
@@ -80,29 +85,76 @@ const BasePressable: React.FC<BasePressableProps> = ({
     return unwrapSharedValue(enabledProp);
   }, [enabledProp]);
 
-  const gesture = Gesture.Tap()
-    .maxDuration(4000)
-    .onTouchesDown(() => {
-      if (!enabled.value) return;
-      active.value = true;
-      if (onPressInProvider != null) runOnJS(onPressInProvider)();
-      if (onPressIn != null) runOnJS(onPressIn)();
-    })
-    .onTouchesUp(() => {
-      if (!enabled.value) return;
-      if (onPressProvider != null) runOnJS(onPressProvider)();
-      if (onPress != null) runOnJS(onPress)();
-    })
-    .onFinalize(() => {
-      if (!enabled.value) return;
-      active.value = false;
-      if (onPressOutProvider != null) runOnJS(onPressOutProvider)();
-      if (onPressOut != null) runOnJS(onPressOut)();
-    });
+  const isInScrollContext = useIsInInternalScrollContext();
+  const isTapped = useSharedValue(false);
 
-  if (typeof enabledProp === 'boolean') {
-    gesture.enabled(enabledProp);
-  }
+  const onBegin = useCallback(() => {
+    'worklet';
+    if (!enabled.value) return;
+
+    active.value = true;
+    if (onPressInProvider != null) runOnJS(onPressInProvider)();
+    if (onPressIn != null) runOnJS(onPressIn)();
+  }, [active, enabled.value, onPressIn, onPressInProvider]);
+
+  useAnimatedReaction(
+    () => {
+      if (!isInScrollContext) {
+        return false;
+      }
+
+      return (
+        !scrollableInfoShared.value.isScrolling &&
+        isTapped.value &&
+        scrollableInfoShared.value.activatedTap
+      );
+    },
+    (activated, prevActivated) => {
+      if (activated && !prevActivated) {
+        return onBegin();
+      }
+    }
+  );
+
+  const gesture = useMemo(() => {
+    const tapGesture = Gesture.Tap()
+      .maxDuration(4000)
+      // check if enabledProp is a boolean
+      // if it's a boolean, use it to enable/disable the gesture
+      // if it's not a boolean, use the value of the enabled shared value (in each callback)
+      .enabled(typeof enabledProp === 'boolean' ? enabledProp : true)
+      .onTouchesDown(() => {
+        isTapped.value = true;
+        if (!isInScrollContext) {
+          return onBegin();
+        }
+      })
+      .onTouchesUp(() => {
+        if (!enabled.value || !active.value) return;
+        if (onPressProvider != null) runOnJS(onPressProvider)();
+        if (onPress != null) runOnJS(onPress)();
+      })
+      .onFinalize(() => {
+        isTapped.value = false;
+        if (!enabled.value || !active.value) return;
+        active.value = false;
+        if (onPressOutProvider != null) runOnJS(onPressOutProvider)();
+        if (onPressOut != null) runOnJS(onPressOut)();
+      });
+
+    return tapGesture;
+  }, [
+    active,
+    enabled.value,
+    enabledProp,
+    isInScrollContext,
+    isTapped,
+    onBegin,
+    onPress,
+    onPressOut,
+    onPressOutProvider,
+    onPressProvider,
+  ]);
 
   const rAnimatedStyle = useAnimatedStyle(() => {
     return animatedStyle ? animatedStyle(progress) : {};

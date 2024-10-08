@@ -1,10 +1,9 @@
 import {
   createAnimatedPressable,
-  PressableOpacity,
-  PressableScale,
   PressablesConfig,
+  renderScrollComponent,
 } from 'pressto';
-import { StyleSheet, View } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
 import { gestureHandlerRootHOC } from 'react-native-gesture-handler';
 import { interpolate, interpolateColor } from 'react-native-reanimated';
 
@@ -18,7 +17,7 @@ const PressableRotate = createAnimatedPressable((progress) => {
     backgroundColor: interpolateColor(
       progress.value,
       [0, 1],
-      ['#e4e4e4', '#ffffff']
+      ['#d1d1d1', '#000000']
     ),
     shadowColor: '#ffffff',
     shadowOffset: {
@@ -33,22 +32,12 @@ const PressableRotate = createAnimatedPressable((progress) => {
 function App() {
   return (
     <View style={styles.container}>
-      <PressableRotate
-        style={styles.box}
-        onPress={() => {
-          console.log('tap rotate :)');
-        }}
-      />
-      <PressableScale
-        style={styles.box}
-        onPress={() => {
-          console.log('tap scale :)');
-        }}
-      />
-      <PressableOpacity
-        style={styles.box}
-        onPress={() => {
-          console.log('tap opacity :)');
+      <FlatList
+        contentContainerStyle={styles.container}
+        data={new Array(10).fill(0)}
+        renderScrollComponent={renderScrollComponent}
+        renderItem={() => {
+          return <PressableRotate style={styles.box} />;
         }}
       />
     </View>
@@ -57,18 +46,25 @@ function App() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#000000',
-    gap: 25,
+    paddingTop: 25,
+    backgroundColor: '#fff',
+    gap: 10,
   },
   box: {
-    width: 120,
+    width: '95%',
     height: 120,
-    backgroundColor: '#cbcbcb',
+    elevation: 5,
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0.5,
+    backgroundColor: 'red',
+    shadowRadius: 10,
     borderRadius: 35,
     borderCurve: 'continuous',
+    alignSelf: 'center',
   },
 });
 
