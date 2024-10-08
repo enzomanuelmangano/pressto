@@ -122,21 +122,9 @@ A function to create custom animated pressables. It takes a worklet function tha
 
 A component to configure global settings for all pressable components within its children.
 
-## Contributing
+## Use with ScrollView and FlatList/FlashList
 
-Contributions are welcome! Please see our [contributing guide](CONTRIBUTING.md) for more details.
-
-## License
-
-MIT
-
----
-
-Made with ❤️ using [create-react-native-library](https://github.com/callstack/react-native-builder-bob)
-
-### Use with ScrollView and FlatList
-
-`pressto` provides a custom scroll component that enhances the scrolling experience when used with pressable components.
+`pressto` provides an optional custom scroll render component that enhances the scrolling experience when used with pressable components.
 
 ```jsx
 import { renderScrollComponent } from 'pressto';
@@ -156,3 +144,15 @@ function App() {
 
 The `renderScrollComponent` function wraps the scroll view with additional functionality in order to allow smoother interactions between scrolling and pressable components, preventing unwanted activations during scroll gestures.
 Applying the renderScrollComponent from `pressto` means that the tap gesture will be delayed for a short amount of time to understand if the tap gesture is a scroll or a tap gesture.
+
+## Contributing
+
+Contributions are welcome! Please see our [contributing guide](CONTRIBUTING.md) for more details.
+
+## License
+
+MIT
+
+---
+
+Made with ❤️ using [create-react-native-library](https://github.com/callstack/react-native-builder-bob)
