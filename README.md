@@ -50,9 +50,12 @@ function BasicPressablesExample() {
 ```jsx
 import { createAnimatedPressable } from 'pressto';
 
-const PressableRotate = createAnimatedPressable((progress) => ({
-  transform: [{ rotate: `${(progress.value * Math.PI) / 4}rad` }],
-}));
+const PressableRotate = createAnimatedPressable((progress) => {
+  'worklet';
+  return {
+    transform: [{ rotate: `${(progress.value * Math.PI) / 4}rad` }],
+  };
+});
 
 function CustomPressableExample() {
   return (
