@@ -65,10 +65,12 @@ const callbacks = {
   },
 };
 
-export const renderScrollComponent = ({
+export const renderScrollComponent = <
+  T extends { children?: React.ReactNode },
+>({
   children,
   ...props
-}: ScrollViewProps) => {
+}: T) => {
   return (
     <InternalScrollView
       {...props}
