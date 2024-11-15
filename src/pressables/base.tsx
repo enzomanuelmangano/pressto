@@ -124,17 +124,20 @@ const BasePressable: React.FC<BasePressableProps> = ({
       // if it's not a boolean, use the value of the enabled shared value (in each callback)
       .enabled(typeof enabledProp === 'boolean' ? enabledProp : true)
       .onTouchesDown(() => {
+        'worklet';
         isTapped.value = true;
         if (!isInScrollContext) {
           return onBegin();
         }
       })
       .onTouchesUp(() => {
+        'worklet';
         if (!enabled.value || !active.value) return;
         if (onPressProvider != null) runOnJS(onPressProvider)();
         if (onPress != null) runOnJS(onPress)();
       })
       .onFinalize(() => {
+        'worklet';
         isTapped.value = false;
         if (!enabled.value || !active.value) return;
         active.value = false;
