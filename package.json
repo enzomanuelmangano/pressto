@@ -81,7 +81,7 @@
     "react-native": "0.74.5",
     "react-native-builder-bob": "^0.30.2",
     "react-native-gesture-handler": "~2.16.1",
-    "react-native-reanimated": "~3.10.1",
+    "react-native-reanimated": "~3.16.1",
     "release-it": "^15.0.0",
     "typescript": "^5.2.2"
   },
