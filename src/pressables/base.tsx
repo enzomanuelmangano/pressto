@@ -77,7 +77,7 @@ const BasePressable: React.FC<BasePressableProps> = ({
     return animationType === 'timing' ? withTiming : withSpring;
   }, [animationType]);
 
-  const progress = useDerivedValue(() => {
+  const progress = useDerivedValue<number>(() => {
     return withAnimation(active.value ? 1 : 0, config);
   }, [config, withAnimation]);
 
@@ -95,7 +95,7 @@ const BasePressable: React.FC<BasePressableProps> = ({
     active.value = true;
     if (onPressInProvider != null) runOnJS(onPressInProvider)();
     if (onPressIn != null) runOnJS(onPressIn)();
-  }, [active, enabled.value, onPressIn, onPressInProvider]);
+  }, [active, enabled, onPressIn, onPressInProvider]);
 
   useAnimatedReaction(
     () => {
@@ -148,7 +148,7 @@ const BasePressable: React.FC<BasePressableProps> = ({
     return tapGesture;
   }, [
     active,
-    enabled.value,
+    enabled,
     enabledProp,
     isInScrollContext,
     isTapped,
