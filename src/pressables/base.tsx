@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, type ComponentProps } from 'react';
 import {
   type PressableProps,
   Pressable,
@@ -18,12 +18,15 @@ import type { PressableContextType } from '../provider/context';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
+type AnimatedPressableProps = ComponentProps<typeof AnimatedPressable>;
+
 export type BasePressableProps = {
   children?: React.ReactNode;
   animatedStyle?: (progress: SharedValue<number>) => ViewStyle;
   enabled?: boolean;
 } & Partial<PressableContextType<'timing' | 'spring'>> &
-  PressableProps;
+  PressableProps &
+  Pick<AnimatedPressableProps, 'layout' | 'entering' | 'exiting'>;
 
 const BasePressable: React.FC<BasePressableProps> = ({
   children,
