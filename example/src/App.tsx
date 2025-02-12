@@ -1,10 +1,6 @@
-import {
-  createAnimatedPressable,
-  PressablesConfig,
-  renderScrollComponent,
-} from 'pressto';
+import { createAnimatedPressable, PressablesConfig } from 'pressto';
 import { FlatList, StyleSheet, View } from 'react-native';
-import { gestureHandlerRootHOC } from 'react-native-gesture-handler';
+
 import { interpolate, interpolateColor } from 'react-native-reanimated';
 
 const PressableRotate = createAnimatedPressable((progress) => {
@@ -35,7 +31,6 @@ function App() {
       <FlatList
         contentContainerStyle={styles.container}
         data={new Array(10).fill(0)}
-        renderScrollComponent={renderScrollComponent}
         renderItem={() => {
           return <PressableRotate style={styles.box} />;
         }}
@@ -86,4 +81,4 @@ const AppProvider = () => {
   );
 };
 
-export default gestureHandlerRootHOC(AppProvider);
+export default AppProvider;
