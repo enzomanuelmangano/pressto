@@ -6,7 +6,7 @@ import {
 } from 'react-native';
 import { BaseButton } from 'react-native-gesture-handler';
 import type { SharedValue } from 'react-native-reanimated';
-import {
+import Animated, {
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
@@ -16,7 +16,8 @@ import {
 import { usePressablesConfig } from '../provider';
 import type { PressableContextType } from '../provider/context';
 
-type AnimatedPressableProps = ComponentProps<typeof BaseButton>;
+const AnimatedBaseButton = Animated.createAnimatedComponent(BaseButton);
+type AnimatedPressableProps = ComponentProps<typeof AnimatedBaseButton>;
 
 export type BasePressableProps = {
   children?: React.ReactNode;
@@ -111,16 +112,21 @@ const BasePressable: React.FC<BasePressableProps> = ({
   }, []);
 
   return (
-    <BaseButton
+    <AnimatedBaseButton
       disabled={!enabled}
       {...rest}
       style={[rest?.style ?? {}, rAnimatedStyle]}
-      onPressIn={onPressInWrapper}
+      onActiveStateChange={(active) => {
+        if (active) {
+          onPressInWrapper();
+        } else {
+          onPressOutWrapper();
+        }
+      }}
       onPress={onPressWrapper}
-      onPressOut={onPressOutWrapper}
     >
       {children}
-    </BaseButton>
+    </AnimatedBaseButton>
   );
 };
 
