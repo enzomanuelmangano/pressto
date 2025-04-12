@@ -26,99 +26,103 @@ export type BasePressableProps = {
     onPressOut?: () => void;
   };
 
-const BasePressable: React.FC<BasePressableProps> = ({
-  children,
-  onPress,
-  onPressIn,
-  onPressOut,
-  animatedStyle,
-  animationType: animationTypeProp,
-  config: configProp,
-  enabled = true,
-  ...rest
-}) => {
-  const {
-    animationType: animationTypeProvider,
-    config: configPropProvider,
-    globalHandlers,
-  } = usePressablesConfig();
-  const {
-    onPressIn: onPressInProvider,
-    onPressOut: onPressOutProvider,
-    onPress: onPressProvider,
-  } = globalHandlers ?? {};
-
-  const { animationType, config } = useMemo(() => {
-    if (animationTypeProp != null) {
-      return {
-        animationType: animationTypeProp,
-        config: configProp,
-      };
-    }
-    return {
+const BasePressable: React.FC<BasePressableProps> = React.memo(
+  ({
+    children,
+    onPress,
+    onPressIn,
+    onPressOut,
+    animatedStyle,
+    animationType: animationTypeProp,
+    config: configProp,
+    enabled = true,
+    ...rest
+  }) => {
+    const {
       animationType: animationTypeProvider,
-      config: configProp ?? configPropProvider,
-    };
-  }, [
-    animationTypeProp,
-    animationTypeProvider,
-    configProp,
-    configPropProvider,
-  ]);
+      config: configPropProvider,
+      globalHandlers,
+    } = usePressablesConfig();
+    const {
+      onPressIn: onPressInProvider,
+      onPressOut: onPressOutProvider,
+      onPress: onPressProvider,
+    } = globalHandlers ?? {};
 
-  const active = useSharedValue(false);
+    const { animationType, config } = useMemo(() => {
+      if (animationTypeProp != null) {
+        return {
+          animationType: animationTypeProp,
+          config: configProp,
+        };
+      }
+      return {
+        animationType: animationTypeProvider,
+        config: configProp ?? configPropProvider,
+      };
+    }, [
+      animationTypeProp,
+      animationTypeProvider,
+      configProp,
+      configPropProvider,
+    ]);
 
-  const withAnimation = useMemo(() => {
-    return animationType === 'timing' ? withTiming : withSpring;
-  }, [animationType]);
+    const active = useSharedValue(false);
 
-  const progress = useDerivedValue<number>(() => {
-    return withAnimation(active.value ? 1 : 0, config);
-  }, [config, withAnimation]);
+    const withAnimation = useMemo(() => {
+      return animationType === 'timing' ? withTiming : withSpring;
+    }, [animationType]);
 
-  const onPressInWrapper = useCallback(() => {
-    if (!enabled) return;
-    active.value = true;
-    onPressInProvider?.();
-    onPressIn?.();
-  }, [active, enabled, onPressIn, onPressInProvider]);
+    const progress = useDerivedValue<number>(() => {
+      return withAnimation(active.value ? 1 : 0, config);
+    }, [config, withAnimation]);
 
-  const onPressWrapper = useCallback(() => {
-    if (!enabled) return;
-    active.value = false;
-    onPressProvider?.();
-    onPress?.();
-  }, [active, enabled, onPress, onPressProvider]);
+    const onPressInWrapper = useCallback(() => {
+      if (!enabled) return;
+      active.value = true;
+      onPressInProvider?.();
+      onPressIn?.();
+    }, [active, enabled, onPressIn, onPressInProvider]);
 
-  const onPressOutWrapper = useCallback(() => {
-    if (!enabled) return;
-    active.value = false;
-    onPressOutProvider?.();
-    onPressOut?.();
-  }, [active, enabled, onPressOut, onPressOutProvider]);
+    const onPressWrapper = useCallback(() => {
+      if (!enabled) return;
+      active.value = false;
+      onPressProvider?.();
+      onPress?.();
+    }, [active, enabled, onPress, onPressProvider]);
 
-  const rAnimatedStyle = useAnimatedStyle(() => {
-    return animatedStyle ? animatedStyle(progress) : {};
-  }, []);
+    const onPressOutWrapper = useCallback(() => {
+      if (!enabled) return;
+      active.value = false;
+      onPressOutProvider?.();
+      onPressOut?.();
+    }, [active, enabled, onPressOut, onPressOutProvider]);
 
-  const onActiveStateChange = useCallback(
-    (activeParam: boolean) => {
-      return activeParam ? onPressInWrapper() : onPressOutWrapper();
-    },
-    [onPressInWrapper, onPressOutWrapper]
-  );
+    const rAnimatedStyle = useAnimatedStyle(() => {
+      return animatedStyle ? animatedStyle(progress) : {};
+    }, []);
 
-  return (
-    <AnimatedBaseButton
-      {...rest}
-      style={[rest?.style ?? {}, rAnimatedStyle]}
-      enabled={enabled}
-      onActiveStateChange={onActiveStateChange}
-      onPress={onPressWrapper}
-    >
-      {children}
-    </AnimatedBaseButton>
-  );
-};
+    const onActiveStateChange = useCallback(
+      (activeParam: boolean) => {
+        return activeParam ? onPressInWrapper() : onPressOutWrapper();
+      },
+      [onPressInWrapper, onPressOutWrapper]
+    );
+
+    return (
+      <AnimatedBaseButton
+        {...rest}
+        style={[rest?.style ?? {}, rAnimatedStyle]}
+        enabled={enabled}
+        onActiveStateChange={onActiveStateChange}
+        onPress={onPressWrapper}
+      >
+        {children}
+      </AnimatedBaseButton>
+    );
+  }
+);
+
+BasePressable.displayName = 'BasePressable';
 
 export { BasePressable };
