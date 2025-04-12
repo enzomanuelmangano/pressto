@@ -20,7 +20,7 @@ export type BasePressableProps = {
   animatedStyle?: (progress: SharedValue<number>) => ViewStyle;
   enabled?: boolean;
 } & Partial<PressableContextType<'timing' | 'spring'>> &
-  Pick<AnimatedPressableProps, 'layout' | 'entering' | 'exiting'> & {
+  Pick<AnimatedPressableProps, 'layout' | 'entering' | 'exiting' | 'style'> & {
     onPress?: () => void;
     onPressIn?: () => void;
     onPressOut?: () => void;
@@ -102,21 +102,17 @@ const BasePressable: React.FC<BasePressableProps> = ({
   }, []);
 
   const onActiveStateChange = useCallback(
-    (active: boolean) => {
-      if (active) {
-        onPressInWrapper();
-      } else {
-        onPressOutWrapper();
-      }
+    (activeParam: boolean) => {
+      return activeParam ? onPressInWrapper() : onPressOutWrapper();
     },
     [onPressInWrapper, onPressOutWrapper]
   );
 
   return (
     <AnimatedBaseButton
-      disabled={!enabled}
       {...rest}
       style={[rest?.style ?? {}, rAnimatedStyle]}
+      enabled={enabled}
       onActiveStateChange={onActiveStateChange}
       onPress={onPressWrapper}
     >

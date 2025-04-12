@@ -1,6 +1,6 @@
-import { createAnimatedPressable, PressablesConfig } from 'pressto';
+import { createAnimatedPressable } from 'pressto';
 import { StyleSheet } from 'react-native';
-import { FlatList, gestureHandlerRootHOC } from 'react-native-gesture-handler';
+import { FlatList } from 'react-native-gesture-handler';
 
 import { interpolate, interpolateColor } from 'react-native-reanimated';
 
@@ -26,11 +26,11 @@ const PressableRotate = createAnimatedPressable((progress) => {
   };
 });
 
-function App() {
+export default function App() {
   return (
     <FlatList
       contentContainerStyle={styles.container}
-      data={new Array(100).fill(0)}
+      data={new Array(1000).fill(0)}
       renderItem={() => {
         return (
           <PressableRotate
@@ -47,13 +47,12 @@ function App() {
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 50,
-    backgroundColor: '#fff',
     gap: 10,
+    paddingTop: 15,
   },
   box: {
     width: '95%',
-    height: 120,
+    height: 100,
     elevation: 5,
     shadowColor: '#000000',
     shadowOffset: {
@@ -68,23 +67,3 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
 });
-
-const AppProvider = () => {
-  return (
-    <PressablesConfig
-      animationType="spring"
-      config={{
-        mass: 2,
-      }}
-      globalHandlers={{
-        onPress: () => {
-          console.log('use haptics!');
-        },
-      }}
-    >
-      <App />
-    </PressablesConfig>
-  );
-};
-
-export default gestureHandlerRootHOC(AppProvider);
