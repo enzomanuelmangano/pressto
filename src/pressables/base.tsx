@@ -1,12 +1,12 @@
 import React, { useCallback, useMemo, type ComponentProps } from 'react';
 import {
-  type PressableProps,
-  Pressable,
   type GestureResponderEvent,
+  type PressableProps,
   type ViewStyle,
 } from 'react-native';
+import { BaseButton } from 'react-native-gesture-handler';
 import type { SharedValue } from 'react-native-reanimated';
-import Animated, {
+import {
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
@@ -16,9 +16,7 @@ import Animated, {
 import { usePressablesConfig } from '../provider';
 import type { PressableContextType } from '../provider/context';
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
-type AnimatedPressableProps = ComponentProps<typeof AnimatedPressable>;
+type AnimatedPressableProps = ComponentProps<typeof BaseButton>;
 
 export type BasePressableProps = {
   children?: React.ReactNode;
@@ -113,7 +111,7 @@ const BasePressable: React.FC<BasePressableProps> = ({
   }, []);
 
   return (
-    <AnimatedPressable
+    <BaseButton
       disabled={!enabled}
       {...rest}
       style={[rest?.style ?? {}, rAnimatedStyle]}
@@ -122,7 +120,7 @@ const BasePressable: React.FC<BasePressableProps> = ({
       onPressOut={onPressOutWrapper}
     >
       {children}
-    </AnimatedPressable>
+    </BaseButton>
   );
 };
 
