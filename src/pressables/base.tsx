@@ -1,9 +1,5 @@
 import React, { useCallback, useMemo, type ComponentProps } from 'react';
-import {
-  type GestureResponderEvent,
-  type PressableProps,
-  type ViewStyle,
-} from 'react-native';
+import { type ViewStyle } from 'react-native';
 import { BaseButton } from 'react-native-gesture-handler';
 import type { SharedValue } from 'react-native-reanimated';
 import Animated, {
@@ -24,8 +20,11 @@ export type BasePressableProps = {
   animatedStyle?: (progress: SharedValue<number>) => ViewStyle;
   enabled?: boolean;
 } & Partial<PressableContextType<'timing' | 'spring'>> &
-  PressableProps &
-  Pick<AnimatedPressableProps, 'layout' | 'entering' | 'exiting'>;
+  Pick<AnimatedPressableProps, 'layout' | 'entering' | 'exiting'> & {
+    onPress?: () => void;
+    onPressIn?: () => void;
+    onPressOut?: () => void;
+  };
 
 const BasePressable: React.FC<BasePressableProps> = ({
   children,
@@ -77,52 +76,48 @@ const BasePressable: React.FC<BasePressableProps> = ({
     return withAnimation(active.value ? 1 : 0, config);
   }, [config, withAnimation]);
 
-  const onPressInWrapper = useCallback(
-    (event: GestureResponderEvent) => {
-      if (!enabled) return;
-      active.value = true;
-      onPressInProvider?.(event);
-      onPressIn?.(event);
-    },
-    [active, enabled, onPressIn, onPressInProvider]
-  );
+  const onPressInWrapper = useCallback(() => {
+    if (!enabled) return;
+    active.value = true;
+    onPressInProvider?.();
+    onPressIn?.();
+  }, [active, enabled, onPressIn, onPressInProvider]);
 
-  const onPressWrapper = useCallback(
-    (event: GestureResponderEvent) => {
-      if (!enabled) return;
-      active.value = false;
-      onPressProvider?.(event);
-      onPress?.(event);
-    },
-    [active, enabled, onPress, onPressProvider]
-  );
+  const onPressWrapper = useCallback(() => {
+    if (!enabled) return;
+    active.value = false;
+    onPressProvider?.();
+    onPress?.();
+  }, [active, enabled, onPress, onPressProvider]);
 
-  const onPressOutWrapper = useCallback(
-    (event: GestureResponderEvent) => {
-      if (!enabled) return;
-      active.value = false;
-      onPressOutProvider?.(event);
-      onPressOut?.(event);
-    },
-    [active, enabled, onPressOut, onPressOutProvider]
-  );
+  const onPressOutWrapper = useCallback(() => {
+    if (!enabled) return;
+    active.value = false;
+    onPressOutProvider?.();
+    onPressOut?.();
+  }, [active, enabled, onPressOut, onPressOutProvider]);
 
   const rAnimatedStyle = useAnimatedStyle(() => {
     return animatedStyle ? animatedStyle(progress) : {};
   }, []);
+
+  const onActiveStateChange = useCallback(
+    (active: boolean) => {
+      if (active) {
+        onPressInWrapper();
+      } else {
+        onPressOutWrapper();
+      }
+    },
+    [onPressInWrapper, onPressOutWrapper]
+  );
 
   return (
     <AnimatedBaseButton
       disabled={!enabled}
       {...rest}
       style={[rest?.style ?? {}, rAnimatedStyle]}
-      onActiveStateChange={(active) => {
-        if (active) {
-          onPressInWrapper();
-        } else {
-          onPressOutWrapper();
-        }
-      }}
+      onActiveStateChange={onActiveStateChange}
       onPress={onPressWrapper}
     >
       {children}
