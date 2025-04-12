@@ -102,20 +102,18 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       return animatedStyle ? animatedStyle(progress) : {};
     }, []);
 
-    const onActiveStateChange = useCallback(
-      (activeParam: boolean) => {
-        return activeParam ? onPressInWrapper() : onPressOutWrapper();
-      },
-      [onPressInWrapper, onPressOutWrapper]
-    );
-
     return (
       <AnimatedBaseButton
         {...rest}
         style={[rest?.style ?? {}, rAnimatedStyle]}
         enabled={enabled}
-        onActiveStateChange={onActiveStateChange}
         onPress={onPressWrapper}
+        onBegan={onPressInWrapper}
+        onActivated={onPressInWrapper}
+        onEnded={onPressOutWrapper}
+        onFailed={onPressOutWrapper}
+        onCancelled={onPressOutWrapper}
+        exclusive={false}
       >
         {children}
       </AnimatedBaseButton>
