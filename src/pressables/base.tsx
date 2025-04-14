@@ -1,6 +1,11 @@
 import React, { useCallback, useMemo, type ComponentProps } from 'react';
 import { StyleSheet, type ViewStyle } from 'react-native';
-import { BaseButton, type BaseButtonProps } from 'react-native-gesture-handler';
+import {
+  BaseButton,
+  State,
+  type BaseButtonProps,
+  type HandlerStateChangeEvent,
+} from 'react-native-gesture-handler';
 import type { SharedValue } from 'react-native-reanimated';
 import Animated, {
   useAnimatedStyle,
@@ -178,17 +183,33 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       return computedStyle;
     }, [rest?.style]);
 
+    const onHandlerStateChange = useCallback(
+      (state: HandlerStateChangeEvent) => {
+        'worklet'; // is it needed?
+        switch (state.nativeEvent.state) {
+          case State.BEGAN:
+          case State.ACTIVE:
+            return onPressInWrapper();
+          case State.END: {
+            onPressWrapper();
+            return onPressOutWrapper();
+          }
+          case State.FAILED:
+          case State.UNDETERMINED:
+          case State.CANCELLED:
+            return onPressOutWrapper();
+        }
+      },
+      [onPressInWrapper, onPressOutWrapper, onPressWrapper]
+    );
+
     return (
       <AnimatedBaseButton
         {...rest}
         style={[fixedStyle, rAnimatedStyle]}
         enabled={enabled}
         onPress={onPressWrapper}
-        onBegan={onPressInWrapper}
-        onActivated={onPressInWrapper}
-        onEnded={onPressOutWrapper}
-        onFailed={onPressOutWrapper}
-        onCancelled={onPressOutWrapper}
+        onHandlerStateChange={onHandlerStateChange}
         exclusive={false}
       >
         {children}
