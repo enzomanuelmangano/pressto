@@ -1,5 +1,5 @@
 import { createAnimatedPressable } from 'pressto';
-import { StyleSheet } from 'react-native';
+import { Dimensions, StyleSheet } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
 
 import { interpolate, interpolateColor } from 'react-native-reanimated';
@@ -51,8 +51,9 @@ const styles = StyleSheet.create({
     paddingTop: 15,
   },
   box: {
-    width: '95%',
+    width: 0.95 * Dimensions.get('window').width,
     height: 100,
+    aspectRatio: 3,
     elevation: 5,
     shadowColor: '#000000',
     shadowOffset: {
@@ -62,7 +63,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     backgroundColor: 'red',
     shadowRadius: 10,
-    borderRadius: 35,
+    borderRadius: 100,
     borderCurve: 'continuous',
     alignSelf: 'center',
   },

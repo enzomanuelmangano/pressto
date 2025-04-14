@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, type ComponentProps } from 'react';
-import { type ViewStyle } from 'react-native';
-import { BaseButton } from 'react-native-gesture-handler';
+import { StyleSheet, type ViewStyle } from 'react-native';
+import { BaseButton, type BaseButtonProps } from 'react-native-gesture-handler';
 import type { SharedValue } from 'react-native-reanimated';
 import Animated, {
   useAnimatedStyle,
@@ -15,16 +15,26 @@ import type { PressableContextType } from '../provider/context';
 const AnimatedBaseButton = Animated.createAnimatedComponent(BaseButton);
 type AnimatedPressableProps = ComponentProps<typeof AnimatedBaseButton>;
 
+type AnimatedPressablePropsStyle = Omit<
+  BaseButtonProps['style'],
+  'width' | 'height'
+> & {
+  width?: number;
+  height?: number;
+};
+
 export type BasePressableProps = {
   children?: React.ReactNode;
   animatedStyle?: (progress: SharedValue<number>) => ViewStyle;
   enabled?: boolean;
 } & Partial<PressableContextType<'timing' | 'spring'>> &
-  Pick<AnimatedPressableProps, 'layout' | 'entering' | 'exiting' | 'style'> & {
+  Pick<AnimatedPressableProps, 'layout' | 'entering' | 'exiting'> & {
     onPress?: () => void;
     onPressIn?: () => void;
     onPressOut?: () => void;
-  };
+  } & { style?: AnimatedPressablePropsStyle };
+
+const isNewArch = (global as any)?.nativeFabricUIManager === 'Fabric';
 
 const BasePressable: React.FC<BasePressableProps> = React.memo(
   ({
@@ -78,34 +88,100 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     }, [config, withAnimation]);
 
     const onPressInWrapper = useCallback(() => {
-      if (!enabled) return;
       active.value = true;
       onPressInProvider?.();
       onPressIn?.();
-    }, [active, enabled, onPressIn, onPressInProvider]);
+    }, [active, onPressIn, onPressInProvider]);
 
     const onPressWrapper = useCallback(() => {
-      if (!enabled) return;
       active.value = false;
       onPressProvider?.();
       onPress?.();
-    }, [active, enabled, onPress, onPressProvider]);
+    }, [active, onPress, onPressProvider]);
 
     const onPressOutWrapper = useCallback(() => {
-      if (!enabled) return;
       active.value = false;
       onPressOutProvider?.();
       onPressOut?.();
-    }, [active, enabled, onPressOut, onPressOutProvider]);
+    }, [active, onPressOut, onPressOutProvider]);
 
     const rAnimatedStyle = useAnimatedStyle(() => {
       return animatedStyle ? animatedStyle(progress) : {};
     }, []);
 
+    // This code handles style calculations for the pressable component
+    // On the new React Native architecture, it returns the style as-is
+    // On the old architecture, it ensures the borderRadius doesn't exceed half the smallest dimension
+    // This prevents visual artifacts that can occur with large border radii
+    const fixedStyle = useMemo(() => {
+      if (isNewArch) {
+        return rest?.style;
+      }
+
+      if (!rest?.style) {
+        return {};
+      }
+
+      const baseStyle = StyleSheet.flatten(rest.style) as ViewStyle;
+      const computedStyle = { ...baseStyle };
+      const borderRadius = Number(computedStyle.borderRadius);
+      const aspectRatio = Number(baseStyle.aspectRatio);
+      const width = Number(baseStyle.width ?? 0);
+      const height = Number(baseStyle.height ?? 0);
+
+      if (baseStyle.width && baseStyle.height) {
+        const computedBorderRadius = Math.min(
+          borderRadius,
+          Math.min(height, width) / 2
+        );
+        return { ...computedStyle, borderRadius: computedBorderRadius };
+      }
+
+      if (baseStyle.aspectRatio) {
+        if (width) {
+          const _height = width / aspectRatio;
+          const computedBorderRadius = Math.min(
+            borderRadius,
+            Math.min(_height, width) / 2
+          );
+          return {
+            ...computedStyle,
+            borderRadius: computedBorderRadius,
+          };
+        }
+
+        if (height) {
+          const _width = height * aspectRatio;
+          const computedBorderRadius = Math.min(
+            borderRadius,
+            Math.min(height, _width) / 2
+          );
+          return {
+            ...computedStyle,
+            borderRadius: computedBorderRadius,
+          };
+        }
+      }
+
+      if (computedStyle.borderRadius) {
+        const computedBorderRadius = Math.min(
+          borderRadius,
+          Math.min(height, width) / 2
+        );
+
+        return {
+          ...computedStyle,
+          borderRadius: computedBorderRadius,
+        };
+      }
+
+      return computedStyle;
+    }, [rest?.style]);
+
     return (
       <AnimatedBaseButton
         {...rest}
-        style={[rest?.style ?? {}, rAnimatedStyle]}
+        style={[fixedStyle, rAnimatedStyle]}
         enabled={enabled}
         onPress={onPressWrapper}
         onBegan={onPressInWrapper}
