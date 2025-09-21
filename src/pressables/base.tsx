@@ -21,7 +21,25 @@ export type BasePressableProps = {
   enabled?: boolean;
 } & Partial<PressableContextType<'timing' | 'spring'>> &
   Partial<
-    Pick<AnimatedPressableProps, 'layout' | 'entering' | 'exiting' | 'style'>
+    Pick<
+      AnimatedPressableProps,
+      | 'layout'
+      | 'entering'
+      | 'exiting'
+      | 'style'
+      | 'hitSlop'
+      | 'testID'
+      | 'userSelect'
+      | 'activeCursor'
+      | 'shouldCancelWhenOutside'
+      | 'cancelsTouchesInView'
+      | 'enableContextMenu'
+      | 'rippleColor'
+      | 'rippleRadius'
+      | 'touchSoundDisabled'
+      | 'waitFor'
+      | 'simultaneousHandlers'
+    >
   > & {
     onPress?: () => void;
     onPressIn?: () => void;
