@@ -20,7 +20,9 @@ export type BasePressableProps = {
   animatedStyle?: (progress: SharedValue<number>) => ViewStyle;
   enabled?: boolean;
 } & Partial<PressableContextType<'timing' | 'spring'>> &
-  Pick<AnimatedPressableProps, 'layout' | 'entering' | 'exiting' | 'style'> & {
+  Partial<
+    Pick<AnimatedPressableProps, 'layout' | 'entering' | 'exiting' | 'style'>
+  > & {
     onPress?: () => void;
     onPressIn?: () => void;
     onPressOut?: () => void;
