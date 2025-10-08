@@ -5,8 +5,8 @@ import { interpolate } from 'react-native-reanimated';
 
 const PressableHighlight = createAnimatedPressable((progress) => {
   'worklet';
-  const opacity = interpolate(progress.value, [0, 1], [0, 0.1]).toFixed(2);
-  const scale = interpolate(progress.value, [0, 1], [1, 0.95]);
+  const opacity = interpolate(progress.get(), [0, 1], [0, 0.1]).toFixed(2);
+  const scale = interpolate(progress.get(), [0, 1], [1, 0.95]);
 
   return {
     backgroundColor: `rgba(255,255,255,${opacity})`,

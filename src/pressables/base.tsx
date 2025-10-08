@@ -94,26 +94,26 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     }, [animationType]);
 
     const progress = useDerivedValue<number>(() => {
-      return withAnimation(active.value ? 1 : 0, config);
+      return withAnimation(active.get() ? 1 : 0, config);
     }, [config, withAnimation]);
 
     const onPressInWrapper = useCallback(() => {
       if (!enabled) return;
-      active.value = true;
+      active.set(true);
       onPressInProvider?.();
       onPressIn?.();
     }, [active, enabled, onPressIn, onPressInProvider]);
 
     const onPressWrapper = useCallback(() => {
       if (!enabled) return;
-      active.value = false;
+      active.set(false);
       onPressProvider?.();
       onPress?.();
     }, [active, enabled, onPress, onPressProvider]);
 
     const onPressOutWrapper = useCallback(() => {
       if (!enabled) return;
-      active.value = false;
+      active.set(false);
       onPressOutProvider?.();
       onPressOut?.();
     }, [active, enabled, onPressOut, onPressOutProvider]);
