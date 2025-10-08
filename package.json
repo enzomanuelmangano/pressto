@@ -37,7 +37,7 @@
     "!**/.*"
   ],
   "scripts": {
-    "example": "bun --filter pressto-example",
+    "example": "bun --cwd example",
     "test": "jest",
     "typecheck": "tsc",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
