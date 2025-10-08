@@ -98,25 +98,22 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     }, [config, withAnimation]);
 
     const onPressInWrapper = useCallback(() => {
-      if (!enabled) return;
       active.set(true);
       onPressInProvider?.();
       onPressIn?.();
-    }, [active, enabled, onPressIn, onPressInProvider]);
+    }, [active, onPressIn, onPressInProvider]);
 
     const onPressWrapper = useCallback(() => {
-      if (!enabled) return;
       active.set(false);
       onPressProvider?.();
       onPress?.();
-    }, [active, enabled, onPress, onPressProvider]);
+    }, [active, onPress, onPressProvider]);
 
     const onPressOutWrapper = useCallback(() => {
-      if (!enabled) return;
       active.set(false);
       onPressOutProvider?.();
       onPressOut?.();
-    }, [active, enabled, onPressOut, onPressOutProvider]);
+    }, [active, onPressOut, onPressOutProvider]);
 
     const rAnimatedStyle = useAnimatedStyle(() => {
       return animatedStyle ? animatedStyle(progress) : {};
