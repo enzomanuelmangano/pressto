@@ -10,10 +10,10 @@
   },
   "dependencies": {
     "@expo/metro-runtime": "~6.1.2",
-    "expo": "~54.0.7",
+    "expo": "54.0.12",
     "expo-constants": "~18.0.9",
     "expo-linking": "~8.0.8",
-    "expo-router": "~6.0.7",
+    "expo-router": "~6.0.10",
     "expo-status-bar": "~3.0.8",
     "react": "19.1.0",
     "react-dom": "19.1.0",

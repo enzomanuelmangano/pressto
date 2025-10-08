@@ -188,8 +188,5 @@
   "create-react-native-library": {
     "type": "library",
     "version": "0.41.2"
-  },
-  "dependencies": {
-    "react-native-worklets": "^0.6.0"
   }
 }
