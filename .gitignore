@@ -82,3 +82,5 @@ ios/generated
 android/generated
 
 .cursor
+
+dist
