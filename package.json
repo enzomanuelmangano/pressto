@@ -37,7 +37,7 @@
     "!**/.*"
   ],
   "scripts": {
-    "example": "yarn workspace pressto-example",
+    "example": "bun --filter pressto-example",
     "test": "jest",
     "typecheck": "tsc",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
@@ -97,7 +97,7 @@
   "workspaces": [
     "example"
   ],
-  "packageManager": "yarn@3.6.1",
+  "packageManager": "bun@1.2.19",
   "jest": {
     "preset": "react-native",
     "modulePathIgnorePatterns": [

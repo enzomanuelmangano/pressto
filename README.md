@@ -8,7 +8,7 @@ The package is built on top of the BaseButton from [react-native-gesture-handler
 ## Installation
 
 ```sh
-yarn add pressto react-native-reanimated react-native-gesture-handler
+bun add pressto react-native-reanimated react-native-gesture-handler
 ```
 
 Or with Expo
