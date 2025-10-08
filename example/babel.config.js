@@ -10,6 +10,7 @@ module.exports = function (api) {
   return getConfig(
     {
       presets: ['babel-preset-expo'],
+      plugins: ['react-native-worklets/plugin'],
     },
     { root, pkg }
   );

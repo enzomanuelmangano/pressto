@@ -12,7 +12,6 @@ export default function RootLayout() {
         damping: 15,
         stiffness: 120,
         overshootClamping: false,
-        restDisplacementThreshold: 0.01,
       }}
       globalHandlers={{
         onPress: () => {
