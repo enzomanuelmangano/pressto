@@ -27,8 +27,6 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
-    "@expo/webpack-config": "^19.0.1",
-    "@types/minimatch": "^6.0.0",
     "react-native-builder-bob": "^0.30.2"
   },
   "publishConfig": {
