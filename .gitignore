@@ -84,3 +84,5 @@ android/generated
 .cursor
 
 dist
+
+coverage
