@@ -1,0 +1,9 @@
+node_modules/
+lib/
+coverage/
+example/node_modules/
+example/android/
+example/ios/
+example/.expo/
+example/dist/
+*.config.js
