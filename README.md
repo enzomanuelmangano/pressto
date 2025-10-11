@@ -27,6 +27,7 @@ npx expo install pressto react-native-reanimated react-native-gesture-handler re
 - **Advanced interaction states**: `isPressed`, `isToggled`, `isSelected`
 - **Type-safe metadata**: Pass theme/design tokens directly into worklets
 - **Group coordination**: Track selected items across pressable groups
+- **Optional Liquid Glass support**: `PressableGlass` component available via `pressto/glass` (iOS 26+ with automatic fallbacks)
 
 ## Usage
 
@@ -49,6 +50,8 @@ function BasicPressablesExample() {
   );
 }
 ```
+
+**Note:** For liquid glass effects, see [PressableGlass](#optional-liquid-glass-effects-ios-26) below.
 
 ### Create a custom Pressable with createAnimatedPressable
 
@@ -184,6 +187,87 @@ function App() {
 }
 ```
 
+### Optional: Liquid Glass Effects (iOS 26+)
+
+PressableGlass provides beautiful iOS 26+ liquid glass effects with automatic fallbacks for unsupported platforms.
+
+**Important:** `PressableGlass` is only available via `pressto/glass` import. This keeps it tree-shakable so users who don't need glass effects won't bundle unnecessary code.
+
+**Installation:**
+
+Choose one of these packages:
+
+```sh
+# Official Expo package (recommended for Expo projects)
+npx expo install expo-glass-effect
+
+# OR Callstack's package (works with Expo and vanilla React Native)
+npm install @callstack/liquid-glass
+```
+
+**Requirements:**
+- iOS 26+ for liquid glass effects
+- Xcode 26+ (for @callstack/liquid-glass)
+- Falls back gracefully on unsupported platforms
+
+**Usage:**
+
+```jsx
+// ONLY available from 'pressto/glass' (not from main 'pressto' export)
+import { PressableGlass } from 'pressto/glass';
+import { Text, StyleSheet } from 'react-native';
+
+function GlassButtonExample() {
+  return (
+    <PressableGlass
+      style={styles.glassButton}
+      glassEffectStyle="clear"
+      interactive
+      tintColor="#ffffff"
+      fallbackBackgroundColor="rgba(255, 255, 255, 0.2)"
+      onPress={() => console.log('pressed')}
+    >
+      <Text style={styles.buttonText}>Glass Button</Text>
+    </PressableGlass>
+  );
+}
+
+const styles = StyleSheet.create({
+  glassButton: {
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#000',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+});
+```
+
+**Props:**
+
+- `glassEffectStyle?: 'clear' | 'regular'` - Glass effect style (default: 'regular')
+- `interactive?: boolean` - Enable touch interaction effects (default: false)
+- `tintColor?: string` - Tint color overlay for the glass effect
+- `colorScheme?: 'light' | 'dark' | 'system'` - Color scheme (default: 'system', @callstack/liquid-glass only)
+- `fallbackBackgroundColor?: string` - Background color for unsupported platforms (default: 'rgba(255, 255, 255, 0.3)')
+
+**Fallback Behavior:**
+
+PressableGlass gracefully handles unsupported scenarios:
+
+1. **No liquid glass package installed:**
+   - Shows a console warning
+   - Renders an animated pressable with `fallbackBackgroundColor`
+   - Press animations still work (opacity + slight scale)
+
+2. **Package installed but iOS < 26 or non-iOS platform:**
+   - The liquid glass library's native fallback activates
+   - Renders a regular `View` with `fallbackBackgroundColor`
+   - Press animations still work
+
 ## API
 
 ### PressableScale
@@ -193,6 +277,18 @@ A pressable component that scales when pressed.
 ### PressableOpacity
 
 A pressable component that changes opacity when pressed.
+
+### PressableGlass
+
+A pressable component with iOS 26+ liquid glass effect.
+
+**Import:** `import { PressableGlass } from 'pressto/glass'` (NOT from main 'pressto' export)
+
+**Requirements:** Requires either `expo-glass-effect` or `@callstack/liquid-glass` to be installed.
+
+**Fallback:** Falls back to an animated semi-transparent pressable on unsupported platforms.
+
+See the [Liquid Glass Effects](#optional-liquid-glass-effects-ios-26) section for detailed usage, installation, and fallback behavior.
 
 ### createAnimatedPressable
 

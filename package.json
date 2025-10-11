@@ -16,6 +16,16 @@
         "types": "./lib/typescript/commonjs/src/index.d.ts",
         "default": "./lib/commonjs/index.js"
       }
+    },
+    "./glass": {
+      "import": {
+        "types": "./lib/typescript/module/src/glass.d.ts",
+        "default": "./lib/module/glass.js"
+      },
+      "require": {
+        "types": "./lib/typescript/commonjs/src/glass.d.ts",
+        "default": "./lib/commonjs/glass.js"
+      }
     }
   },
   "files": [
@@ -101,7 +111,17 @@
     "react-native": "*",
     "react-native-gesture-handler": "*",
     "react-native-reanimated": "*",
-    "react-native-worklets": "*"
+    "react-native-worklets": "*",
+    "expo-glass-effect": "*",
+    "@callstack/liquid-glass": "*"
+  },
+  "peerDependenciesMeta": {
+    "expo-glass-effect": {
+      "optional": true
+    },
+    "@callstack/liquid-glass": {
+      "optional": true
+    }
   },
   "workspaces": [
     "example"
