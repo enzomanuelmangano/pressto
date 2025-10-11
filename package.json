@@ -1,6 +1,6 @@
 {
   "name": "pressto",
-  "version": "0.2.1",
+  "version": "0.2.2-beta.6",
   "description": "Some custom react native touchables",
   "source": "./src/index.tsx",
   "main": "./lib/commonjs/index.js",
@@ -37,10 +37,10 @@
     "!**/.*"
   ],
   "scripts": {
-    "example": "yarn workspace pressto-example",
+    "example": "bun --cwd example",
     "test": "jest",
     "typecheck": "tsc",
-    "lint": "eslint \"**/*.{js,ts,tsx}\"",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "clean": "del-cli lib",
     "prepare": "bob build",
     "release": "release-it"
@@ -64,24 +64,42 @@
     "registry": "https://registry.npmjs.org/"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.28.4",
+    "@babel/preset-env": "^7.28.3",
+    "@babel/preset-react": "^7.27.1",
+    "@babel/preset-typescript": "^7.27.1",
     "@commitlint/config-conventional": "^17.0.2",
     "@evilmartians/lefthook": "^1.5.0",
     "@react-native/eslint-config": "^0.73.1",
+    "@react-native/eslint-plugin": "^0.82.0",
     "@release-it/conventional-changelog": "^5.0.0",
+    "@testing-library/jest-native": "^5.4.3",
+    "@testing-library/react-native": "^13.3.3",
     "@types/jest": "^29.5.5",
+    "@types/minimatch": "^6.0.0",
     "@types/react": "^18.2.44",
+    "@typescript-eslint/eslint-plugin": "^8.46.0",
+    "@typescript-eslint/parser": "^8.46.0",
     "commitlint": "^17.0.2",
     "del-cli": "^5.1.0",
     "eslint": "^8.51.0",
     "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-ft-flow": "^3.0.11",
+    "eslint-plugin-jest": "^29.0.1",
     "eslint-plugin-prettier": "^5.0.1",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.0",
+    "eslint-plugin-react-native": "^5.0.0",
     "jest": "^29.7.0",
     "prettier": "^3.0.3",
-    "react": "18.2.0",
-    "react-native": "0.74.5",
+    "react": "19.1.0",
+    "react-native": "0.81.4",
     "react-native-builder-bob": "^0.30.2",
-    "react-native-gesture-handler": "~2.16.1",
-    "react-native-reanimated": "~3.16.1",
+    "react-native-gesture-handler": "~2.28.0",
+    "react-native-reanimated": "~4.1.1",
+    "react-native-worklets": "0.5.1",
+    "react-test-renderer": "^19.2.0",
     "release-it": "^15.0.0",
     "typescript": "^5.2.2"
   },
@@ -92,19 +110,13 @@
     "react": "*",
     "react-native": "*",
     "react-native-gesture-handler": "*",
-    "react-native-reanimated": "*"
+    "react-native-reanimated": "*",
+    "react-native-worklets": "*"
   },
   "workspaces": [
     "example"
   ],
-  "packageManager": "yarn@3.6.1",
-  "jest": {
-    "preset": "react-native",
-    "modulePathIgnorePatterns": [
-      "<rootDir>/example/node_modules",
-      "<rootDir>/lib/"
-    ]
-  },
+  "packageManager": "bun@1.2.19",
   "commitlint": {
     "extends": [
       "@commitlint/config-conventional"

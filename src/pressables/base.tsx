@@ -1,10 +1,8 @@
-import React, { useCallback, useMemo } from 'react';
-import type { ViewProps, ViewStyle } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import type { AnimateProps, SharedValue } from 'react-native-reanimated';
+import React, { useCallback, useMemo, type ComponentProps } from 'react';
+import { type ViewStyle } from 'react-native';
+import { BaseButton } from 'react-native-gesture-handler';
+import type { SharedValue } from 'react-native-reanimated';
 import Animated, {
-  runOnJS,
-  useAnimatedReaction,
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
@@ -13,163 +11,133 @@ import Animated, {
 } from 'react-native-reanimated';
 import { usePressablesConfig } from '../provider';
 import type { PressableContextType } from '../provider/context';
-import {
-  scrollableInfoShared,
-  useIsInInternalScrollContext,
-} from './render-scroll';
-import { unwrapSharedValue } from './utils';
 
-type AnimatedViewProps = AnimateProps<ViewProps>;
+const AnimatedBaseButton = Animated.createAnimatedComponent(BaseButton);
+type AnimatedPressableProps = ComponentProps<typeof AnimatedBaseButton>;
 
 export type BasePressableProps = {
   children?: React.ReactNode;
-  onPress?: () => void;
-  onPressIn?: () => void;
-  onPressOut?: () => void;
   animatedStyle?: (progress: SharedValue<number>) => ViewStyle;
-  enabled?: boolean | SharedValue<boolean>;
+  enabled?: boolean;
 } & Partial<PressableContextType<'timing' | 'spring'>> &
-  AnimatedViewProps;
+  Partial<
+    Pick<
+      AnimatedPressableProps,
+      | 'layout'
+      | 'entering'
+      | 'exiting'
+      | 'style'
+      | 'hitSlop'
+      | 'testID'
+      | 'userSelect'
+      | 'activeCursor'
+      | 'shouldCancelWhenOutside'
+      | 'cancelsTouchesInView'
+      | 'enableContextMenu'
+      | 'rippleColor'
+      | 'rippleRadius'
+      | 'touchSoundDisabled'
+      | 'waitFor'
+      | 'simultaneousHandlers'
+    >
+  > & {
+    onPress?: () => void;
+    onPressIn?: () => void;
+    onPressOut?: () => void;
+  };
 
-const BasePressable: React.FC<BasePressableProps> = ({
-  children,
-  onPress,
-  onPressIn,
-  onPressOut,
-  animatedStyle,
-  animationType: animationTypeProp,
-  config: configProp,
-  enabled: enabledProp = true,
-  ...rest
-}) => {
-  const {
-    animationType: animationTypeProvider,
-    config: configPropProvider,
-    globalHandlers,
-  } = usePressablesConfig();
-  const {
-    onPressIn: onPressInProvider,
-    onPressOut: onPressOutProvider,
-    onPress: onPressProvider,
-  } = globalHandlers ?? {};
-
-  const { animationType, config } = useMemo(() => {
-    if (animationTypeProp != null) {
-      return {
-        animationType: animationTypeProp,
-        config: configProp,
-      };
-    }
-    return {
-      animationType: animationTypeProvider,
-      config: configProp ?? configPropProvider,
-    };
-  }, [
-    animationTypeProp,
-    animationTypeProvider,
-    configProp,
-    configPropProvider,
-  ]);
-
-  const active = useSharedValue(false);
-
-  const withAnimation = useMemo(() => {
-    return animationType === 'timing' ? withTiming : withSpring;
-  }, [animationType]);
-
-  const progress = useDerivedValue<number>(() => {
-    return withAnimation(active.value ? 1 : 0, config);
-  }, [config, withAnimation]);
-
-  const enabled = useDerivedValue(() => {
-    return unwrapSharedValue(enabledProp);
-  }, [enabledProp]);
-
-  const isInScrollContext = useIsInInternalScrollContext();
-  const isTapped = useSharedValue(false);
-
-  const onBegin = useCallback(() => {
-    'worklet';
-    if (!enabled.value) return;
-
-    active.value = true;
-    if (onPressInProvider != null) runOnJS(onPressInProvider)();
-    if (onPressIn != null) runOnJS(onPressIn)();
-  }, [active, enabled, onPressIn, onPressInProvider]);
-
-  useAnimatedReaction(
-    () => {
-      if (!isInScrollContext) {
-        return false;
-      }
-
-      return (
-        !scrollableInfoShared.value.isScrolling &&
-        isTapped.value &&
-        scrollableInfoShared.value.activatedTap
-      );
-    },
-    (activated, prevActivated) => {
-      if (activated && !prevActivated) {
-        return onBegin();
-      }
-    }
-  );
-
-  const gesture = useMemo(() => {
-    const tapGesture = Gesture.Tap()
-      .maxDuration(4000)
-      // check if enabledProp is a boolean
-      // if it's a boolean, use it to enable/disable the gesture
-      // if it's not a boolean, use the value of the enabled shared value (in each callback)
-      .enabled(typeof enabledProp === 'boolean' ? enabledProp : true)
-      .onTouchesDown(() => {
-        'worklet';
-        isTapped.value = true;
-        if (!isInScrollContext) {
-          return onBegin();
-        }
-      })
-      .onTouchesUp(() => {
-        'worklet';
-        if (!enabled.value || !active.value) return;
-        if (onPressProvider != null) runOnJS(onPressProvider)();
-        if (onPress != null) runOnJS(onPress)();
-      })
-      .onFinalize(() => {
-        'worklet';
-        isTapped.value = false;
-        if (!enabled.value || !active.value) return;
-        active.value = false;
-        if (onPressOutProvider != null) runOnJS(onPressOutProvider)();
-        if (onPressOut != null) runOnJS(onPressOut)();
-      });
-
-    return tapGesture;
-  }, [
-    active,
-    enabled,
-    enabledProp,
-    isInScrollContext,
-    isTapped,
-    onBegin,
+const BasePressable: React.FC<BasePressableProps> = React.memo(
+  ({
+    children,
     onPress,
+    onPressIn,
     onPressOut,
-    onPressOutProvider,
-    onPressProvider,
-  ]);
+    animatedStyle,
+    animationType: animationTypeProp,
+    config: configProp,
+    enabled = true,
+    ...rest
+  }) => {
+    const {
+      animationType: animationTypeProvider,
+      config: configPropProvider,
+      globalHandlers,
+    } = usePressablesConfig();
+    const {
+      onPressIn: onPressInProvider,
+      onPressOut: onPressOutProvider,
+      onPress: onPressProvider,
+    } = globalHandlers ?? {};
 
-  const rAnimatedStyle = useAnimatedStyle(() => {
-    return animatedStyle ? animatedStyle(progress) : {};
-  }, []);
+    const { animationType, config } = useMemo(() => {
+      if (animationTypeProp != null) {
+        return {
+          animationType: animationTypeProp,
+          config: configProp,
+        };
+      }
+      return {
+        animationType: animationTypeProvider,
+        config: configProp ?? configPropProvider,
+      };
+    }, [
+      animationTypeProp,
+      animationTypeProvider,
+      configProp,
+      configPropProvider,
+    ]);
 
-  return (
-    <GestureDetector gesture={gesture}>
-      <Animated.View {...rest} style={[rest?.style ?? {}, rAnimatedStyle]}>
+    const active = useSharedValue(false);
+
+    const withAnimation = useMemo(() => {
+      return animationType === 'timing' ? withTiming : withSpring;
+    }, [animationType]);
+
+    const progress = useDerivedValue<number>(() => {
+      return withAnimation(active.get() ? 1 : 0, config);
+    }, [config, withAnimation]);
+
+    const onPressInWrapper = useCallback(() => {
+      active.set(true);
+      onPressInProvider?.();
+      onPressIn?.();
+    }, [active, onPressIn, onPressInProvider]);
+
+    const onPressWrapper = useCallback(() => {
+      active.set(false);
+      onPressProvider?.();
+      onPress?.();
+    }, [active, onPress, onPressProvider]);
+
+    const onPressOutWrapper = useCallback(() => {
+      active.set(false);
+      onPressOutProvider?.();
+      onPressOut?.();
+    }, [active, onPressOut, onPressOutProvider]);
+
+    const rAnimatedStyle = useAnimatedStyle(() => {
+      return animatedStyle ? animatedStyle(progress) : {};
+    }, [animatedStyle, progress]);
+
+    return (
+      <AnimatedBaseButton
+        {...rest}
+        style={[rest?.style ?? {}, rAnimatedStyle]}
+        enabled={enabled}
+        onPress={onPressWrapper}
+        onBegan={onPressInWrapper}
+        onActivated={onPressInWrapper}
+        onEnded={onPressOutWrapper}
+        onFailed={onPressOutWrapper}
+        onCancelled={onPressOutWrapper}
+        exclusive={false}
+      >
         {children}
-      </Animated.View>
-    </GestureDetector>
-  );
-};
+      </AnimatedBaseButton>
+    );
+  }
+);
+
+BasePressable.displayName = 'BasePressable';
 
 export { BasePressable };

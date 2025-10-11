@@ -1,20 +1,22 @@
+## Pressto 🔥
+
 https://github.com/user-attachments/assets/c857eb8d-3ce7-4afe-b2dd-e974560684d8
 
 The fastest way to improve your React Native app is by using tap gestures.
 That's why I've created **pressto**, a super-simple package to help you get started.
 
-The package is built on top of the Tap Gesture from [react-native-gesture-handler](https://docs.swmansion.com/react-native-gesture-handler/) to handle the resulting gestures and animations on the main thread. It aims to replace your “TouchableOpacity”.
+The package is built on top of the BaseButton from [react-native-gesture-handler](https://docs.swmansion.com/react-native-gesture-handler/) to handle the resulting gestures and animations on the main thread. It aims to replace your “TouchableOpacity”.
 
 ## Installation
 
 ```sh
-yarn add pressto react-native-reanimated react-native-gesture-handler
+bun add pressto react-native-reanimated react-native-gesture-handler react-native-worklets
 ```
 
 Or with Expo
 
 ```sh
-npx expo install pressto react-native-reanimated react-native-gesture-handler
+npx expo install pressto react-native-reanimated react-native-gesture-handler react-native-worklets
 ```
 
 ## Features
@@ -95,7 +97,7 @@ function App() {
 export default () => (
   <PressablesConfig
     animationType="spring"
-    config={{ mass: 2 }}
+    config={{ mass: 1, damping: 30, stiffness: 200 }}
     globalHandlers={{
       onPress: () => {
         console.log('you can call haptics here');
@@ -125,19 +127,16 @@ A function to create custom animated pressables. It takes a worklet function tha
 
 A component to configure global settings for all pressable components within its children.
 
-## Use with ScrollView and FlatList/FlashList
+## Avoid highlight flicker effect in Scrollable List
 
-`pressto` provides an optional custom scroll render component that enhances the scrolling experience when used with pressable components.
+Since pressto is built on top of the BaseButton from react-native-gesture-handler, it handles tap conflict detection automatically when used with a FlatList imported from react-native-gesture-handler.
 
 ```jsx
-import { renderScrollComponent } from 'pressto';
-import { FlatList } from 'react-native';
+import { FlatList } from 'react-native-gesture-handler';
 
 function App() {
   return (
-    // This works with all the lists that support the renderScrollComponent prop
     <FlatList
-      renderScrollComponent={renderScrollComponent}
       data={data}
       renderItem={({ item }) => <PressableRotate style={styles.box} />}
     />
@@ -145,8 +144,21 @@ function App() {
 }
 ```
 
-The `renderScrollComponent` function wraps the scroll view with additional functionality in order to allow smoother interactions between scrolling and pressable components, preventing unwanted activations during scroll gestures.
-Applying the renderScrollComponent from `pressto` means that the tap gesture will be delayed for a short amount of time to understand if the tap gesture is a scroll or a tap gesture.
+You can also use whatever Scrollable component you want, as long as it supports the renderScrollComponent prop.
+
+```jsx
+import { WhateverList } from 'your-favorite-list-package'
+import { ScrollView } from 'react-native-gesture-handler';
+
+function App() {
+  return (
+    <WhateverList
+      data={data}
+      renderItem={({ item }) => <PressableRotate style={styles.box} />}
+      renderScrollComponent={(props) => <ScrollView {...props} />}
+  );
+}
+```
 
 ## Contributing
 
