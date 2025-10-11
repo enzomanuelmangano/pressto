@@ -199,6 +199,7 @@ A pressable component that changes opacity when pressed.
 Creates a custom animated pressable component.
 
 **Signature:**
+
 ```typescript
 createAnimatedPressable<TMetadata = unknown>(
   animatedStyle: (
@@ -214,6 +215,7 @@ createAnimatedPressable<TMetadata = unknown>(
 ```
 
 **Parameters:**
+
 - `progress` (number): Animation progress from 0 (idle) to 1 (pressed)
 - `options.isPressed` (boolean): True while actively pressing
 - `options.isToggled` (boolean): Toggles on each press (persistent state)
@@ -221,6 +223,7 @@ createAnimatedPressable<TMetadata = unknown>(
 - `options.metadata` (TMetadata): Custom data from `PressablesConfig`
 
 **Example:**
+
 ```jsx
 const MyButton = createAnimatedPressable((progress, { isToggled }) => {
   'worklet';
@@ -236,12 +239,14 @@ const MyButton = createAnimatedPressable((progress, { isToggled }) => {
 Provides global configuration for all pressable components.
 
 **Props:**
+
 - `animationType?: 'timing' | 'spring'` - Animation type (default: 'timing')
 - `config?: WithTimingConfig | WithSpringConfig` - Animation configuration
 - `globalHandlers?: { onPress?, onPressIn?, onPressOut? }` - Global event handlers
 - `metadata?: TMetadata` - Custom theme/config available in all pressables
 
 **Example:**
+
 ```jsx
 <PressablesConfig
   animationType="spring"
@@ -251,6 +256,26 @@ Provides global configuration for all pressable components.
   <App />
 </PressablesConfig>
 ```
+
+## Migration Guide
+
+### Upgrading from 0.3.x to 0.5.x
+
+**Breaking Change:** The `progress` parameter is now a plain `number` instead of `SharedValue<number>`.
+
+```diff
+const MyPressable = createAnimatedPressable((progress) => {
+  'worklet';
+  return {
+-   opacity: progress.get() * 0.5,
++   opacity: progress * 0.5,
+-   scale: interpolate(progress.get(), [0, 1], [1, 0.95]),
++   scale: interpolate(progress, [0, 1], [1, 0.95]),
+  };
+});
+```
+
+**What to do:** Remove all `.get()` / `.value` calls on the `progress` parameter.
 
 ## Avoid highlight flicker effect in Scrollable List
 
