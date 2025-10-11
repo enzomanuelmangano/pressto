@@ -46,24 +46,41 @@ export default function OptionsExample() {
       <Text style={styles.subtitle}>
         • isPressed: Active during press{'\n'}• isToggled: Flips on each press
         (green when toggled){'\n'}• isSelected: Gold border on last pressed
-        button
+        button{'\n'}• Callbacks receive options object
       </Text>
 
       <View style={styles.section}>
-        <PressableToggle style={styles.item}>
+        <PressableToggle
+          style={styles.item}
+          onPress={(options) => {
+            console.log('Button 1 pressed:', options);
+          }}
+        >
           <Text style={styles.itemText}>Button 1</Text>
+          <Text style={styles.hint}>Logs options on press</Text>
         </PressableToggle>
 
         <PressableToggle
           style={styles.item}
           initialToggled={true}
-          onPress={() => {}}
+          onPress={(options) => {
+            console.log('Button 2 toggled to:', options.isToggled);
+          }}
         >
           <Text style={styles.itemText}>Button 2 (starts toggled)</Text>
+          <Text style={styles.hint}>Logs toggle state</Text>
         </PressableToggle>
 
-        <PressableToggle style={styles.item} onPress={() => {}}>
+        <PressableToggle
+          style={styles.item}
+          onPress={(options) => {
+            if (options.isSelected) {
+              console.log('Button 3 is now selected!');
+            }
+          }}
+        >
           <Text style={styles.itemText}>Button 3</Text>
+          <Text style={styles.hint}>Logs when selected</Text>
         </PressableToggle>
       </View>
     </View>
@@ -93,14 +110,16 @@ const styles = StyleSheet.create({
   item: {
     padding: 20,
     borderRadius: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
   },
   itemText: {
     fontSize: 16,
     color: '#fff',
     fontWeight: '600',
+  },
+  hint: {
+    fontSize: 12,
+    color: '#aaa',
+    marginTop: 4,
   },
   checkmark: {
     fontSize: 20,

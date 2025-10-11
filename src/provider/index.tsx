@@ -9,6 +9,7 @@ import { DefaultConfigs } from './constants';
 import {
   PressablesContext,
   PressablesGroupContext,
+  type AnimatedPressableOptions,
   type AnimationType,
 } from './context';
 
@@ -20,9 +21,9 @@ export type PressablesConfigProps<
   animationType?: T;
   config?: T extends 'timing' ? WithTimingConfig : WithSpringConfig;
   globalHandlers?: {
-    onPressIn?: () => void;
-    onPressOut?: () => void;
-    onPress?: () => void;
+    onPressIn?: (options: AnimatedPressableOptions) => void;
+    onPressOut?: (options: AnimatedPressableOptions) => void;
+    onPress?: (options: AnimatedPressableOptions) => void;
   };
   metadata?: TMetadata;
 };

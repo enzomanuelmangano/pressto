@@ -9,12 +9,15 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useLastTouchedPressable, usePressablesConfig } from '../provider';
-import type { PressableContextType } from '../provider/context';
+import type {
+  AnimatedPressableOptions,
+  PressableContextType,
+} from '../provider/context';
 
 const AnimatedBaseButton = Animated.createAnimatedComponent(BaseButton);
 type AnimatedPressableProps = ComponentProps<typeof AnimatedBaseButton>;
 
-export type AnimatedPressableOptions<TMetadata = unknown> = {
+export type AnimatedPressableStyleOptions<TMetadata = unknown> = {
   isPressed: boolean;
   isToggled: boolean;
   isSelected: boolean;
@@ -25,7 +28,7 @@ export type BasePressableProps<TMetadata = unknown> = {
   children?: React.ReactNode;
   animatedStyle?: (
     progress: number,
-    options: AnimatedPressableOptions<TMetadata>
+    options: AnimatedPressableStyleOptions<TMetadata>
   ) => ViewStyle;
   enabled?: boolean;
   initialToggled?: boolean;
@@ -57,9 +60,9 @@ export type BasePressableProps<TMetadata = unknown> = {
       | 'accessibilityActions'
     >
   > & {
-    onPress?: () => void;
-    onPressIn?: () => void;
-    onPressOut?: () => void;
+    onPress?: (options: AnimatedPressableOptions) => void;
+    onPressIn?: (options: AnimatedPressableOptions) => void;
+    onPressOut?: (options: AnimatedPressableOptions) => void;
   };
 
 const BasePressable: React.FC<BasePressableProps> = React.memo(
@@ -122,16 +125,33 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
 
     const onPressInWrapper = useCallback(() => {
       active.set(true);
-      onPressInProvider?.();
-      onPressIn?.();
-    }, [active, onPressIn, onPressInProvider]);
+      const options: AnimatedPressableOptions = {
+        isPressed: active.get(),
+        isToggled: isToggled.get(),
+        isSelected: lastTouchedPressable.get() === pressableId,
+      };
+      onPressInProvider?.(options);
+      onPressIn?.(options);
+    }, [
+      active,
+      onPressIn,
+      onPressInProvider,
+      isToggled,
+      lastTouchedPressable,
+      pressableId,
+    ]);
 
     const onPressWrapper = useCallback(() => {
       active.set(false);
       isToggled.set(!isToggled.get());
       lastTouchedPressable.set(pressableId);
-      onPressProvider?.();
-      onPress?.();
+      const options: AnimatedPressableOptions = {
+        isPressed: active.get(),
+        isToggled: isToggled.get(),
+        isSelected: lastTouchedPressable.get() === pressableId,
+      };
+      onPressProvider?.(options);
+      onPress?.(options);
     }, [
       active,
       onPress,
@@ -143,9 +163,21 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
 
     const onPressOutWrapper = useCallback(() => {
       active.set(false);
-      onPressOutProvider?.();
-      onPressOut?.();
-    }, [active, onPressOut, onPressOutProvider]);
+      const options: AnimatedPressableOptions = {
+        isPressed: active.get(),
+        isToggled: isToggled.get(),
+        isSelected: lastTouchedPressable.get() === pressableId,
+      };
+      onPressOutProvider?.(options);
+      onPressOut?.(options);
+    }, [
+      active,
+      onPressOut,
+      onPressOutProvider,
+      isToggled,
+      lastTouchedPressable,
+      pressableId,
+    ]);
 
     const rAnimatedStyle = useAnimatedStyle(() => {
       return animatedStyle

@@ -9,6 +9,12 @@ import { DefaultConfigs } from './constants';
 
 export type AnimationType = 'timing' | 'spring';
 
+export type AnimatedPressableOptions = {
+  isPressed: boolean;
+  isToggled: boolean;
+  isSelected: boolean;
+};
+
 export type PressableContextType<
   T extends AnimationType,
   TMetadata = unknown,
@@ -16,9 +22,9 @@ export type PressableContextType<
   animationType: T;
   config: T extends 'timing' ? WithTimingConfig : WithSpringConfig;
   globalHandlers?: {
-    onPressIn?: () => void;
-    onPressOut?: () => void;
-    onPress?: () => void;
+    onPressIn?: (options: AnimatedPressableOptions) => void;
+    onPressOut?: (options: AnimatedPressableOptions) => void;
+    onPress?: (options: AnimatedPressableOptions) => void;
   };
   metadata?: TMetadata;
 };
