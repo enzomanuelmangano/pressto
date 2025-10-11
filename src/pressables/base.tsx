@@ -117,7 +117,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
 
     const rAnimatedStyle = useAnimatedStyle(() => {
       return animatedStyle ? animatedStyle(progress) : {};
-    }, []);
+    }, [animatedStyle, progress]);
 
     return (
       <AnimatedBaseButton

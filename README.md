@@ -97,7 +97,7 @@ function App() {
 export default () => (
   <PressablesConfig
     animationType="spring"
-    config={{ mass: 2 }}
+    config={{ mass: 1, damping: 30, stiffness: 200 }}
     globalHandlers={{
       onPress: () => {
         console.log('you can call haptics here');

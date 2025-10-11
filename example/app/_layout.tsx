@@ -6,13 +6,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 export default function RootLayout() {
   return (
     <PressablesConfig
-      animationType="spring"
-      config={{
-        mass: 1,
-        damping: 15,
-        stiffness: 120,
-        overshootClamping: false,
-      }}
+      animationType="timing"
       globalHandlers={{
         onPress: () => {
           console.log('use haptics!');
