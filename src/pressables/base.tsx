@@ -28,6 +28,7 @@ export type BasePressableProps<TMetadata = unknown> = {
     options: AnimatedPressableOptions<TMetadata>
   ) => ViewStyle;
   enabled?: boolean;
+  initialToggled?: boolean;
 } & Partial<PressableContextType<'timing' | 'spring'>> &
   Partial<
     Pick<
@@ -71,6 +72,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     animationType: animationTypeProp,
     config: configProp,
     enabled = true,
+    initialToggled = false,
     ...rest
   }) => {
     const {
@@ -90,7 +92,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     } = globalHandlers ?? {};
 
     const active = useSharedValue(false);
-    const isToggled = useSharedValue(false);
+    const isToggled = useSharedValue(initialToggled);
 
     const { animationType, config } = useMemo(() => {
       if (animationTypeProp != null) {

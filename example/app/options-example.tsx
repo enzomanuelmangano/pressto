@@ -54,7 +54,11 @@ export default function OptionsExample() {
           <Text style={styles.itemText}>Button 1</Text>
         </PressableToggle>
 
-        <PressableToggle style={styles.item} onPress={() => {}}>
+        <PressableToggle
+          style={styles.item}
+          initialToggled={true}
+          onPress={() => {}}
+        >
           <Text style={styles.itemText}>Button 2 (starts toggled)</Text>
         </PressableToggle>
 
