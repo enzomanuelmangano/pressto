@@ -17,13 +17,7 @@ const withAnimatedTapStyle = <TMetadata = unknown,>(
   ) => ViewStyle
 ) => {
   return (props: CustomPressableProps) => {
-    return (
-      <WrappedComponent
-        {...props}
-        animatedStyle={animatedStyle}
-        options={props.options}
-      />
-    );
+    return <WrappedComponent {...props} animatedStyle={animatedStyle} />;
   };
 };
 

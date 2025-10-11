@@ -42,3 +42,9 @@ export const PressablesGroupContext = createContext<{
 }>({
   lastTouchedPressable: makeMutable<string | null>(null),
 });
+
+export const PressablesGroupContext = createContext<{
+  lastTouchedPressable: SharedValue<string | null>;
+}>({
+  lastTouchedPressable: makeMutable<string | null>(null),
+});
