@@ -24,6 +24,9 @@ npx expo install pressto react-native-reanimated react-native-gesture-handler re
 - Pre-built animated pressable components: `PressableScale` and `PressableOpacity`
 - Easy creation of custom animated pressables with `createAnimatedPressable`
 - Configurable animation types and durations
+- **Advanced interaction states**: `isPressed`, `isToggled`, `isSelected`
+- **Type-safe metadata**: Pass theme/design tokens directly into worklets
+- **Group coordination**: Track selected items across pressable groups
 
 ## Usage
 
@@ -71,6 +74,36 @@ function CustomPressableExample() {
 }
 ```
 
+### Advanced: Using interaction states
+
+```jsx
+import { createAnimatedPressable } from 'pressto';
+import { interpolateColor } from 'react-native-reanimated';
+
+const ToggleButton = createAnimatedPressable((progress, options) => {
+  'worklet';
+
+  const { isPressed, isToggled, isSelected, metadata } = options;
+
+  // isPressed: true while actively pressing
+  // isToggled: toggles on each press
+  // isSelected: true for last pressed item in group
+  // metadata: custom theme/config from PressablesConfig
+
+  const backgroundColor = interpolateColor(
+    progress,
+    [0, 1],
+    isToggled ? ['#4CAF50', '#388E3C'] : ['#2196F3', '#1976D2']
+  );
+
+  return {
+    backgroundColor,
+    opacity: isPressed ? 0.9 : 1,
+    borderWidth: isSelected ? 2 : 0,
+  };
+});
+```
+
 ### Use the PressablesConfig
 
 ```jsx
@@ -109,6 +142,48 @@ export default () => (
 );
 ```
 
+### Advanced: Theme metadata
+
+Pass your design system directly into worklets with full type safety:
+
+```jsx
+import { createAnimatedPressable, PressablesConfig } from 'pressto';
+
+// Define your theme
+const theme = {
+  colors: {
+    primary: '#6366F1',
+    secondary: '#EC4899',
+  },
+  spacing: {
+    medium: 16,
+    large: 24,
+  },
+  borderRadius: {
+    medium: 12,
+  },
+};
+
+// Create themed pressables
+const ThemedButton = createAnimatedPressable((progress, { metadata }) => {
+  'worklet';
+  return {
+    backgroundColor: metadata.colors.primary,
+    padding: metadata.spacing.medium,
+    borderRadius: metadata.borderRadius.medium,
+  };
+});
+
+// Provide theme to all pressables
+function App() {
+  return (
+    <PressablesConfig metadata={theme}>
+      <ThemedButton onPress={() => console.log('pressed')} />
+    </PressablesConfig>
+  );
+}
+```
+
 ## API
 
 ### PressableScale
@@ -121,11 +196,61 @@ A pressable component that changes opacity when pressed.
 
 ### createAnimatedPressable
 
-A function to create custom animated pressables. It takes a worklet function that defines how the component should animate based on the press progress.
+Creates a custom animated pressable component.
+
+**Signature:**
+```typescript
+createAnimatedPressable<TMetadata = unknown>(
+  animatedStyle: (
+    progress: number,
+    options: {
+      isPressed: boolean;
+      isToggled: boolean;
+      isSelected: boolean;
+      metadata: TMetadata;
+    }
+  ) => ViewStyle
+)
+```
+
+**Parameters:**
+- `progress` (number): Animation progress from 0 (idle) to 1 (pressed)
+- `options.isPressed` (boolean): True while actively pressing
+- `options.isToggled` (boolean): Toggles on each press (persistent state)
+- `options.isSelected` (boolean): True for the last pressed item in a group
+- `options.metadata` (TMetadata): Custom data from `PressablesConfig`
+
+**Example:**
+```jsx
+const MyButton = createAnimatedPressable((progress, { isToggled }) => {
+  'worklet';
+  return {
+    backgroundColor: isToggled ? '#4CAF50' : '#2196F3',
+    transform: [{ scale: 1 - progress * 0.05 }],
+  };
+});
+```
 
 ### PressablesConfig
 
-A component to configure global settings for all pressable components within its children.
+Provides global configuration for all pressable components.
+
+**Props:**
+- `animationType?: 'timing' | 'spring'` - Animation type (default: 'timing')
+- `config?: WithTimingConfig | WithSpringConfig` - Animation configuration
+- `globalHandlers?: { onPress?, onPressIn?, onPressOut? }` - Global event handlers
+- `metadata?: TMetadata` - Custom theme/config available in all pressables
+
+**Example:**
+```jsx
+<PressablesConfig
+  animationType="spring"
+  config={{ damping: 30, stiffness: 200 }}
+  metadata={{ colors: { primary: '#6366F1' } }}
+>
+  <App />
+</PressablesConfig>
+```
 
 ## Avoid highlight flicker effect in Scrollable List
 
