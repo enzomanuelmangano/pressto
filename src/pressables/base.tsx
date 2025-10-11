@@ -11,14 +11,19 @@ import Animated, {
 } from 'react-native-reanimated';
 import { usePressablesConfig } from '../provider';
 import type { PressableContextType } from '../provider/context';
+import type { AnimatedPressableOptions } from './hoc';
 
 const AnimatedBaseButton = Animated.createAnimatedComponent(BaseButton);
 type AnimatedPressableProps = ComponentProps<typeof AnimatedBaseButton>;
 
 export type BasePressableProps = {
   children?: React.ReactNode;
-  animatedStyle?: (progress: SharedValue<number>) => ViewStyle;
+  animatedStyle?: (
+    progress: SharedValue<number>,
+    options?: AnimatedPressableOptions
+  ) => ViewStyle;
   enabled?: boolean;
+  options?: AnimatedPressableOptions;
 } & Partial<PressableContextType<'timing' | 'spring'>> &
   Partial<
     Pick<
@@ -62,6 +67,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     animationType: animationTypeProp,
     config: configProp,
     enabled = true,
+    options,
     ...rest
   }) => {
     const {
@@ -74,6 +80,9 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       onPressOut: onPressOutProvider,
       onPress: onPressProvider,
     } = globalHandlers ?? {};
+
+    const active = useSharedValue(false);
+    const toggled = useSharedValue(false);
 
     const { animationType, config } = useMemo(() => {
       if (animationTypeProp != null) {
@@ -93,8 +102,6 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       configPropProvider,
     ]);
 
-    const active = useSharedValue(false);
-
     const withAnimation = useMemo(() => {
       return animationType === 'timing' ? withTiming : withSpring;
     }, [animationType]);
@@ -111,9 +118,10 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
 
     const onPressWrapper = useCallback(() => {
       active.set(false);
+      toggled.set(!toggled.get());
       onPressProvider?.();
       onPress?.();
-    }, [active, onPress, onPressProvider]);
+    }, [active, onPress, onPressProvider, toggled]);
 
     const onPressOutWrapper = useCallback(() => {
       active.set(false);
@@ -122,8 +130,10 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     }, [active, onPressOut, onPressOutProvider]);
 
     const rAnimatedStyle = useAnimatedStyle(() => {
-      return animatedStyle ? animatedStyle(progress) : {};
-    }, [animatedStyle, progress]);
+      return animatedStyle
+        ? animatedStyle(progress, { toggled: toggled, ...options })
+        : {};
+    }, [animatedStyle, progress, toggled]);
 
     return (
       <AnimatedBaseButton

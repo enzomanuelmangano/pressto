@@ -17,14 +17,20 @@ const PressableHighlight = createAnimatedPressable((progress) => {
 export default function Page() {
   const router = useRouter();
 
-  const handlePress = () => {
-    router.navigate('/screen');
-  };
-
   return (
     <View style={styles.container}>
-      <PressableHighlight onPress={handlePress} style={styles.button}>
-        <Text style={styles.buttonText}>Press me</Text>
+      <PressableHighlight
+        onPress={() => router.navigate('/screen')}
+        style={styles.button}
+      >
+        <Text style={styles.buttonText}>Rotation Example</Text>
+      </PressableHighlight>
+
+      <PressableHighlight
+        onPress={() => router.navigate('/options-example')}
+        style={styles.button}
+      >
+        <Text style={styles.buttonText}>Toggle Options</Text>
       </PressableHighlight>
     </View>
   );
@@ -36,18 +42,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#000000',
+    gap: 20,
   },
   button: {
     backgroundColor: 'black',
     height: 100,
-    aspectRatio: 1,
-    borderRadius: 50,
+    width: 200,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
   },
   buttonText: {
     color: 'white',
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
 });
