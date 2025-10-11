@@ -8,11 +8,11 @@ export type { AnimatedPressableOptions };
 
 export type CustomPressableProps = Omit<BasePressableProps, 'animatedStyle'>;
 
-const withAnimatedTapStyle = (
-  WrappedComponent: React.ComponentType<BasePressableProps>,
+const withAnimatedTapStyle = <TMetadata = unknown,>(
+  WrappedComponent: React.ComponentType<BasePressableProps<TMetadata>>,
   animatedStyle: (
     progress: number,
-    options: AnimatedPressableOptions
+    options: AnimatedPressableOptions<TMetadata>
   ) => ViewStyle
 ) => {
   return (props: CustomPressableProps) => {
@@ -20,11 +20,14 @@ const withAnimatedTapStyle = (
   };
 };
 
-export const createAnimatedPressable = (
+export const createAnimatedPressable = <TMetadata = unknown,>(
   animatedStyle: (
     progress: number,
-    options: AnimatedPressableOptions
+    options: AnimatedPressableOptions<TMetadata>
   ) => ViewStyle
 ) => {
-  return withAnimatedTapStyle(BasePressable, animatedStyle);
+  return withAnimatedTapStyle<TMetadata>(
+    BasePressable as React.ComponentType<BasePressableProps<TMetadata>>,
+    animatedStyle
+  );
 };

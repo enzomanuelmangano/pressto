@@ -32,6 +32,13 @@ export default function Page() {
       >
         <Text style={styles.buttonText}>Toggle Options</Text>
       </PressableHighlight>
+
+      <PressableHighlight
+        onPress={() => router.navigate('/metadata-example')}
+        style={styles.button}
+      >
+        <Text style={styles.buttonText}>Theme Metadata</Text>
+      </PressableHighlight>
     </View>
   );
 }

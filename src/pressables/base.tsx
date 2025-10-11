@@ -14,17 +14,18 @@ import type { PressableContextType } from '../provider/context';
 const AnimatedBaseButton = Animated.createAnimatedComponent(BaseButton);
 type AnimatedPressableProps = ComponentProps<typeof AnimatedBaseButton>;
 
-export type AnimatedPressableOptions = {
+export type AnimatedPressableOptions<TMetadata = unknown> = {
   isPressed: boolean;
   isToggled: boolean;
   isFocused: boolean;
+  metadata: TMetadata;
 };
 
-export type BasePressableProps = {
+export type BasePressableProps<TMetadata = unknown> = {
   children?: React.ReactNode;
   animatedStyle?: (
     progress: number,
-    options: AnimatedPressableOptions
+    options: AnimatedPressableOptions<TMetadata>
   ) => ViewStyle;
   enabled?: boolean;
 } & Partial<PressableContextType<'timing' | 'spring'>> &
@@ -76,6 +77,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       animationType: animationTypeProvider,
       config: configPropProvider,
       globalHandlers,
+      metadata,
     } = usePressablesConfig();
 
     const lastTouchedPressable = useLastTouchedPressable();
@@ -149,6 +151,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
             isPressed: active.get(),
             isToggled: isToggled.get(),
             isFocused: lastTouchedPressable.get() === pressableId,
+            metadata,
           })
         : {};
     }, [
@@ -158,6 +161,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       isToggled,
       lastTouchedPressable,
       pressableId,
+      metadata,
     ]);
 
     return (

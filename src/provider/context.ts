@@ -9,7 +9,10 @@ import { DefaultConfigs } from './constants';
 
 export type AnimationType = 'timing' | 'spring';
 
-export type PressableContextType<T extends AnimationType> = {
+export type PressableContextType<
+  T extends AnimationType,
+  TMetadata = unknown,
+> = {
   animationType: T;
   config: T extends 'timing' ? WithTimingConfig : WithSpringConfig;
   globalHandlers?: {
@@ -17,13 +20,15 @@ export type PressableContextType<T extends AnimationType> = {
     onPressOut?: () => void;
     onPress?: () => void;
   };
+  metadata?: TMetadata;
 };
 
 export const PressablesContext = createContext<
-  PressableContextType<AnimationType>
+  PressableContextType<AnimationType, unknown>
 >({
   animationType: 'timing',
   config: DefaultConfigs.timing,
+  metadata: undefined,
 });
 
 export const PressablesGroupContext = createContext<{

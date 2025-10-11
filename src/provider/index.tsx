@@ -12,7 +12,10 @@ import {
   type AnimationType,
 } from './context';
 
-export type PressablesConfigProps<T extends AnimationType> = {
+export type PressablesConfigProps<
+  T extends AnimationType,
+  TMetadata = unknown,
+> = {
   children?: React.ReactNode;
   animationType?: T;
   config?: T extends 'timing' ? WithTimingConfig : WithSpringConfig;
@@ -21,6 +24,7 @@ export type PressablesConfigProps<T extends AnimationType> = {
     onPressOut?: () => void;
     onPress?: () => void;
   };
+  metadata?: TMetadata;
 };
 
 export const PressablesGroup = ({ children }: PropsWithChildren) => {
@@ -39,19 +43,21 @@ export const PressablesGroup = ({ children }: PropsWithChildren) => {
   );
 };
 
-export const PressablesConfig = <T extends AnimationType>({
+export const PressablesConfig = <T extends AnimationType, TMetadata = unknown>({
   children,
   animationType = 'timing' as T,
   config,
   globalHandlers,
-}: PressablesConfigProps<T>) => {
+  metadata,
+}: PressablesConfigProps<T, TMetadata>) => {
   const value = useMemo(() => {
     return {
       animationType,
       config: config ?? DefaultConfigs[animationType],
       globalHandlers,
+      metadata,
     };
-  }, [animationType, config, globalHandlers]);
+  }, [animationType, config, globalHandlers, metadata]);
 
   return (
     <PressablesContext.Provider value={value}>
