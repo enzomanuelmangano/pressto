@@ -6,14 +6,14 @@ import { interpolate, interpolateColor } from 'react-native-reanimated';
 const PressableToggle = createAnimatedPressable((progress, options) => {
   'worklet';
 
-  const isToggled = options?.toggled?.get() ?? false;
+  const isToggled = options?.toggled ?? false;
 
   // Base scale animation on press
-  const scale = interpolate(progress.get(), [0, 1], [1, 0.95]);
+  const scale = interpolate(progress, [0, 1], [1, 0.95]);
 
   // Background color changes based on toggle state
   const backgroundColor = interpolateColor(
-    progress.get(),
+    progress,
     [0, 1],
     isToggled
       ? ['#4CAF50', '#388E3C'] // Green when toggled

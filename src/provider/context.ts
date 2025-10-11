@@ -1,7 +1,9 @@
 import { createContext } from 'react';
-import type {
-  WithSpringConfig,
-  WithTimingConfig,
+import {
+  makeMutable,
+  type SharedValue,
+  type WithSpringConfig,
+  type WithTimingConfig,
 } from 'react-native-reanimated';
 import { DefaultConfigs } from './constants';
 
@@ -22,4 +24,10 @@ export const PressablesContext = createContext<
 >({
   animationType: 'timing',
   config: DefaultConfigs.timing,
+});
+
+export const PressablesGroupContext = createContext<{
+  lastTouchedPressable: SharedValue<string | null>;
+}>({
+  lastTouchedPressable: makeMutable<string | null>(null),
 });

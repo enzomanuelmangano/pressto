@@ -6,7 +6,7 @@ export const PressableScale = createAnimatedPressable((progress) => {
   return {
     transform: [
       {
-        scale: interpolate(progress.get(), [0, 1], [1, 0.96]),
+        scale: interpolate(progress, [0, 1], [1, 0.96]),
       },
     ],
   };
