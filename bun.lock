@@ -10,6 +10,7 @@
         "@commitlint/config-conventional": "^17.0.2",
         "@evilmartians/lefthook": "^1.5.0",
         "@react-native/eslint-config": "^0.73.1",
+        "@react-native/eslint-plugin": "^0.82.0",
         "@release-it/conventional-changelog": "^5.0.0",
         "@testing-library/jest-native": "^5.4.3",
         "@testing-library/react-native": "^13.3.3",
@@ -633,7 +634,7 @@
 
     "@react-native/eslint-config": ["@react-native/eslint-config@0.73.2", "", { "dependencies": { "@babel/core": "^7.20.0", "@babel/eslint-parser": "^7.20.0", "@react-native/eslint-plugin": "0.73.1", "@typescript-eslint/eslint-plugin": "^5.57.1", "@typescript-eslint/parser": "^5.57.1", "eslint-config-prettier": "^8.5.0", "eslint-plugin-eslint-comments": "^3.2.0", "eslint-plugin-ft-flow": "^2.0.1", "eslint-plugin-jest": "^26.5.3", "eslint-plugin-prettier": "^4.2.1", "eslint-plugin-react": "^7.30.1", "eslint-plugin-react-hooks": "^4.6.0", "eslint-plugin-react-native": "^4.0.0" }, "peerDependencies": { "eslint": ">=8", "prettier": ">=2" } }, "sha512-YzMfes19loTfbrkbYNAfHBDXX4oRBzc5wnvHs4h2GIHUj6YKs5ZK5lldqSrBJCdZAI3nuaO9Qj+t5JRwou571w=="],
 
-    "@react-native/eslint-plugin": ["@react-native/eslint-plugin@0.73.1", "", {}, "sha512-8BNMFE8CAI7JLWLOs3u33wcwcJ821LYs5g53Xyx9GhSg0h8AygTwDrwmYb/pp04FkCNCPjKPBoaYRthQZmxgwA=="],
+    "@react-native/eslint-plugin": ["@react-native/eslint-plugin@0.82.0", "", {}, "sha512-kSZvt008PemdyDUDEYwTEM3ar1UcES74yEN74ogTnMThWeHx/SADOex10yqdzeHwVmjl+N9q0R96Rg49B4h6Vw=="],
 
     "@react-native/gradle-plugin": ["@react-native/gradle-plugin@0.81.4", "", {}, "sha512-T7fPcQvDDCSusZFVSg6H1oVDKb/NnVYLnsqkcHsAF2C2KGXyo3J7slH/tJAwNfj/7EOA2OgcWxfC1frgn9TQvw=="],
 
@@ -2734,6 +2735,8 @@
     "@react-native/community-cli-plugin/semver": ["semver@7.7.2", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA=="],
 
     "@react-native/dev-middleware/open": ["open@7.4.2", "", { "dependencies": { "is-docker": "^2.0.0", "is-wsl": "^2.1.1" } }, "sha512-MVHddDVweXZF3awtlAS+6pgKLlm/JgxZ90+/NBurBoQctVOOB/zDdVjcyPzQ+0laDGbsWgrRkflI65sQeOgT9Q=="],
+
+    "@react-native/eslint-config/@react-native/eslint-plugin": ["@react-native/eslint-plugin@0.73.1", "", {}, "sha512-8BNMFE8CAI7JLWLOs3u33wcwcJ821LYs5g53Xyx9GhSg0h8AygTwDrwmYb/pp04FkCNCPjKPBoaYRthQZmxgwA=="],
 
     "@react-native/eslint-config/eslint-config-prettier": ["eslint-config-prettier@8.10.2", "", { "peerDependencies": { "eslint": ">=7.0.0" }, "bin": { "eslint-config-prettier": "bin/cli.js" } }, "sha512-/IGJ6+Dka158JnP5n5YFMOszjDWrXggGz1LaK/guZq9vZTmniaKlHcsscvkAhn9y4U+BU3JuUdYvtAMcv30y4A=="],
 
