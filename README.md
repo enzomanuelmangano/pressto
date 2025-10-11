@@ -1,3 +1,5 @@
+## Pressto 🔥
+
 https://github.com/user-attachments/assets/c857eb8d-3ce7-4afe-b2dd-e974560684d8
 
 The fastest way to improve your React Native app is by using tap gestures.
@@ -8,13 +10,13 @@ The package is built on top of the BaseButton from [react-native-gesture-handler
 ## Installation
 
 ```sh
-bun add pressto react-native-reanimated react-native-gesture-handler
+bun add pressto react-native-reanimated react-native-gesture-handler react-native-worklets
 ```
 
 Or with Expo
 
 ```sh
-npx expo install pressto react-native-reanimated react-native-gesture-handler
+npx expo install pressto react-native-reanimated react-native-gesture-handler react-native-worklets
 ```
 
 ## Features
