@@ -14,14 +14,17 @@ import type { PressableContextType } from '../provider/context';
 const AnimatedBaseButton = Animated.createAnimatedComponent(BaseButton);
 type AnimatedPressableProps = ComponentProps<typeof AnimatedBaseButton>;
 
+export type AnimatedPressableOptions = {
+  isPressed: boolean;
+  isToggled: boolean;
+  isFocused: boolean;
+};
+
 export type BasePressableProps = {
   children?: React.ReactNode;
   animatedStyle?: (
     progress: number,
-    options?: {
-      toggled: boolean;
-      isLastTouched: boolean;
-    }
+    options: AnimatedPressableOptions
   ) => ViewStyle;
   enabled?: boolean;
 } & Partial<PressableContextType<'timing' | 'spring'>> &
@@ -85,7 +88,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     } = globalHandlers ?? {};
 
     const active = useSharedValue(false);
-    const toggled = useSharedValue(false);
+    const isToggled = useSharedValue(false);
 
     const { animationType, config } = useMemo(() => {
       if (animationTypeProp != null) {
@@ -121,7 +124,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
 
     const onPressWrapper = useCallback(() => {
       active.set(false);
-      toggled.set(!toggled.get());
+      isToggled.set(!isToggled.get());
       lastTouchedPressable.set(pressableId);
       onPressProvider?.();
       onPress?.();
@@ -129,7 +132,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       active,
       onPress,
       onPressProvider,
-      toggled,
+      isToggled,
       lastTouchedPressable,
       pressableId,
     ]);
@@ -143,11 +146,19 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     const rAnimatedStyle = useAnimatedStyle(() => {
       return animatedStyle
         ? animatedStyle(progress.get(), {
-            toggled: toggled.get(),
-            isLastTouched: lastTouchedPressable.get() === pressableId,
+            isPressed: active.get(),
+            isToggled: isToggled.get(),
+            isFocused: lastTouchedPressable.get() === pressableId,
           })
         : {};
-    }, [animatedStyle, progress, toggled, lastTouchedPressable, pressableId]);
+    }, [
+      animatedStyle,
+      progress,
+      active,
+      isToggled,
+      lastTouchedPressable,
+      pressableId,
+    ]);
 
     return (
       <AnimatedBaseButton

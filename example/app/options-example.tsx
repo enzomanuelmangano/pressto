@@ -2,39 +2,51 @@ import { createAnimatedPressable } from 'pressto';
 import { StyleSheet, Text, View } from 'react-native';
 import { interpolate, interpolateColor } from 'react-native-reanimated';
 
-// Toggle-aware pressable that changes appearance based on toggle state
-const PressableToggle = createAnimatedPressable((progress, options) => {
-  'worklet';
+// Pressable that responds to all three option states
+const PressableToggle = createAnimatedPressable(
+  (progress, { isPressed, isToggled, isFocused }) => {
+    'worklet';
 
-  const isToggled = options?.toggled ?? false;
+    // Base scale animation on press - uses progress AND isPressed
+    const scale = interpolate(progress, [0, 1], [1, 0.95]);
 
-  // Base scale animation on press
-  const scale = interpolate(progress, [0, 1], [1, 0.95]);
+    // Additional opacity change when actively pressed
+    const opacity = isPressed ? 0.9 : 1;
 
-  // Background color changes based on toggle state
-  const backgroundColor = interpolateColor(
-    progress,
-    [0, 1],
-    isToggled
-      ? ['#4CAF50', '#388E3C'] // Green when toggled
-      : ['#2196F3', '#1976D2'] // Blue when not toggled
-  );
+    // Background color changes based on toggle state
+    const backgroundColor = interpolateColor(
+      progress,
+      [0, 1],
+      isToggled
+        ? ['#4CAF50', '#388E3C'] // Green when toggled
+        : ['#2196F3', '#1976D2'] // Blue when not toggled
+    );
 
-  // Slight rotation when toggled
-  const rotate = isToggled ? '5deg' : '0deg';
+    // Slight rotation when toggled
+    const rotate = isToggled ? '5deg' : '0deg';
 
-  return {
-    transform: [{ scale }, { rotate }],
-    backgroundColor,
-  };
-});
+    // Add a border for focused items
+    const borderWidth = isFocused ? 3 : 0;
+    const borderColor = '#FFD700'; // Gold border
+
+    return {
+      transform: [{ scale }, { rotate }],
+      backgroundColor,
+      borderWidth,
+      borderColor,
+      opacity,
+    };
+  }
+);
 
 export default function OptionsExample() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Toggle Example</Text>
+      <Text style={styles.title}>Pressable Options Demo</Text>
       <Text style={styles.subtitle}>
-        Tap buttons to toggle. Animation adapts to toggle state.
+        • isPressed: Active during press{'\n'}• isToggled: Flips on each press
+        (green when toggled){'\n'}• isFocused: Gold border on last pressed
+        button
       </Text>
 
       <View style={styles.section}>

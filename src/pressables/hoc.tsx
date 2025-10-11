@@ -1,23 +1,18 @@
 import React from 'react';
 
 import type { ViewStyle } from 'react-native';
-import type { BasePressableProps } from './base';
+import type { AnimatedPressableOptions, BasePressableProps } from './base';
 import { BasePressable } from './base';
 
-export type AnimatedPressableOptions = {
-  toggled: boolean;
-  isLastTouched: boolean;
-};
+export type { AnimatedPressableOptions };
 
-export type CustomPressableProps = Omit<BasePressableProps, 'animatedStyle'> & {
-  options?: AnimatedPressableOptions;
-};
+export type CustomPressableProps = Omit<BasePressableProps, 'animatedStyle'>;
 
 const withAnimatedTapStyle = (
   WrappedComponent: React.ComponentType<BasePressableProps>,
   animatedStyle: (
     progress: number,
-    options?: AnimatedPressableOptions
+    options: AnimatedPressableOptions
   ) => ViewStyle
 ) => {
   return (props: CustomPressableProps) => {
@@ -28,7 +23,7 @@ const withAnimatedTapStyle = (
 export const createAnimatedPressable = (
   animatedStyle: (
     progress: number,
-    options?: AnimatedPressableOptions
+    options: AnimatedPressableOptions
   ) => ViewStyle
 ) => {
   return withAnimatedTapStyle(BasePressable, animatedStyle);
