@@ -17,7 +17,7 @@ type AnimatedPressableProps = ComponentProps<typeof AnimatedBaseButton>;
 export type AnimatedPressableOptions<TMetadata = unknown> = {
   isPressed: boolean;
   isToggled: boolean;
-  isFocused: boolean;
+  isSelected: boolean;
   metadata: TMetadata;
 };
 
@@ -150,7 +150,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
         ? animatedStyle(progress.get(), {
             isPressed: active.get(),
             isToggled: isToggled.get(),
-            isFocused: lastTouchedPressable.get() === pressableId,
+            isSelected: lastTouchedPressable.get() === pressableId,
             metadata,
           })
         : {};

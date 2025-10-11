@@ -4,7 +4,7 @@ import { interpolate, interpolateColor } from 'react-native-reanimated';
 
 // Pressable that responds to all three option states
 const PressableToggle = createAnimatedPressable(
-  (progress, { isPressed, isToggled, isFocused }) => {
+  (progress, { isPressed, isToggled, isSelected }) => {
     'worklet';
 
     // Base scale animation on press - uses progress AND isPressed
@@ -25,8 +25,8 @@ const PressableToggle = createAnimatedPressable(
     // Slight rotation when toggled
     const rotate = isToggled ? '5deg' : '0deg';
 
-    // Add a border for focused items
-    const borderWidth = isFocused ? 3 : 0;
+    // Add a border for selected items
+    const borderWidth = isSelected ? 3 : 0;
     const borderColor = '#FFD700'; // Gold border
 
     return {
@@ -45,7 +45,7 @@ export default function OptionsExample() {
       <Text style={styles.title}>Pressable Options Demo</Text>
       <Text style={styles.subtitle}>
         • isPressed: Active during press{'\n'}• isToggled: Flips on each press
-        (green when toggled){'\n'}• isFocused: Gold border on last pressed
+        (green when toggled){'\n'}• isSelected: Gold border on last pressed
         button
       </Text>
 

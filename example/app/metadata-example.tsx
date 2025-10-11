@@ -100,7 +100,7 @@ const ThemedSecondaryButton = createAnimatedPressable<AppTheme>(
 );
 
 const ThemedCard = createAnimatedPressable<AppTheme>(
-  (progress, { isFocused, metadata }) => {
+  (progress, { isSelected, metadata }) => {
     'worklet';
 
     const scale = interpolate(progress, [0, 1], [1, 0.98]);
@@ -110,8 +110,8 @@ const ThemedCard = createAnimatedPressable<AppTheme>(
       backgroundColor: metadata.colors.background,
       borderRadius: metadata.borderRadius.large,
       padding: metadata.spacing.large,
-      borderWidth: isFocused ? 2 : 1,
-      borderColor: isFocused
+      borderWidth: isSelected ? 2 : 1,
+      borderColor: isSelected
         ? metadata.colors.primary
         : metadata.colors.primaryDark,
     };
@@ -143,12 +143,12 @@ export default function MetadataExample() {
 
           <ThemedCard onPress={() => console.log('card 1')}>
             <Text style={styles.cardText}>Themed Card 1</Text>
-            <Text style={styles.hint}>Focuses with primary border</Text>
+            <Text style={styles.hint}>Selected shows primary border</Text>
           </ThemedCard>
 
           <ThemedCard onPress={() => console.log('card 2')}>
             <Text style={styles.cardText}>Themed Card 2</Text>
-            <Text style={styles.hint}>Last pressed shows border</Text>
+            <Text style={styles.hint}>Last pressed is selected</Text>
           </ThemedCard>
         </View>
       </View>
