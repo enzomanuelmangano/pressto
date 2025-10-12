@@ -172,11 +172,7 @@ export const PressableGlass: React.FC<PressableGlassProps> = ({
   }
 
   const baseTouchableComponent = (internalProps: BaseButtonProps) => (
-    <TouchableGlassComponent
-      {...internalProps}
-      {...glassProps}
-      style={style as StyleProp<ViewStyle>}
-    />
+    <TouchableGlassComponent {...glassProps} {...internalProps} />
   );
 
   return (

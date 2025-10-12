@@ -6,6 +6,11 @@
   "main": "./lib/commonjs/index.js",
   "module": "./lib/module/index.js",
   "types": "./lib/typescript/module/src/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "glass": ["./lib/typescript/module/src/glass.d.ts"]
+    }
+  },
   "exports": {
     ".": {
       "import": {
