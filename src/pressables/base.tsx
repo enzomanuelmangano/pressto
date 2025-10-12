@@ -24,6 +24,7 @@ export type BasePressableProps = {
     Pick<
       AnimatedPressableProps,
       | 'layout'
+      | 'onLongPress'
       | 'entering'
       | 'exiting'
       | 'style'
