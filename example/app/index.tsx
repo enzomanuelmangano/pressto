@@ -1,5 +1,6 @@
 import { useRouter } from 'expo-router';
-import { createAnimatedPressable, PressableGlass } from 'pressto';
+import { createAnimatedPressable } from 'pressto';
+import { PressableGlass } from 'pressto/glass';
 import { StyleSheet, Text, View } from 'react-native';
 import { interpolate } from 'react-native-reanimated';
 

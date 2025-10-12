@@ -2,7 +2,8 @@
   "compilerOptions": {
     "rootDir": ".",
     "paths": {
-      "pressto": ["./src/index"]
+      "pressto": ["./src/index"],
+      "pressto/glass": ["./src/glass"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,

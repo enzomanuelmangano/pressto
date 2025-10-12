@@ -56,6 +56,7 @@ type TouchableGlassComponentProps = LiquidGlassProps &
     | 'enabled'
     | 'onBegan'
     | 'onActivated'
+    | 'onPress'
     | 'onEnded'
     | 'onFailed'
     | 'onCancelled'
@@ -86,11 +87,11 @@ const TouchableGlassComponent = memo((props: TouchableGlassComponentProps) => {
       .onTouchesDown((event) => {
         props.onBegan?.(event as unknown as HandlerStateChangeEvent);
       })
+      .onTouchesUp(() => {
+        props.onPress?.(true);
+      })
       .onTouchesCancelled((event) => {
         props.onCancelled?.(event as unknown as HandlerStateChangeEvent);
-      })
-      .onTouchesUp((event) => {
-        props.onEnded?.(event as unknown as HandlerStateChangeEvent);
       });
 
     if (props.activeCursor) {
@@ -105,7 +106,11 @@ const TouchableGlassComponent = memo((props: TouchableGlassComponentProps) => {
       gesture.cancelsTouchesInView(props.cancelsTouchesInView);
     }
 
-    return gesture.enabled(!!props.enabled);
+    if (props.enabled !== undefined) {
+      gesture.enabled(props.enabled);
+    }
+
+    return gesture;
   }, [props]);
 
   return (
