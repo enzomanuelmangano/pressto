@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { createAnimatedPressable } from 'pressto';
+import { createAnimatedPressable, PressableGlass } from 'pressto';
 import { StyleSheet, Text, View } from 'react-native';
 import { interpolate } from 'react-native-reanimated';
 
@@ -19,12 +19,12 @@ export default function Page() {
 
   return (
     <View style={styles.container}>
-      <PressableHighlight
+      <PressableGlass
         onPress={() => router.navigate('/screen')}
         style={styles.button}
       >
         <Text style={styles.buttonText}>Rotation Example</Text>
-      </PressableHighlight>
+      </PressableGlass>
 
       <PressableHighlight
         onPress={() => router.navigate('/options-example')}
@@ -48,11 +48,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#000000',
+    backgroundColor: '#b3b3b3',
     gap: 20,
   },
   button: {
-    backgroundColor: 'black',
+    backgroundColor: '#7a7a7a',
     height: 100,
     width: 200,
     borderRadius: 16,

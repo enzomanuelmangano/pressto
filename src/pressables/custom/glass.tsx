@@ -1,13 +1,22 @@
-import React from 'react';
+import React, { memo, useMemo } from 'react';
+import type { StyleProp, ViewStyle } from 'react-native';
+import {
+  Gesture,
+  GestureDetector,
+  type BaseButtonProps,
+  type HandlerStateChangeEvent,
+} from 'react-native-gesture-handler';
+import Animated from 'react-native-reanimated';
 import {
   GlassView,
   hasLiquidGlassSupport,
   isGlassEffectAvailable,
   type GlassColorScheme,
   type GlassEffectStyle,
+  type LiquidGlassProps,
 } from '../../integrations/liquid-glass';
+import { BasePressable } from '../base';
 import type { CustomPressableProps } from '../hoc';
-import { createAnimatedPressable } from '../hoc';
 import { PressableScale } from './scale';
 
 /**
@@ -19,6 +28,7 @@ export type PressableGlassProps = CustomPressableProps & {
   tintColor?: string;
   colorScheme?: GlassColorScheme;
 };
+
 /**
  * A pressable component with liquid glass effect (iOS 26+)
  *
@@ -39,20 +49,78 @@ export type PressableGlassProps = CustomPressableProps & {
  * />
  * ```
  */
-const BasePressableGlass = createAnimatedPressable(
-  (progress, { isPressed }) => {
-    'worklet';
-    return {
-      opacity: isPressed ? 0.8 : 1,
-      transform: [{ scale: 1 - progress * 0.02 }],
-    };
-  }
-);
+
+type TouchableGlassComponentProps = LiquidGlassProps &
+  Pick<
+    BaseButtonProps,
+    | 'enabled'
+    | 'onBegan'
+    | 'onActivated'
+    | 'onEnded'
+    | 'onFailed'
+    | 'onCancelled'
+    | 'hitSlop'
+    | 'testID'
+    | 'userSelect'
+    | 'activeCursor'
+    | 'shouldCancelWhenOutside'
+    | 'cancelsTouchesInView'
+    | 'enableContextMenu'
+    | 'rippleColor'
+    | 'rippleRadius'
+    | 'touchSoundDisabled'
+    | 'waitFor'
+    | 'simultaneousHandlers'
+  > & {
+    children?: React.ReactNode;
+    style?: StyleProp<ViewStyle>;
+  };
+
+const AnimatedGlassView = Animated.createAnimatedComponent(GlassView);
+
+const TouchableGlassComponent = memo((props: TouchableGlassComponentProps) => {
+  const tapGesture = useMemo(() => {
+    const gesture = Gesture.Tap()
+      .hitSlop(props.hitSlop ?? 0)
+      .runOnJS(true)
+      .onTouchesDown((event) => {
+        props.onBegan?.(event as unknown as HandlerStateChangeEvent);
+      })
+      .onTouchesCancelled((event) => {
+        props.onCancelled?.(event as unknown as HandlerStateChangeEvent);
+      })
+      .onTouchesUp((event) => {
+        props.onEnded?.(event as unknown as HandlerStateChangeEvent);
+      });
+
+    if (props.activeCursor) {
+      gesture.activeCursor(props.activeCursor);
+    }
+
+    if (props.shouldCancelWhenOutside) {
+      gesture.shouldCancelWhenOutside(props.shouldCancelWhenOutside);
+    }
+
+    if (props.cancelsTouchesInView) {
+      gesture.cancelsTouchesInView(props.cancelsTouchesInView);
+    }
+
+    return gesture.enabled(!!props.enabled);
+  }, [props]);
+
+  return (
+    <GestureDetector gesture={tapGesture}>
+      <AnimatedGlassView {...props}>{props.children}</AnimatedGlassView>
+    </GestureDetector>
+  );
+});
+
+TouchableGlassComponent.displayName = 'TouchableGlassComponent';
 
 export const PressableGlass: React.FC<PressableGlassProps> = ({
   children,
-  glassEffectStyle = 'regular',
-  interactive = false,
+  glassEffectStyle = 'clear',
+  interactive = true,
   tintColor,
   colorScheme,
   style,
@@ -69,7 +137,6 @@ export const PressableGlass: React.FC<PressableGlassProps> = ({
     );
   }
 
-  const GlassComponent = GlassView;
   const isAvailable = isGlassEffectAvailable();
 
   // Normalize props for both packages
@@ -99,10 +166,22 @@ export const PressableGlass: React.FC<PressableGlassProps> = ({
     glassProps.colorScheme = colorScheme;
   }
 
+  const baseTouchableComponent = (internalProps: BaseButtonProps) => (
+    <TouchableGlassComponent
+      {...internalProps}
+      {...glassProps}
+      style={style as StyleProp<ViewStyle>}
+    />
+  );
+
   return (
-    <BasePressableGlass {...rest} style={style}>
-      <GlassComponent {...glassProps}>{children}</GlassComponent>
-    </BasePressableGlass>
+    <BasePressable
+      {...rest}
+      style={style}
+      BaseComponent={baseTouchableComponent}
+    >
+      {children}
+    </BasePressable>
   );
 };
 

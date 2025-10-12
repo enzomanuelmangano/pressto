@@ -86,3 +86,6 @@ android/generated
 dist
 
 coverage
+
+ios/
+android/
