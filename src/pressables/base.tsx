@@ -39,6 +39,12 @@ export type BasePressableProps = {
       | 'touchSoundDisabled'
       | 'waitFor'
       | 'simultaneousHandlers'
+      | 'accessibilityHint'
+      | 'accessibilityLabel'
+      | 'accessibilityRole'
+      | 'accessibilityState'
+      | 'accessibilityValue'
+      | 'accessibilityActions'
     >
   > & {
     onPress?: () => void;
