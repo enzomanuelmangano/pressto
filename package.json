@@ -1,11 +1,18 @@
 {
   "name": "pressto",
-  "version": "0.5.1",
+  "version": "0.5.2-beta.2",
   "description": "Some custom react native touchables",
-  "source": "./src/index.tsx",
+  "source": "./src",
   "main": "./lib/commonjs/index.js",
   "module": "./lib/module/index.js",
   "types": "./lib/typescript/module/src/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "glass": [
+        "./lib/typescript/module/src/glass.d.ts"
+      ]
+    }
+  },
   "exports": {
     ".": {
       "import": {
@@ -16,10 +23,19 @@
         "types": "./lib/typescript/commonjs/src/index.d.ts",
         "default": "./lib/commonjs/index.js"
       }
+    },
+    "./glass": {
+      "import": {
+        "types": "./lib/typescript/module/src/glass.d.ts",
+        "default": "./lib/module/glass.js"
+      },
+      "require": {
+        "types": "./lib/typescript/commonjs/src/glass.d.ts",
+        "default": "./lib/commonjs/glass.js"
+      }
     }
   },
   "files": [
-    "src",
     "lib",
     "!**/__tests__",
     "!**/__fixtures__",
@@ -101,7 +117,17 @@
     "react-native": "*",
     "react-native-gesture-handler": "*",
     "react-native-reanimated": "*",
-    "react-native-worklets": "*"
+    "react-native-worklets": "*",
+    "expo-glass-effect": "*",
+    "@callstack/liquid-glass": "*"
+  },
+  "peerDependenciesMeta": {
+    "expo-glass-effect": {
+      "optional": true
+    },
+    "@callstack/liquid-glass": {
+      "optional": true
+    }
   },
   "workspaces": [
     "example"

@@ -15,6 +15,7 @@ import type {
 } from '../provider/context';
 
 const AnimatedBaseButton = Animated.createAnimatedComponent(BaseButton);
+
 type AnimatedPressableProps = ComponentProps<typeof AnimatedBaseButton>;
 
 export type AnimatedPressableStyleOptions<TMetadata = unknown> = {
@@ -32,6 +33,7 @@ export type BasePressableProps<TMetadata = unknown> = {
   ) => ViewStyle;
   enabled?: boolean;
   initialToggled?: boolean;
+  BaseComponent?: React.ComponentType<any>;
 } & Omit<Partial<PressableContextType<'timing' | 'spring'>>, 'metadata'> &
   Partial<
     Pick<
@@ -77,6 +79,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     config: configProp,
     enabled = true,
     initialToggled = false,
+    BaseComponent = AnimatedBaseButton,
     ...rest
   }) => {
     const {
@@ -200,7 +203,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     ]);
 
     return (
-      <AnimatedBaseButton
+      <BaseComponent
         {...rest}
         style={[rest?.style ?? {}, rAnimatedStyle]}
         enabled={enabled}
@@ -213,7 +216,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
         exclusive={false}
       >
         {children}
-      </AnimatedBaseButton>
+      </BaseComponent>
     );
   }
 );
