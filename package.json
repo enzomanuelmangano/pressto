@@ -1,6 +1,6 @@
 {
   "name": "pressto",
-  "version": "0.5.2-beta.1",
+  "version": "0.5.2-beta.2",
   "description": "Some custom react native touchables",
   "source": "./src",
   "main": "./lib/commonjs/index.js",
