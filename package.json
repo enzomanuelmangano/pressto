@@ -2,7 +2,7 @@
   "name": "pressto",
   "version": "0.5.2-beta.1",
   "description": "Some custom react native touchables",
-  "source": "./src/index.tsx",
+  "source": "./src",
   "main": "./lib/commonjs/index.js",
   "module": "./lib/module/index.js",
   "types": "./lib/typescript/module/src/index.d.ts",
@@ -36,7 +36,6 @@
     }
   },
   "files": [
-    "src",
     "lib",
     "!**/__tests__",
     "!**/__fixtures__",

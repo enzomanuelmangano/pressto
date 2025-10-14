@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
 import {
   Gesture,
@@ -131,6 +131,23 @@ export const PressableGlass: React.FC<PressableGlassProps> = ({
   style,
   ...rest
 }) => {
+  const isAvailable = isGlassEffectAvailable();
+
+  // Normalize props for both packages
+  const glassProps: any = useMemo(
+    () => ({
+      style: [!isAvailable],
+    }),
+    [isAvailable]
+  );
+
+  const baseTouchableComponent = useCallback(
+    (internalProps: BaseButtonProps) => (
+      <TouchableGlassComponent {...glassProps} {...internalProps} />
+    ),
+    [glassProps]
+  );
+
   if (!hasLiquidGlassSupport()) {
     console.warn(
       'PressableGlass: Liquid glass package not found. Install either "expo-glass-effect" or "@callstack/liquid-glass" for glass effects. Falling back to View.'
@@ -141,13 +158,6 @@ export const PressableGlass: React.FC<PressableGlassProps> = ({
       </PressableScale>
     );
   }
-
-  const isAvailable = isGlassEffectAvailable();
-
-  // Normalize props for both packages
-  const glassProps: any = {
-    style: [!isAvailable],
-  };
 
   // expo-glass-effect uses these prop names
   if (glassEffectStyle) {
@@ -170,10 +180,6 @@ export const PressableGlass: React.FC<PressableGlassProps> = ({
   if (colorScheme) {
     glassProps.colorScheme = colorScheme;
   }
-
-  const baseTouchableComponent = (internalProps: BaseButtonProps) => (
-    <TouchableGlassComponent {...glassProps} {...internalProps} />
-  );
 
   return (
     <BasePressable
