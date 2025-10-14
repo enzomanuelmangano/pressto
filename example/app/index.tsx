@@ -22,6 +22,11 @@ export default function Page() {
     <View style={styles.container}>
       <PressableGlass
         onPress={() => router.navigate('/screen')}
+        style={styles.roundedButton}
+      />
+
+      <PressableGlass
+        onPress={() => router.navigate('/screen')}
         style={styles.button}
       >
         <Text style={styles.buttonText}>Rotation Example</Text>
@@ -65,5 +70,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  roundedButton: {
+    backgroundColor: 'red',
+    height: 32,
+    width: 32,
+    borderRadius: 16,
   },
 });

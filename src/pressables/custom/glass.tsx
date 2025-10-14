@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useMemo } from 'react';
-import type { StyleProp, ViewStyle } from 'react-native';
+import { StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import {
   Gesture,
   GestureDetector,
@@ -133,6 +133,25 @@ export const PressableGlass: React.FC<PressableGlassProps> = ({
 }) => {
   const isAvailable = isGlassEffectAvailable();
 
+  // Extract backgroundColor from style to use as tintColor
+  const { effectiveTintColor, styleWithoutBackground } = useMemo(() => {
+    if (!style) {
+      return { effectiveTintColor: tintColor, styleWithoutBackground: style };
+    }
+
+    const flattenedStyle = StyleSheet.flatten(style);
+    const { backgroundColor, ...restStyle } = flattenedStyle as {
+      backgroundColor: string;
+      [key: string]: any;
+    };
+
+    return {
+      effectiveTintColor: tintColor ?? (backgroundColor as string | undefined),
+      styleWithoutBackground:
+        Object.keys(restStyle).length > 0 ? restStyle : undefined,
+    };
+  }, [style, tintColor]);
+
   // Normalize props for both packages
   const glassProps: any = useMemo(
     () => ({
@@ -166,8 +185,8 @@ export const PressableGlass: React.FC<PressableGlassProps> = ({
   if (interactive !== undefined) {
     glassProps.isInteractive = interactive;
   }
-  if (tintColor) {
-    glassProps.tintColor = tintColor;
+  if (effectiveTintColor) {
+    glassProps.tintColor = effectiveTintColor;
   }
 
   // @callstack/liquid-glass uses these prop names (fallback)
@@ -184,7 +203,7 @@ export const PressableGlass: React.FC<PressableGlassProps> = ({
   return (
     <BasePressable
       {...rest}
-      style={style}
+      style={styleWithoutBackground}
       BaseComponent={baseTouchableComponent}
     >
       {children}
