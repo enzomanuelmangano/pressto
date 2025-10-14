@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useMemo } from 'react';
-import { StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
+import { type StyleProp, type ViewStyle } from 'react-native';
 import {
   Gesture,
   GestureDetector,
@@ -113,9 +113,51 @@ const TouchableGlassComponent = memo((props: TouchableGlassComponentProps) => {
     return gesture;
   }, [props]);
 
+  // Extract backgroundColor from style to use as tintColor and remove it from styles
+  const { effectiveTintColor, styleWithoutBackground } = useMemo(() => {
+    if (!props.style) {
+      return {
+        effectiveTintColor: props.tintColor,
+        styleWithoutBackground: undefined,
+      };
+    }
+
+    // Convert style to array for consistent processing
+    const styleArray = Array.isArray(props.style) ? props.style : [props.style];
+
+    let extractedBackgroundColor: string | undefined;
+    const processedStyles = styleArray.map((styleItem) => {
+      if (!styleItem || typeof styleItem !== 'object') {
+        return styleItem;
+      }
+
+      // Extract backgroundColor if present
+      if ('backgroundColor' in styleItem && !extractedBackgroundColor) {
+        extractedBackgroundColor = styleItem.backgroundColor as string;
+      }
+
+      // Remove backgroundColor from this style object
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { backgroundColor, ...restStyle } = styleItem as any;
+      return restStyle;
+    });
+
+    return {
+      effectiveTintColor: props.tintColor ?? extractedBackgroundColor,
+      styleWithoutBackground: processedStyles,
+    };
+  }, [props.style, props.tintColor]);
+
   return (
     <GestureDetector gesture={tapGesture}>
-      <AnimatedGlassView {...props}>{props.children}</AnimatedGlassView>
+      {/* @ts-expect-error */}
+      <AnimatedGlassView
+        {...props}
+        tintColor={props.tintColor ?? effectiveTintColor}
+        style={styleWithoutBackground}
+      >
+        {props.children}
+      </AnimatedGlassView>
     </GestureDetector>
   );
 });
@@ -132,25 +174,6 @@ export const PressableGlass: React.FC<PressableGlassProps> = ({
   ...rest
 }) => {
   const isAvailable = isGlassEffectAvailable();
-
-  // Extract backgroundColor from style to use as tintColor
-  const { effectiveTintColor, styleWithoutBackground } = useMemo(() => {
-    if (!style) {
-      return { effectiveTintColor: tintColor, styleWithoutBackground: style };
-    }
-
-    const flattenedStyle = StyleSheet.flatten(style);
-    const { backgroundColor, ...restStyle } = flattenedStyle as {
-      backgroundColor: string;
-      [key: string]: any;
-    };
-
-    return {
-      effectiveTintColor: tintColor ?? (backgroundColor as string | undefined),
-      styleWithoutBackground:
-        Object.keys(restStyle).length > 0 ? restStyle : undefined,
-    };
-  }, [style, tintColor]);
 
   // Normalize props for both packages
   const glassProps: any = useMemo(
@@ -185,8 +208,8 @@ export const PressableGlass: React.FC<PressableGlassProps> = ({
   if (interactive !== undefined) {
     glassProps.isInteractive = interactive;
   }
-  if (effectiveTintColor) {
-    glassProps.tintColor = effectiveTintColor;
+  if (tintColor) {
+    glassProps.tintColor = tintColor;
   }
 
   // @callstack/liquid-glass uses these prop names (fallback)
@@ -203,7 +226,7 @@ export const PressableGlass: React.FC<PressableGlassProps> = ({
   return (
     <BasePressable
       {...rest}
-      style={styleWithoutBackground}
+      style={style}
       BaseComponent={baseTouchableComponent}
     >
       {children}
