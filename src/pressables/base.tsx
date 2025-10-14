@@ -33,6 +33,7 @@ export type BasePressableProps<TMetadata = unknown> = {
   ) => ViewStyle;
   enabled?: boolean;
   initialToggled?: boolean;
+  BaseComponent?: React.ComponentType<any>;
 } & Omit<Partial<PressableContextType<'timing' | 'spring'>>, 'metadata'> &
   Partial<
     Pick<
