@@ -8,21 +8,17 @@ const PressableRotate = createAnimatedPressable((progress) => {
   'worklet';
   return {
     transform: [
-      { rotate: `${(progress.get() * Math.PI) / 4}rad` },
-      { scale: interpolate(progress.get(), [0, 1], [1, 0.9]) },
+      { rotate: `${(progress * Math.PI) / 4}rad` },
+      { scale: interpolate(progress, [0, 1], [1, 0.9]) },
     ],
-    backgroundColor: interpolateColor(
-      progress.get(),
-      [0, 1],
-      ['#d1d1d1', '#000000']
-    ),
+    backgroundColor: interpolateColor(progress, [0, 1], ['#d1d1d1', '#000000']),
     shadowColor: '#ffffff',
     shadowOffset: {
       width: 0,
       height: 0,
     },
-    shadowOpacity: interpolate(progress.get(), [0, 1], [0, 1]),
-    shadowRadius: interpolate(progress.get(), [0, 1], [0, 150]),
+    shadowOpacity: interpolate(progress, [0, 1], [0, 1]),
+    shadowRadius: interpolate(progress, [0, 1], [0, 150]),
   };
 });
 

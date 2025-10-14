@@ -1,23 +1,34 @@
 import React from 'react';
-import type { SharedValue } from 'react-native-reanimated';
 
 import type { ViewStyle } from 'react-native';
-import type { BasePressableProps } from './base';
+import type { AnimatedPressableOptions } from '../provider/context';
+import type { AnimatedPressableStyleOptions, BasePressableProps } from './base';
 import { BasePressable } from './base';
+
+export type { AnimatedPressableOptions, AnimatedPressableStyleOptions };
 
 export type CustomPressableProps = Omit<BasePressableProps, 'animatedStyle'>;
 
-const withAnimatedTapStyle = (
-  WrappedComponent: React.ComponentType<BasePressableProps>,
-  animatedStyle: (progress: SharedValue<number>) => ViewStyle
+const withAnimatedTapStyle = <TMetadata = unknown,>(
+  WrappedComponent: React.ComponentType<BasePressableProps<TMetadata>>,
+  animatedStyle: (
+    progress: number,
+    options: AnimatedPressableStyleOptions<TMetadata>
+  ) => ViewStyle
 ) => {
   return (props: CustomPressableProps) => {
     return <WrappedComponent {...props} animatedStyle={animatedStyle} />;
   };
 };
 
-export const createAnimatedPressable = (
-  animatedStyle: (progress: SharedValue<number>) => ViewStyle
+export const createAnimatedPressable = <TMetadata = unknown,>(
+  animatedStyle: (
+    progress: number,
+    options: AnimatedPressableStyleOptions<TMetadata>
+  ) => ViewStyle
 ) => {
-  return withAnimatedTapStyle(BasePressable, animatedStyle);
+  return withAnimatedTapStyle<TMetadata>(
+    BasePressable as React.ComponentType<BasePressableProps<TMetadata>>,
+    animatedStyle
+  );
 };

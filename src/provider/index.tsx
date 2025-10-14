@@ -1,40 +1,68 @@
-import { useMemo } from 'react';
-import type {
-  WithSpringConfig,
-  WithTimingConfig,
+import { useMemo, type PropsWithChildren } from 'react';
+import {
+  useSharedValue,
+  type WithSpringConfig,
+  type WithTimingConfig,
 } from 'react-native-reanimated';
 
 import { DefaultConfigs } from './constants';
-import { PressablesContext, type AnimationType } from './context';
+import {
+  PressablesContext,
+  PressablesGroupContext,
+  type AnimatedPressableOptions,
+  type AnimationType,
+} from './context';
 
-export type PressablesConfigProps<T extends AnimationType> = {
+export type PressablesConfigProps<
+  T extends AnimationType,
+  TMetadata = unknown,
+> = {
   children?: React.ReactNode;
   animationType?: T;
   config?: T extends 'timing' ? WithTimingConfig : WithSpringConfig;
   globalHandlers?: {
-    onPressIn?: () => void;
-    onPressOut?: () => void;
-    onPress?: () => void;
+    onPressIn?: (options: AnimatedPressableOptions) => void;
+    onPressOut?: (options: AnimatedPressableOptions) => void;
+    onPress?: (options: AnimatedPressableOptions) => void;
   };
+  metadata?: TMetadata;
 };
 
-export const PressablesConfig = <T extends AnimationType>({
+export const PressablesGroup = ({ children }: PropsWithChildren) => {
+  const lastTouchedPressable = useSharedValue<string | null>(null);
+
+  const groupValue = useMemo(() => {
+    return {
+      lastTouchedPressable: lastTouchedPressable,
+    };
+  }, [lastTouchedPressable]);
+
+  return (
+    <PressablesGroupContext.Provider value={groupValue}>
+      {children}
+    </PressablesGroupContext.Provider>
+  );
+};
+
+export const PressablesConfig = <T extends AnimationType, TMetadata = unknown>({
   children,
   animationType = 'timing' as T,
   config,
   globalHandlers,
-}: PressablesConfigProps<T>) => {
+  metadata,
+}: PressablesConfigProps<T, TMetadata>) => {
   const value = useMemo(() => {
     return {
       animationType,
       config: config ?? DefaultConfigs[animationType],
       globalHandlers,
+      metadata,
     };
-  }, [animationType, config, globalHandlers]);
+  }, [animationType, config, globalHandlers, metadata]);
 
   return (
     <PressablesContext.Provider value={value}>
-      {children}
+      <PressablesGroup>{children}</PressablesGroup>
     </PressablesContext.Provider>
   );
 };
