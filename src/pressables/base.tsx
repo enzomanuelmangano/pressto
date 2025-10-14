@@ -32,7 +32,7 @@ export type BasePressableProps<TMetadata = unknown> = {
   ) => ViewStyle;
   enabled?: boolean;
   initialToggled?: boolean;
-} & Partial<PressableContextType<'timing' | 'spring'>> &
+} & Omit<Partial<PressableContextType<'timing' | 'spring'>>, 'metadata'> &
   Partial<
     Pick<
       AnimatedPressableProps,
