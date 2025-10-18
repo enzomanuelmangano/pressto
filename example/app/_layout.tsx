@@ -7,6 +7,7 @@ export default function RootLayout() {
   return (
     <PressablesConfig
       animationType="timing"
+      activateOnHover
       globalHandlers={{
         onPress: () => {
           console.log('use haptics!');

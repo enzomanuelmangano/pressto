@@ -26,6 +26,11 @@ export type PressablesConfigProps<
     onPress?: (options: AnimatedPressableOptions) => void;
   };
   metadata?: TMetadata;
+  /**
+   * Activates the pressable animation on hover (web only)
+   * @platform web
+   */
+  activateOnHover?: boolean;
 };
 
 export const PressablesGroup = ({ children }: PropsWithChildren) => {
@@ -50,6 +55,7 @@ export const PressablesConfig = <T extends AnimationType, TMetadata = unknown>({
   config,
   globalHandlers,
   metadata,
+  activateOnHover,
 }: PressablesConfigProps<T, TMetadata>) => {
   const value = useMemo(() => {
     return {
@@ -57,8 +63,9 @@ export const PressablesConfig = <T extends AnimationType, TMetadata = unknown>({
       config: config ?? DefaultConfigs[animationType],
       globalHandlers,
       metadata,
+      activateOnHover,
     };
-  }, [animationType, config, globalHandlers, metadata]);
+  }, [animationType, config, globalHandlers, metadata, activateOnHover]);
 
   return (
     <PressablesContext.Provider value={value}>

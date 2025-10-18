@@ -1,5 +1,5 @@
 import React, { useCallback, useId, useMemo, type ComponentProps } from 'react';
-import { type ViewStyle } from 'react-native';
+import { Platform, type ViewStyle } from 'react-native';
 import { BaseButton } from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedStyle,
@@ -32,6 +32,11 @@ export type BasePressableProps<TMetadata = unknown> = {
   ) => ViewStyle;
   enabled?: boolean;
   initialToggled?: boolean;
+  /**
+   * Activates the pressable animation on hover (web only)
+   * @platform web
+   */
+  activateOnHover?: boolean;
 } & Omit<Partial<PressableContextType<'timing' | 'spring'>>, 'metadata'> &
   Partial<
     Pick<
@@ -77,6 +82,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     config: configProp,
     enabled = true,
     initialToggled = false,
+    activateOnHover: activateOnHoverProp,
     ...rest
   }) => {
     const {
@@ -84,6 +90,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       config: configPropProvider,
       globalHandlers,
       metadata,
+      activateOnHover: activateOnHoverProvider,
     } = usePressablesConfig();
 
     const lastTouchedPressable = useLastTouchedPressable();
@@ -180,6 +187,24 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       pressableId,
     ]);
 
+    // Determine if hover should be enabled (web only)
+    const shouldEnableHover =
+      Platform.OS === 'web' &&
+      (activateOnHoverProp ?? activateOnHoverProvider ?? false);
+
+    // Hover handlers for web
+    const onMouseEnter = useCallback(() => {
+      if (shouldEnableHover && enabled) {
+        active.set(true);
+      }
+    }, [shouldEnableHover, enabled, active]);
+
+    const onMouseLeave = useCallback(() => {
+      if (shouldEnableHover) {
+        active.set(false);
+      }
+    }, [shouldEnableHover, active]);
+
     const rAnimatedStyle = useAnimatedStyle(() => {
       return animatedStyle
         ? animatedStyle(progress.get(), {
@@ -199,9 +224,21 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       metadata,
     ]);
 
+    const hoverProps = useMemo(
+      () =>
+        shouldEnableHover
+          ? {
+              onMouseEnter,
+              onMouseLeave,
+            }
+          : {},
+      [shouldEnableHover, onMouseEnter, onMouseLeave]
+    );
+
     return (
       <AnimatedBaseButton
         {...rest}
+        {...(hoverProps as any)}
         style={[rest?.style ?? {}, rAnimatedStyle]}
         enabled={enabled}
         onPress={onPressWrapper}

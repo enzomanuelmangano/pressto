@@ -186,8 +186,10 @@ const theme = {
   },
 };
 
+type Theme = typeof theme;
+
 // Create themed pressables
-const ThemedButton = createAnimatedPressable((progress, { metadata }) => {
+const ThemedButton = createAnimatedPressable<Theme>((progress, { metadata }) => {
   'worklet';
   return {
     backgroundColor: metadata.colors.primary,
