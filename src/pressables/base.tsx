@@ -9,6 +9,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useLastTouchedPressable, usePressablesConfig } from '../provider';
+import type { PressableConfig } from '../provider/constants';
 import type {
   AnimatedPressableOptions,
   PressableContextType,
@@ -22,6 +23,7 @@ export type AnimatedPressableStyleOptions<TMetadata = unknown> = {
   isToggled: boolean;
   isSelected: boolean;
   metadata: TMetadata;
+  config: PressableConfig;
 };
 
 export type BasePressableProps<TMetadata = unknown> = {
@@ -37,7 +39,10 @@ export type BasePressableProps<TMetadata = unknown> = {
    * @platform web
    */
   activateOnHover?: boolean;
-} & Omit<Partial<PressableContextType<'timing' | 'spring'>>, 'metadata'> &
+} & Omit<
+  Partial<PressableContextType<'timing' | 'spring'>>,
+  'metadata' | 'config'
+> &
   Partial<
     Pick<
       AnimatedPressableProps,
@@ -81,7 +86,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     onPressOut,
     animatedStyle,
     animationType: animationTypeProp,
-    config: configProp,
+    animationConfig: animationConfigProp,
     enabled = true,
     initialToggled = false,
     activateOnHover: activateOnHoverProp,
@@ -89,10 +94,11 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
   }) => {
     const {
       animationType: animationTypeProvider,
-      config: configPropProvider,
+      animationConfig: animationConfigProvider,
       globalHandlers,
       metadata,
       activateOnHover: activateOnHoverProvider,
+      config,
     } = usePressablesConfig();
 
     const lastTouchedPressable = useLastTouchedPressable();
@@ -107,22 +113,22 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     const active = useSharedValue(false);
     const isToggled = useSharedValue(initialToggled);
 
-    const { animationType, config } = useMemo(() => {
+    const { animationType, animationConfig } = useMemo(() => {
       if (animationTypeProp != null) {
         return {
           animationType: animationTypeProp,
-          config: configProp,
+          animationConfig: animationConfigProp,
         };
       }
       return {
         animationType: animationTypeProvider,
-        config: configProp ?? configPropProvider,
+        animationConfig: animationConfigProp ?? animationConfigProvider,
       };
     }, [
       animationTypeProp,
       animationTypeProvider,
-      configProp,
-      configPropProvider,
+      animationConfigProp,
+      animationConfigProvider,
     ]);
 
     const withAnimation = useMemo(() => {
@@ -130,8 +136,8 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     }, [animationType]);
 
     const progress = useDerivedValue<number>(() => {
-      return withAnimation(active.get() ? 1 : 0, config);
-    }, [config, withAnimation]);
+      return withAnimation(active.get() ? 1 : 0, animationConfig);
+    }, [animationConfig, withAnimation]);
 
     const onPressInWrapper = useCallback(() => {
       active.set(true);
@@ -214,6 +220,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
             isToggled: isToggled.get(),
             isSelected: lastTouchedPressable.get() === pressableId,
             metadata,
+            config,
           })
         : {};
     }, [
@@ -224,6 +231,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       lastTouchedPressable,
       pressableId,
       metadata,
+      config,
     ]);
 
     const hoverProps = useMemo(

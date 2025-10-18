@@ -5,7 +5,7 @@ import {
   type WithSpringConfig,
   type WithTimingConfig,
 } from 'react-native-reanimated';
-import { DefaultConfigs } from './constants';
+import { DefaultAnimationConfigs, DefaultPressableConfig, type PressableConfig } from './constants';
 
 export type AnimationType = 'timing' | 'spring';
 
@@ -20,7 +20,7 @@ export type PressableContextType<
   TMetadata = unknown,
 > = {
   animationType: T;
-  config: T extends 'timing' ? WithTimingConfig : WithSpringConfig;
+  animationConfig: T extends 'timing' ? WithTimingConfig : WithSpringConfig;
   globalHandlers?: {
     onPressIn?: (options: AnimatedPressableOptions) => void;
     onPressOut?: (options: AnimatedPressableOptions) => void;
@@ -32,14 +32,19 @@ export type PressableContextType<
    * @platform web
    */
   activateOnHover?: boolean;
+  /**
+   * Pressable configuration values (opacity, scale, etc.)
+   */
+  config: PressableConfig;
 };
 
 export const PressablesContext = createContext<
   PressableContextType<AnimationType, unknown>
 >({
   animationType: 'timing',
-  config: DefaultConfigs.timing,
+  animationConfig: DefaultAnimationConfigs.timing,
   metadata: undefined,
+  config: DefaultPressableConfig,
 });
 
 export const PressablesGroupContext = createContext<{

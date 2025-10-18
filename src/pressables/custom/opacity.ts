@@ -1,9 +1,9 @@
 import { interpolate } from 'react-native-reanimated';
 import { createAnimatedPressable } from '../hoc';
 
-export const PressableOpacity = createAnimatedPressable((progress) => {
+export const PressableOpacity = createAnimatedPressable((progress, { config }) => {
   'worklet';
   return {
-    opacity: interpolate(progress, [0, 1], [1, 0.5]),
+    opacity: interpolate(progress, [0, 1], [1, config.activeOpacity]),
   };
 });
