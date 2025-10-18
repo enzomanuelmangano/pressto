@@ -2,10 +2,18 @@ import React from 'react';
 
 import type { ViewStyle } from 'react-native';
 import type { AnimatedPressableOptions } from '../provider/context';
-import type { AnimatedPressableStyleOptions, BasePressableProps } from './base';
+import type {
+  AnimatedPressableStyleOptions,
+  BasePressableProps,
+  PressableChildrenCallbackParams,
+} from './base';
 import { BasePressable } from './base';
 
-export type { AnimatedPressableOptions, AnimatedPressableStyleOptions };
+export type {
+  AnimatedPressableOptions,
+  AnimatedPressableStyleOptions,
+  PressableChildrenCallbackParams,
+};
 
 export type CustomPressableProps = Omit<BasePressableProps, 'animatedStyle'>;
 
