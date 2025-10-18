@@ -16,11 +16,16 @@
         "types": "./lib/typescript/commonjs/src/index.d.ts",
         "default": "./lib/commonjs/index.js"
       }
+    },
+    "./eslint-plugin": {
+      "require": "./eslint-plugin/index.js",
+      "default": "./eslint-plugin/index.js"
     }
   },
   "files": [
     "src",
     "lib",
+    "eslint-plugin",
     "!**/__tests__",
     "!**/__fixtures__",
     "!**/__mocks__",
@@ -38,7 +43,14 @@
   "keywords": [
     "react-native",
     "ios",
-    "android"
+    "android",
+    "pressable",
+    "touchable",
+    "gesture",
+    "animation",
+    "reanimated",
+    "eslint-plugin",
+    "worklet"
   ],
   "repository": {
     "type": "git",
@@ -127,26 +139,6 @@
       "@release-it/conventional-changelog": {
         "preset": "angular"
       }
-    }
-  },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@react-native",
-      "prettier"
-    ],
-    "rules": {
-      "react/react-in-jsx-scope": "off",
-      "prettier/prettier": [
-        "error",
-        {
-          "quoteProps": "consistent",
-          "singleQuote": true,
-          "tabWidth": 2,
-          "trailingComma": "es5",
-          "useTabs": false
-        }
-      ]
     }
   },
   "eslintIgnore": [

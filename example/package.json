@@ -6,7 +6,8 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "lint": "eslint \"app/**/*.{ts,tsx}\""
   },
   "dependencies": {
     "@expo/metro-runtime": "~6.1.2",
@@ -27,8 +28,17 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.0",
+    "@typescript-eslint/parser": "^8.46.0",
     "babel-preset-expo": "~54.0.0",
-    "react-native-builder-bob": "^0.30.2"
+    "eslint": "^8.51.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.0",
+    "prettier": "^3.0.3",
+    "react-native-builder-bob": "^0.30.2",
+    "typescript": "^5.2.2"
   },
   "publishConfig": {
     "access": "public"

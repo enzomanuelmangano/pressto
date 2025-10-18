@@ -27,6 +27,7 @@ npx expo install pressto react-native-reanimated react-native-gesture-handler re
 - **Advanced interaction states**: `isPressed`, `isToggled`, `isSelected`
 - **Type-safe metadata**: Pass theme/design tokens directly into worklets
 - **Group coordination**: Track selected items across pressable groups
+- **ESLint plugin**: Automatically catch missing `'worklet'` directives
 
 ## Usage
 
@@ -256,6 +257,12 @@ Provides global configuration for all pressable components.
   <App />
 </PressablesConfig>
 ```
+
+## ESLint Plugin
+
+Pressto includes an ESLint plugin to help catch common mistakes when using `createAnimatedPressable`. The plugin enforces that all animation functions include the required `'worklet'` directive.
+
+See the [ESLint Plugin Documentation](./eslint-plugin/README.md) for setup instructions.
 
 ## Migration Guide
 
