@@ -27,7 +27,6 @@ npx expo install pressto react-native-reanimated react-native-gesture-handler re
 - **Advanced interaction states**: `isPressed`, `isToggled`, `isSelected`
 - **Type-safe metadata**: Pass theme/design tokens directly into worklets
 - **Group coordination**: Track selected items across pressable groups
-- **ESLint plugin**: Automatically catch missing `'worklet'` directives
 
 ## Usage
 
@@ -260,9 +259,47 @@ Provides global configuration for all pressable components.
 
 ## ESLint Plugin
 
-Pressto includes an ESLint plugin to help catch common mistakes when using `createAnimatedPressable`. The plugin enforces that all animation functions include the required `'worklet'` directive.
+Pressto provides an ESLint plugin to help catch common mistakes when using `createAnimatedPressable`. The plugin enforces that all animation functions include the required `'worklet'` directive.
 
-See the [ESLint Plugin Documentation](./eslint-plugin/README.md) for setup instructions.
+### Installation
+
+```bash
+npm install -D eslint-plugin-pressto
+# or
+bun add -D eslint-plugin-pressto
+```
+
+### Setup
+
+**With `.eslintrc.js` (legacy config):**
+
+```javascript
+module.exports = {
+  plugins: ['pressto'],
+  rules: {
+    'pressto/require-worklet-directive': 'error',
+  },
+};
+```
+
+**With `eslint.config.js` (flat config):**
+
+```javascript
+const presstoPlugin = require('eslint-plugin-pressto');
+
+module.exports = [
+  {
+    plugins: {
+      pressto: presstoPlugin,
+    },
+    rules: {
+      'pressto/require-worklet-directive': 'error',
+    },
+  },
+];
+```
+
+See the [eslint-plugin-pressto documentation](https://github.com/enzomanuelmangano/pressto/tree/main/eslint-plugin-pressto) for more details.
 
 ## Migration Guide
 
@@ -316,6 +353,14 @@ function App() {
   );
 }
 ```
+
+## Repository Structure
+
+This is a monorepo containing:
+
+- **pressto** - The main library (root package)
+- **eslint-plugin-pressto** - Standalone ESLint plugin
+- **example** - Example app
 
 ## Contributing
 

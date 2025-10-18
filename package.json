@@ -16,16 +16,11 @@
         "types": "./lib/typescript/commonjs/src/index.d.ts",
         "default": "./lib/commonjs/index.js"
       }
-    },
-    "./eslint-plugin": {
-      "require": "./eslint-plugin/index.js",
-      "default": "./eslint-plugin/index.js"
     }
   },
   "files": [
     "src",
     "lib",
-    "eslint-plugin",
     "!**/__tests__",
     "!**/__fixtures__",
     "!**/__mocks__",
@@ -48,9 +43,7 @@
     "touchable",
     "gesture",
     "animation",
-    "reanimated",
-    "eslint-plugin",
-    "worklet"
+    "reanimated"
   ],
   "repository": {
     "type": "git",
@@ -89,6 +82,7 @@
     "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-ft-flow": "^3.0.11",
     "eslint-plugin-jest": "^29.0.1",
+    "eslint-plugin-pressto": "workspace:eslint-plugin-pressto",
     "eslint-plugin-prettier": "^5.0.1",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.0",
@@ -116,7 +110,8 @@
     "react-native-worklets": "*"
   },
   "workspaces": [
-    "example"
+    "example",
+    "eslint-plugin-pressto"
   ],
   "packageManager": "bun@1.2.19",
   "commitlint": {

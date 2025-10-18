@@ -1,5 +1,6 @@
 /**
- * Custom ESLint plugin for pressto
+ * ESLint plugin for pressto
+ * Enforces best practices when using pressto's createAnimatedPressable
  */
 module.exports = {
   rules: {
