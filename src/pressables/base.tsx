@@ -71,6 +71,8 @@ export type BasePressableProps<TMetadata = unknown> = {
     onPressOut?: (options: AnimatedPressableOptions) => void;
   };
 
+const cursorStyle = Platform.OS === 'web' ? { cursor: 'pointer' as const } : {};
+
 const BasePressable: React.FC<BasePressableProps> = React.memo(
   ({
     children,
@@ -239,7 +241,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       <AnimatedBaseButton
         {...rest}
         {...(hoverProps as any)}
-        style={[rest?.style ?? {}, rAnimatedStyle]}
+        style={[rest?.style ?? {}, rAnimatedStyle, cursorStyle]}
         enabled={enabled}
         onPress={onPressWrapper}
         onBegan={onPressInWrapper}

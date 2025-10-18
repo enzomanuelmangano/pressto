@@ -220,7 +220,10 @@ import { PressableScale, PressablesConfig } from 'pressto';
 function App() {
   return (
     <PressablesConfig activateOnHover={true}>
-      <PressableScale style={styles.button} onPress={() => console.log('pressed')} />
+      <PressableScale
+        style={styles.button}
+        onPress={() => console.log('pressed')}
+      />
       {/* This will scale on hover on web */}
     </PressablesConfig>
   );
@@ -230,7 +233,7 @@ function App() {
 function ComponentExample() {
   return (
     <PressableScale
-      activateOnHover={true}
+      activateOnHover
       style={styles.button}
       onPress={() => console.log('pressed')}
     />
@@ -309,7 +312,7 @@ Provides global configuration for all pressable components.
   animationType="spring"
   config={{ damping: 30, stiffness: 200 }}
   metadata={{ colors: { primary: '#6366F1' } }}
-  activateOnHover={true}
+  activateOnHover
 >
   <App />
 </PressablesConfig>
