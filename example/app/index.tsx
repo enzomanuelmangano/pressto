@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { createAnimatedPressable } from 'pressto';
-import { StyleSheet, Text, View } from 'react-native';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 import { interpolate } from 'react-native-reanimated';
 
 const PressableHighlight = createAnimatedPressable((progress) => {
@@ -39,6 +39,15 @@ export default function Page() {
       >
         <Text style={styles.buttonText}>Theme Metadata</Text>
       </PressableHighlight>
+      {Platform.OS === 'web' && (
+        <PressableHighlight
+          onPress={() => console.log("won't activate on hover")}
+          style={styles.button}
+          activateOnHover={false}
+        >
+          <Text style={styles.buttonText}>Won&apos;t activate on hover</Text>
+        </PressableHighlight>
+      )}
     </View>
   );
 }
