@@ -94,6 +94,8 @@ bun add -D eslint-plugin-pressto
 
 The ESLint plugin catches these issues **at development time**, saving you debugging time. See the [ESLint Plugin section](#eslint-plugin) below for configuration.
 
+See the [eslint-plugin-pressto documentation](https://github.com/enzomanuelmangano/pressto/tree/main/eslint-plugin-pressto) for more details.
+
 ### Advanced: Using interaction states
 
 ```jsx
@@ -276,50 +278,6 @@ Provides global configuration for all pressable components.
   <App />
 </PressablesConfig>
 ```
-
-## ESLint Plugin
-
-Pressto provides an ESLint plugin to help catch common mistakes when using `createAnimatedPressable`. The plugin enforces that all animation functions include the required `'worklet'` directive.
-
-### Installation
-
-```bash
-npm install -D eslint-plugin-pressto
-# or
-bun add -D eslint-plugin-pressto
-```
-
-### Setup
-
-**With `.eslintrc.js` (legacy config):**
-
-```javascript
-module.exports = {
-  plugins: ['pressto'],
-  rules: {
-    'pressto/require-worklet-directive': 'error',
-  },
-};
-```
-
-**With `eslint.config.js` (flat config):**
-
-```javascript
-const presstoPlugin = require('eslint-plugin-pressto');
-
-module.exports = [
-  {
-    plugins: {
-      pressto: presstoPlugin,
-    },
-    rules: {
-      'pressto/require-worklet-directive': 'error',
-    },
-  },
-];
-```
-
-See the [eslint-plugin-pressto documentation](https://github.com/enzomanuelmangano/pressto/tree/main/eslint-plugin-pressto) for more details.
 
 ## Migration Guide
 
