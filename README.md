@@ -56,7 +56,7 @@ function BasicPressablesExample() {
 import { createAnimatedPressable } from 'pressto';
 
 const PressableRotate = createAnimatedPressable((progress) => {
-  'worklet';
+  'worklet'; // I recommend installing the eslint plugin below to avoid forgetting the worklet.
   return {
     transform: [{ rotate: `${(progress * Math.PI) / 4}rad` }],
   };
@@ -73,6 +73,28 @@ function CustomPressableExample() {
   );
 }
 ```
+
+> **⚠️ Important:** Notice the `'worklet';` directive at the start of the animation function. This is **required** for the function to run on the UI thread with React Native Reanimated.
+
+#### ESLint Plugin (Recommended)
+
+Install the ESLint plugin to automatically catch missing `'worklet'` directives:
+
+```sh
+npm install -D eslint-plugin-pressto
+# or
+bun add -D eslint-plugin-pressto
+```
+
+**Why you need this:** Forgetting the `'worklet'` directive causes:
+
+- ❌ Runtime errors or crashes
+- ❌ Animations running on the JS thread (poor performance)
+- ❌ Unexpected behavior with Reanimated shared values
+
+The ESLint plugin catches these issues **at development time**, saving you debugging time. See the [ESLint Plugin section](#eslint-plugin) below for configuration.
+
+See the [eslint-plugin-pressto documentation](https://github.com/enzomanuelmangano/pressto/tree/main/eslint-plugin-pressto) for more details.
 
 ### Advanced: Using interaction states
 
@@ -309,6 +331,14 @@ function App() {
   );
 }
 ```
+
+## Repository Structure
+
+This is a monorepo containing:
+
+- **pressto** - The main library (root package)
+- **eslint-plugin-pressto** - Standalone ESLint plugin
+- **example** - Example app
 
 ## Contributing
 

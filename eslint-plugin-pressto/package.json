@@ -1,0 +1,36 @@
+{
+  "name": "eslint-plugin-pressto",
+  "version": "0.1.0",
+  "description": "ESLint plugin for pressto - enforces worklet directives in createAnimatedPressable functions",
+  "main": "index.js",
+  "keywords": [
+    "eslint",
+    "eslint-plugin",
+    "pressto",
+    "react-native",
+    "reanimated",
+    "worklet",
+    "linter"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/enzomanuelmangano/pressto.git",
+    "directory": "eslint-plugin-pressto"
+  },
+  "author": "Enzo Manuel Mangano <enzomanuelmangano@gmail.com> (https://github.com/enzomanuelmangano)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/enzomanuelmangano/pressto/issues"
+  },
+  "homepage": "https://github.com/enzomanuelmangano/pressto#readme",
+  "peerDependencies": {
+    "eslint": "^7.0.0 || ^8.0.0 || ^9.0.0"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "files": [
+    "index.js",
+    "rules/"
+  ]
+}
