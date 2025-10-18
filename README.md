@@ -84,33 +84,6 @@ const PressableRotate = createAnimatedPressable((progress) => {
 
 **The `progress` parameter** goes from `0` (idle) to `1` (pressed), allowing you to interpolate any style property.
 
-### More Examples
-
-**Color change:**
-
-```jsx
-import { interpolateColor } from 'react-native-reanimated';
-
-const PressableColor = createAnimatedPressable((progress) => {
-  'worklet';
-  return {
-    backgroundColor: interpolateColor(progress, [0, 1], ['#3B82F6', '#1D4ED8']),
-  };
-});
-```
-
-**Combined animations:**
-
-```jsx
-const PressableCombo = createAnimatedPressable((progress) => {
-  'worklet';
-  return {
-    transform: [{ scale: 1 - progress * 0.1 }],
-    opacity: 1 - progress * 0.3,
-  };
-});
-```
-
 > **⚠️ Important:** The `'worklet';` directive is **required** at the start of your animation function. Without it, animations won't run on the UI thread.
 >
 > **Tip:** Install [eslint-plugin-pressto](https://github.com/enzomanuelmangano/pressto/tree/main/eslint-plugin-pressto) to catch missing `'worklet'` directives at development time.
