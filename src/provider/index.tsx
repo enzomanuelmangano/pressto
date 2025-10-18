@@ -5,7 +5,7 @@ import {
   type WithTimingConfig,
 } from 'react-native-reanimated';
 
-import { DefaultConfigs } from './constants';
+import { DefaultAnimationConfigs, DefaultPressableConfig, type PressableConfig } from './constants';
 import {
   PressablesContext,
   PressablesGroupContext,
@@ -19,7 +19,7 @@ export type PressablesConfigProps<
 > = {
   children?: React.ReactNode;
   animationType?: T;
-  config?: T extends 'timing' ? WithTimingConfig : WithSpringConfig;
+  animationConfig?: T extends 'timing' ? WithTimingConfig : WithSpringConfig;
   globalHandlers?: {
     onPressIn?: (options: AnimatedPressableOptions) => void;
     onPressOut?: (options: AnimatedPressableOptions) => void;
@@ -31,6 +31,10 @@ export type PressablesConfigProps<
    * @platform web
    */
   activateOnHover?: boolean;
+  /**
+   * Pressable configuration values (opacity, scale, etc.)
+   */
+  config?: Partial<PressableConfig>;
 };
 
 export const PressablesGroup = ({ children }: PropsWithChildren) => {
@@ -52,20 +56,22 @@ export const PressablesGroup = ({ children }: PropsWithChildren) => {
 export const PressablesConfig = <T extends AnimationType, TMetadata = unknown>({
   children,
   animationType = 'timing' as T,
-  config,
+  animationConfig,
   globalHandlers,
   metadata,
   activateOnHover,
+  config,
 }: PressablesConfigProps<T, TMetadata>) => {
   const value = useMemo(() => {
     return {
       animationType,
-      config: config ?? DefaultConfigs[animationType],
+      animationConfig: animationConfig ?? DefaultAnimationConfigs[animationType],
       globalHandlers,
       metadata,
       activateOnHover,
+      config: { ...DefaultPressableConfig, ...config },
     };
-  }, [animationType, config, globalHandlers, metadata, activateOnHover]);
+  }, [animationType, animationConfig, globalHandlers, metadata, activateOnHover, config]);
 
   return (
     <PressablesContext.Provider value={value}>
@@ -75,3 +81,4 @@ export const PressablesConfig = <T extends AnimationType, TMetadata = unknown>({
 };
 
 export * from './hooks';
+export type { PressableConfig } from './constants';
