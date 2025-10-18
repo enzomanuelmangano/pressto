@@ -106,12 +106,13 @@ import { interpolateColor } from 'react-native-reanimated';
 const ToggleButton = createAnimatedPressable((progress, options) => {
   'worklet';
 
-  const { isPressed, isToggled, isSelected, metadata } = options;
+  const { isPressed, isToggled, isSelected, metadata, config } = options;
 
   // isPressed: true while actively pressing
   // isToggled: toggles on each press
   // isSelected: true for last pressed item in group
   // metadata: custom theme/config from PressablesConfig
+  // config: pressable configuration (activeOpacity, minScale, baseScale)
 
   const backgroundColor = interpolateColor(
     progress,
@@ -153,7 +154,7 @@ function App() {
 export default () => (
   <PressablesConfig
     animationType="spring"
-    config={{ mass: 1, damping: 30, stiffness: 200 }}
+    animationConfig={{ mass: 1, damping: 30, stiffness: 200 }}
     globalHandlers={{
       onPress: () => {
         console.log('you can call haptics here');
@@ -268,6 +269,7 @@ createAnimatedPressable<TMetadata = unknown>(
       isToggled: boolean;
       isSelected: boolean;
       metadata: TMetadata;
+      config: PressableConfig;
     }
   ) => ViewStyle
 )
@@ -280,6 +282,7 @@ createAnimatedPressable<TMetadata = unknown>(
 - `options.isToggled` (boolean): Toggles on each press (persistent state)
 - `options.isSelected` (boolean): True for the last pressed item in a group
 - `options.metadata` (TMetadata): Custom data from `PressablesConfig`
+- `options.config` (PressableConfig): Pressable configuration values (activeOpacity, minScale, baseScale)
 
 **Example:**
 
@@ -300,7 +303,8 @@ Provides global configuration for all pressable components.
 **Props:**
 
 - `animationType?: 'timing' | 'spring'` - Animation type (default: 'timing')
-- `config?: WithTimingConfig | WithSpringConfig` - Animation configuration
+- `animationConfig?: WithTimingConfig | WithSpringConfig` - Animation timing/spring configuration
+- `config?: Partial<PressableConfig>` - Pressable configuration (activeOpacity, minScale, baseScale)
 - `globalHandlers?: { onPress?, onPressIn?, onPressOut? }` - Global event handlers
 - `metadata?: TMetadata` - Custom theme/config available in all pressables
 - `activateOnHover?: boolean` - Activate animations on hover (web only)
@@ -310,7 +314,8 @@ Provides global configuration for all pressable components.
 ```jsx
 <PressablesConfig
   animationType="spring"
-  config={{ damping: 30, stiffness: 200 }}
+  animationConfig={{ damping: 30, stiffness: 200 }}
+  config={{ activeOpacity: 0.3, minScale: 0.95 }}
   metadata={{ colors: { primary: '#6366F1' } }}
   activateOnHover
 >
@@ -318,7 +323,108 @@ Provides global configuration for all pressable components.
 </PressablesConfig>
 ```
 
+### PressableConfig
+
+Configure default values for pressable animations. These values are automatically used by `PressableOpacity` and `PressableScale`:
+
+```typescript
+type PressableConfig = {
+  activeOpacity: number;  // Default: 0.5 - used by PressableOpacity
+  minScale: number;       // Default: 0.96 - used by PressableScale
+  baseScale: number;      // Default: 1 - used by PressableScale
+};
+```
+
+**Defaults:**
+```jsx
+{
+  activeOpacity: 0.5,   // Opacity when pressed (PressableOpacity)
+  minScale: 0.96,       // Scale when pressed (PressableScale)
+  baseScale: 1,         // Scale when idle (PressableScale)
+}
+```
+
+**Usage:**
+
+```jsx
+<PressablesConfig
+  config={{
+    activeOpacity: 0.3,  // Override: more transparent
+    minScale: 0.9,       // Override: shrink more
+  }}
+>
+  <PressableOpacity />  {/* Automatically uses activeOpacity: 0.3 */}
+  <PressableScale />    {/* Automatically uses minScale: 0.9, baseScale: 1 */}
+</PressablesConfig>
+```
+
+Access in custom pressables via `options.config`:
+
+```jsx
+const CustomButton = createAnimatedPressable((progress, { config }) => {
+  'worklet';
+  return {
+    opacity: interpolate(progress, [0, 1], [1, config.activeOpacity]),
+    transform: [{
+      scale: interpolate(progress, [0, 1], [config.baseScale, config.minScale])
+    }],
+  };
+});
+```
+
 ## Migration Guide
+
+### Upgrading from 0.5.1 to 0.6.0
+
+**Breaking Changes:**
+
+1. **`PressablesConfig` prop renamed:** `config` → `animationConfig`
+2. **New `config` prop added:** For pressable configuration values
+
+```diff
+<PressablesConfig
+  animationType="spring"
+- config={{ damping: 30, stiffness: 200 }}
++ animationConfig={{ damping: 30, stiffness: 200 }}
++ config={{ activeOpacity: 0.3, minScale: 0.95 }}
+>
+  <App />
+</PressablesConfig>
+```
+
+**What changed:**
+- `config` prop renamed to `animationConfig` (for timing/spring animation settings)
+- New `config` prop added for pressable values (`activeOpacity`, `minScale`, `baseScale`)
+- `createAnimatedPressable` now receives `config` in options parameter
+
+**New feature:** Customize default pressable values globally:
+
+```jsx
+<PressablesConfig
+  config={{
+    activeOpacity: 0.3,  // Custom opacity for PressableOpacity
+    minScale: 0.9,       // Custom pressed scale for PressableScale
+    baseScale: 1,        // Custom idle scale for PressableScale
+  }}
+>
+  <PressableOpacity />  {/* Uses activeOpacity: 0.3 */}
+  <PressableScale />    {/* Scales from 1 to 0.9 */}
+</PressablesConfig>
+```
+
+**Using config in custom pressables:**
+
+```jsx
+const CustomButton = createAnimatedPressable((progress, { config }) => {
+  'worklet';
+  return {
+    opacity: interpolate(progress, [0, 1], [1, config.activeOpacity]),
+    transform: [{
+      scale: interpolate(progress, [0, 1], [config.baseScale, config.minScale])
+    }],
+  };
+});
+```
 
 ### Upgrading from 0.3.x to 0.5.x
 

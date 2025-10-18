@@ -9,11 +9,11 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useLastTouchedPressable, usePressablesConfig } from '../provider';
+import type { PressableConfig } from '../provider/constants';
 import type {
   AnimatedPressableOptions,
   PressableContextType,
 } from '../provider/context';
-import type { PressableConfig } from '../provider/constants';
 
 const AnimatedBaseButton = Animated.createAnimatedComponent(BaseButton);
 type AnimatedPressableProps = ComponentProps<typeof AnimatedBaseButton>;
@@ -39,7 +39,10 @@ export type BasePressableProps<TMetadata = unknown> = {
    * @platform web
    */
   activateOnHover?: boolean;
-} & Omit<Partial<PressableContextType<'timing' | 'spring'>>, 'metadata' | 'config'> &
+} & Omit<
+  Partial<PressableContextType<'timing' | 'spring'>>,
+  'metadata' | 'config'
+> &
   Partial<
     Pick<
       AnimatedPressableProps,
