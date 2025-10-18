@@ -3,15 +3,18 @@ import { PressablesConfig } from 'pressto';
 import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+const globalHandlers = {
+  onPress: () => {
+    console.log('use haptics!');
+  },
+};
+
 export default function RootLayout() {
   return (
     <PressablesConfig
       animationType="timing"
-      globalHandlers={{
-        onPress: () => {
-          console.log('use haptics!');
-        },
-      }}
+      activateOnHover
+      globalHandlers={globalHandlers}
     >
       <GestureHandlerRootView style={styles.container}>
         <Stack />

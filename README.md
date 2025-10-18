@@ -27,6 +27,7 @@ npx expo install pressto react-native-reanimated react-native-gesture-handler re
 - **Advanced interaction states**: `isPressed`, `isToggled`, `isSelected`
 - **Type-safe metadata**: Pass theme/design tokens directly into worklets
 - **Group coordination**: Track selected items across pressable groups
+- **Web hover support**: Activate animations on hover (web only)
 
 ## Usage
 
@@ -186,8 +187,10 @@ const theme = {
   },
 };
 
+type Theme = typeof theme;
+
 // Create themed pressables
-const ThemedButton = createAnimatedPressable((progress, { metadata }) => {
+const ThemedButton = createAnimatedPressable<Theme>((progress, { metadata }) => {
   'worklet';
   return {
     backgroundColor: metadata.colors.primary,
@@ -205,6 +208,40 @@ function App() {
   );
 }
 ```
+
+### Web: Hover support
+
+Activate animations on hover for web platforms:
+
+```jsx
+import { PressableScale, PressablesConfig } from 'pressto';
+
+// Enable hover globally for all pressables
+function App() {
+  return (
+    <PressablesConfig activateOnHover={true}>
+      <PressableScale
+        style={styles.button}
+        onPress={() => console.log('pressed')}
+      />
+      {/* This will scale on hover on web */}
+    </PressablesConfig>
+  );
+}
+
+// Or enable hover per component
+function ComponentExample() {
+  return (
+    <PressableScale
+      activateOnHover
+      style={styles.button}
+      onPress={() => console.log('pressed')}
+    />
+  );
+}
+```
+
+**Note:** The `activateOnHover` prop only works on web platforms (`Platform.OS === 'web'`). On native platforms, it has no effect.
 
 ## API
 
@@ -266,6 +303,7 @@ Provides global configuration for all pressable components.
 - `config?: WithTimingConfig | WithSpringConfig` - Animation configuration
 - `globalHandlers?: { onPress?, onPressIn?, onPressOut? }` - Global event handlers
 - `metadata?: TMetadata` - Custom theme/config available in all pressables
+- `activateOnHover?: boolean` - Activate animations on hover (web only)
 
 **Example:**
 
@@ -274,6 +312,7 @@ Provides global configuration for all pressable components.
   animationType="spring"
   config={{ damping: 30, stiffness: 200 }}
   metadata={{ colors: { primary: '#6366F1' } }}
+  activateOnHover
 >
   <App />
 </PressablesConfig>

@@ -27,6 +27,11 @@ export type PressableContextType<
     onPress?: (options: AnimatedPressableOptions) => void;
   };
   metadata?: TMetadata;
+  /**
+   * Activates the pressable animation on hover (web only)
+   * @platform web
+   */
+  activateOnHover?: boolean;
 };
 
 export const PressablesContext = createContext<
