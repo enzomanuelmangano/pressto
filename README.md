@@ -37,21 +37,23 @@ function App() {
 Pressto comes with two ready-to-use components:
 
 **PressableScale** - Scales down when pressed
+
 ```jsx
 import { PressableScale } from 'pressto';
 
 <PressableScale onPress={() => alert('Pressed!')}>
   <Text>Scale Animation</Text>
-</PressableScale>
+</PressableScale>;
 ```
 
 **PressableOpacity** - Fades when pressed
+
 ```jsx
 import { PressableOpacity } from 'pressto';
 
 <PressableOpacity onPress={() => alert('Pressed!')}>
   <Text>Opacity Animation</Text>
-</PressableOpacity>
+</PressableOpacity>;
 ```
 
 Both components accept all standard React Native Pressable props (`onPress`, `onPressIn`, `onPressOut`, `style`, etc.).
@@ -77,7 +79,7 @@ const PressableRotate = createAnimatedPressable((progress) => {
 // Use it like any other pressable
 <PressableRotate onPress={() => console.log('rotated!')}>
   <Text>Rotate Me</Text>
-</PressableRotate>
+</PressableRotate>;
 ```
 
 **The `progress` parameter** goes from `0` (idle) to `1` (pressed), allowing you to interpolate any style property.
@@ -85,22 +87,20 @@ const PressableRotate = createAnimatedPressable((progress) => {
 ### More Examples
 
 **Color change:**
+
 ```jsx
 import { interpolateColor } from 'react-native-reanimated';
 
 const PressableColor = createAnimatedPressable((progress) => {
   'worklet';
   return {
-    backgroundColor: interpolateColor(
-      progress,
-      [0, 1],
-      ['#3B82F6', '#1D4ED8']
-    ),
+    backgroundColor: interpolateColor(progress, [0, 1], ['#3B82F6', '#1D4ED8']),
   };
 });
 ```
 
 **Combined animations:**
+
 ```jsx
 const PressableCombo = createAnimatedPressable((progress) => {
   'worklet';
@@ -140,6 +140,7 @@ function App() {
 ```
 
 **Options:**
+
 - `animationType`: `'timing'` or `'spring'` (default: `'timing'`)
 - `animationConfig`: Pass timing or spring configuration
 - `config`: Set default values for `minScale`, `activeOpacity`, `baseScale`
@@ -157,7 +158,7 @@ function App() {
     <PressablesConfig
       globalHandlers={{
         onPress: () => {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          Haptics.selectionAsync();
         },
       }}
     >
@@ -265,6 +266,7 @@ function App() {
 Creates a custom animated pressable.
 
 **Parameters:**
+
 - `animatedStyle`: Function that returns animated styles
   - `progress`: number (0-1) - Animation progress
   - `options.isPressed`: boolean - Currently being pressed
@@ -278,6 +280,7 @@ Creates a custom animated pressable.
 Global configuration provider.
 
 **Props:**
+
 - `animationType`: 'timing' | 'spring' - Default: 'timing'
 - `animationConfig`: Timing/spring config object
 - `config`: { activeOpacity, minScale, baseScale }
