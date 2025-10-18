@@ -7,6 +7,7 @@ import Animated, {
   useSharedValue,
   withSpring,
   withTiming,
+  type SharedValue,
 } from 'react-native-reanimated';
 import { useLastTouchedPressable, usePressablesConfig } from '../provider';
 import type { PressableConfig } from '../provider/constants';
@@ -26,8 +27,35 @@ export type AnimatedPressableStyleOptions<TMetadata = unknown> = {
   config: PressableConfig;
 };
 
+export type PressableChildrenCallbackParams = {
+  /**
+   * Animation progress from 0 (idle) to 1 (pressed)
+   */
+  progress: SharedValue<number>;
+  /**
+   * Whether the pressable is currently being pressed
+   */
+  isPressed: SharedValue<boolean>;
+  /**
+   * Toggle state - flips on each press
+   */
+  isToggled: SharedValue<boolean>;
+  /**
+   * Whether this pressable is the last one pressed in the group
+   */
+  isSelected: SharedValue<boolean>;
+  /**
+   * Pre-configured animation function (withTiming or withSpring with config already applied)
+   * @example
+   * const opacity = useDerivedValue(() => withAnimation(isPressed.value ? 0.5 : 1));
+   */
+  withAnimation: (value: number) => number;
+};
+
 export type BasePressableProps<TMetadata = unknown> = {
-  children?: React.ReactNode;
+  children?:
+    | React.ReactNode
+    | ((params: PressableChildrenCallbackParams) => React.ReactNode);
   animatedStyle?: (
     progress: number,
     options: AnimatedPressableStyleOptions<TMetadata>
@@ -135,9 +163,22 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       return animationType === 'timing' ? withTiming : withSpring;
     }, [animationType]);
 
+    // Pre-configured animation function for children (config already applied)
+    const withAnimationConfigured = useMemo(() => {
+      return (value: number) => {
+        'worklet';
+        return withAnimation(value, animationConfig);
+      };
+    }, [withAnimation, animationConfig]);
+
     const progress = useDerivedValue<number>(() => {
-      return withAnimation(active.get() ? 1 : 0, animationConfig);
-    }, [animationConfig, withAnimation]);
+      return withAnimationConfigured(active.get() ? 1 : 0);
+    }, [withAnimationConfigured]);
+
+    // Derived SharedValue for isSelected (computed from comparison)
+    const isSelectedDerived = useDerivedValue(() => {
+      return lastTouchedPressable.get() === pressableId;
+    }, [lastTouchedPressable, pressableId]);
 
     const onPressInWrapper = useCallback(() => {
       active.set(true);
@@ -245,6 +286,24 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       [shouldEnableHover, onMouseEnter, onMouseLeave]
     );
 
+    const childrenCallbackParams = useMemo<PressableChildrenCallbackParams>(
+      () => ({
+        progress,
+        isPressed: active,
+        isToggled,
+        isSelected: isSelectedDerived,
+        withAnimation: withAnimationConfigured,
+      }),
+      [progress, active, isToggled, isSelectedDerived, withAnimationConfigured]
+    );
+
+    const renderedChildren = useMemo(() => {
+      if (typeof children === 'function') {
+        return children(childrenCallbackParams);
+      }
+      return children;
+    }, [children, childrenCallbackParams]);
+
     return (
       <AnimatedBaseButton
         {...rest}
@@ -259,7 +318,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
         onCancelled={onPressOutWrapper}
         exclusive={false}
       >
-        {children}
+        {renderedChildren}
       </AnimatedBaseButton>
     );
   }
