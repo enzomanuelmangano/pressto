@@ -2,10 +2,9 @@
 
 https://github.com/user-attachments/assets/c857eb8d-3ce7-4afe-b2dd-e974560684d8
 
-The fastest way to improve your React Native app is by using tap gestures.
-That's why I've created **pressto**, a super-simple package to help you get started.
+**Replace TouchableOpacity with animated pressables that run on the main thread.**
 
-The package is built on top of the BaseButton from [react-native-gesture-handler](https://docs.swmansion.com/react-native-gesture-handler/) to handle the resulting gestures and animations on the main thread. It aims to replace your “TouchableOpacity”.
+Built on [react-native-gesture-handler](https://docs.swmansion.com/react-native-gesture-handler/) and [react-native-reanimated](https://docs.swmansion.com/react-native-reanimated/) for 60fps animations.
 
 ## Installation
 
@@ -13,481 +12,320 @@ The package is built on top of the BaseButton from [react-native-gesture-handler
 bun add pressto react-native-reanimated react-native-gesture-handler react-native-worklets
 ```
 
-Or with Expo
-
-```sh
-npx expo install pressto react-native-reanimated react-native-gesture-handler react-native-worklets
-```
-
-## Features
-
-- Pre-built animated pressable components: `PressableScale` and `PressableOpacity`
-- Easy creation of custom animated pressables with `createAnimatedPressable`
-- Configurable animation types and durations
-- **Advanced interaction states**: `isPressed`, `isToggled`, `isSelected`
-- **Type-safe metadata**: Pass theme/design tokens directly into worklets
-- **Group coordination**: Track selected items across pressable groups
-- **Web hover support**: Activate animations on hover (web only)
-
-## Usage
-
-### Use basic Pressables: PressableScale and PressableOpacity
+## Quickstart
 
 ```jsx
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { PressableOpacity, PressableScale } from 'pressto';
+import { PressableScale } from 'pressto';
 
-function BasicPressablesExample() {
+function App() {
   return (
-    <View style={styles.container}>
-      <PressableScale style={styles.box} onPress={() => console.log('scale')} />
-      <PressableOpacity
-        style={styles.box}
-        onPress={() => console.log('opacity')}
-      />
-    </View>
+    <PressableScale onPress={() => console.log('pressed')}>
+      <Text>Press me</Text>
+    </PressableScale>
   );
 }
 ```
 
-### Create a custom Pressable with createAnimatedPressable
+**That's it.** Your pressable now scales smoothly on press with main-thread animations.
+
+---
+
+## Basic Usage
+
+### Pre-built Components
+
+Pressto comes with two ready-to-use components:
+
+**PressableScale** - Scales down when pressed
+```jsx
+import { PressableScale } from 'pressto';
+
+<PressableScale onPress={() => alert('Pressed!')}>
+  <Text>Scale Animation</Text>
+</PressableScale>
+```
+
+**PressableOpacity** - Fades when pressed
+```jsx
+import { PressableOpacity } from 'pressto';
+
+<PressableOpacity onPress={() => alert('Pressed!')}>
+  <Text>Opacity Animation</Text>
+</PressableOpacity>
+```
+
+Both components accept all standard React Native Pressable props (`onPress`, `onPressIn`, `onPressOut`, `style`, etc.).
+
+---
+
+## Custom Animations
+
+### Create Your Own Pressable
+
+Use `createAnimatedPressable` to create custom animations:
 
 ```jsx
 import { createAnimatedPressable } from 'pressto';
 
 const PressableRotate = createAnimatedPressable((progress) => {
-  'worklet'; // I recommend installing the eslint plugin below to avoid forgetting the worklet.
+  'worklet';
   return {
-    transform: [{ rotate: `${(progress * Math.PI) / 4}rad` }],
+    transform: [{ rotate: `${progress * 45}deg` }],
   };
 });
 
-function CustomPressableExample() {
-  return (
-    <View style={styles.container}>
-      <PressableRotate
-        style={styles.box}
-        onPress={() => console.log('rotate')}
-      />
-    </View>
-  );
-}
+// Use it like any other pressable
+<PressableRotate onPress={() => console.log('rotated!')}>
+  <Text>Rotate Me</Text>
+</PressableRotate>
 ```
 
-> **⚠️ Important:** Notice the `'worklet';` directive at the start of the animation function. This is **required** for the function to run on the UI thread with React Native Reanimated.
+**The `progress` parameter** goes from `0` (idle) to `1` (pressed), allowing you to interpolate any style property.
 
-#### ESLint Plugin (Recommended)
+### More Examples
 
-Install the ESLint plugin to automatically catch missing `'worklet'` directives:
-
-```sh
-npm install -D eslint-plugin-pressto
-# or
-bun add -D eslint-plugin-pressto
-```
-
-**Why you need this:** Forgetting the `'worklet'` directive causes:
-
-- ❌ Runtime errors or crashes
-- ❌ Animations running on the JS thread (poor performance)
-- ❌ Unexpected behavior with Reanimated shared values
-
-The ESLint plugin catches these issues **at development time**, saving you debugging time. See the [ESLint Plugin section](#eslint-plugin) below for configuration.
-
-See the [eslint-plugin-pressto documentation](https://github.com/enzomanuelmangano/pressto/tree/main/eslint-plugin-pressto) for more details.
-
-### Advanced: Using interaction states
-
+**Color change:**
 ```jsx
-import { createAnimatedPressable } from 'pressto';
 import { interpolateColor } from 'react-native-reanimated';
 
-const ToggleButton = createAnimatedPressable((progress, options) => {
+const PressableColor = createAnimatedPressable((progress) => {
   'worklet';
-
-  const { isPressed, isToggled, isSelected, metadata, config } = options;
-
-  // isPressed: true while actively pressing
-  // isToggled: toggles on each press
-  // isSelected: true for last pressed item in group
-  // metadata: custom theme/config from PressablesConfig
-  // config: pressable configuration (activeOpacity, minScale, baseScale)
-
-  const backgroundColor = interpolateColor(
-    progress,
-    [0, 1],
-    isToggled ? ['#4CAF50', '#388E3C'] : ['#2196F3', '#1976D2']
-  );
-
   return {
-    backgroundColor,
-    opacity: isPressed ? 0.9 : 1,
-    borderWidth: isSelected ? 2 : 0,
+    backgroundColor: interpolateColor(
+      progress,
+      [0, 1],
+      ['#3B82F6', '#1D4ED8']
+    ),
   };
 });
 ```
 
-### Use the PressablesConfig
+**Combined animations:**
+```jsx
+const PressableCombo = createAnimatedPressable((progress) => {
+  'worklet';
+  return {
+    transform: [{ scale: 1 - progress * 0.1 }],
+    opacity: 1 - progress * 0.3,
+  };
+});
+```
+
+> **⚠️ Important:** The `'worklet';` directive is **required** at the start of your animation function. Without it, animations won't run on the UI thread.
+>
+> **Tip:** Install [eslint-plugin-pressto](https://github.com/enzomanuelmangano/pressto/tree/main/eslint-plugin-pressto) to catch missing `'worklet'` directives at development time.
+
+---
+
+## Configuration
+
+Use `PressablesConfig` to customize animation behavior for all pressables in your app:
 
 ```jsx
-import React from 'react';
-import { gestureHandlerRootHOC } from 'react-native-gesture-handler';
-import { PressablesConfig } from 'pressto';
+import { PressablesConfig, PressableScale } from 'pressto';
 
 function App() {
   return (
-    <View style={styles.container}>
-      <PressableRotate
-        style={styles.box}
-        onPress={() => console.log('rotate')}
-      />
-      <PressableScale style={styles.box} onPress={() => console.log('scale')} />
-      <PressableOpacity
-        style={styles.box}
-        onPress={() => console.log('opacity')}
-      />
-    </View>
+    <PressablesConfig
+      animationType="spring"
+      animationConfig={{ damping: 30, stiffness: 200 }}
+      config={{ minScale: 0.9, activeOpacity: 0.6 }}
+    >
+      <PressableScale onPress={() => console.log('pressed')}>
+        <Text>Now with spring animation!</Text>
+      </PressableScale>
+    </PressablesConfig>
   );
 }
-
-export default () => (
-  <PressablesConfig
-    animationType="spring"
-    animationConfig={{ mass: 1, damping: 30, stiffness: 200 }}
-    globalHandlers={{
-      onPress: () => {
-        console.log('you can call haptics here');
-      },
-    }}
-  >
-    <App />
-  </PressablesConfig>
-);
 ```
 
-### Advanced: Theme metadata
+**Options:**
+- `animationType`: `'timing'` or `'spring'` (default: `'timing'`)
+- `animationConfig`: Pass timing or spring configuration
+- `config`: Set default values for `minScale`, `activeOpacity`, `baseScale`
 
-Pass your design system directly into worklets with full type safety:
+### Global Handlers
+
+Add global handlers like haptic feedback:
 
 ```jsx
-import { createAnimatedPressable, PressablesConfig } from 'pressto';
+import { PressablesConfig } from 'pressto';
+import * as Haptics from 'expo-haptics';
 
-// Define your theme
+function App() {
+  return (
+    <PressablesConfig
+      globalHandlers={{
+        onPress: () => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        },
+      }}
+    >
+      {/* All pressables will trigger haptics */}
+      <YourApp />
+    </PressablesConfig>
+  );
+}
+```
+
+---
+
+## Advanced Features
+
+### Interaction States
+
+Access advanced state in your custom pressables:
+
+```jsx
+const ToggleButton = createAnimatedPressable((progress, options) => {
+  'worklet';
+
+  const { isPressed, isToggled, isSelected } = options;
+  // isPressed: true while actively pressing
+  // isToggled: toggles on each press (persistent)
+  // isSelected: true for last pressed item in a group
+
+  return {
+    backgroundColor: isToggled ? '#4CAF50' : '#2196F3',
+    opacity: isPressed ? 0.8 : 1,
+    borderWidth: isSelected ? 3 : 0,
+  };
+});
+```
+
+### Theme Metadata
+
+Pass your design system into worklets with type safety:
+
+```jsx
 const theme = {
-  colors: {
-    primary: '#6366F1',
-    secondary: '#EC4899',
-  },
-  spacing: {
-    medium: 16,
-    large: 24,
-  },
-  borderRadius: {
-    medium: 12,
-  },
+  colors: { primary: '#6366F1' },
+  spacing: { medium: 16 },
 };
 
 type Theme = typeof theme;
 
-// Create themed pressables
 const ThemedButton = createAnimatedPressable<Theme>((progress, { metadata }) => {
   'worklet';
   return {
     backgroundColor: metadata.colors.primary,
     padding: metadata.spacing.medium,
-    borderRadius: metadata.borderRadius.medium,
   };
 });
 
-// Provide theme to all pressables
-function App() {
-  return (
-    <PressablesConfig metadata={theme}>
-      <ThemedButton onPress={() => console.log('pressed')} />
-    </PressablesConfig>
-  );
-}
-```
-
-### Web: Hover support
-
-Activate animations on hover for web platforms:
-
-```jsx
-import { PressableScale, PressablesConfig } from 'pressto';
-
-// Enable hover globally for all pressables
-function App() {
-  return (
-    <PressablesConfig activateOnHover={true}>
-      <PressableScale
-        style={styles.button}
-        onPress={() => console.log('pressed')}
-      />
-      {/* This will scale on hover on web */}
-    </PressablesConfig>
-  );
-}
-
-// Or enable hover per component
-function ComponentExample() {
-  return (
-    <PressableScale
-      activateOnHover
-      style={styles.button}
-      onPress={() => console.log('pressed')}
-    />
-  );
-}
-```
-
-**Note:** The `activateOnHover` prop only works on web platforms (`Platform.OS === 'web'`). On native platforms, it has no effect.
-
-## API
-
-### PressableScale
-
-A pressable component that scales when pressed.
-
-### PressableOpacity
-
-A pressable component that changes opacity when pressed.
-
-### createAnimatedPressable
-
-Creates a custom animated pressable component.
-
-**Signature:**
-
-```typescript
-createAnimatedPressable<TMetadata = unknown>(
-  animatedStyle: (
-    progress: number,
-    options: {
-      isPressed: boolean;
-      isToggled: boolean;
-      isSelected: boolean;
-      metadata: TMetadata;
-      config: PressableConfig;
-    }
-  ) => ViewStyle
-)
-```
-
-**Parameters:**
-
-- `progress` (number): Animation progress from 0 (idle) to 1 (pressed)
-- `options.isPressed` (boolean): True while actively pressing
-- `options.isToggled` (boolean): Toggles on each press (persistent state)
-- `options.isSelected` (boolean): True for the last pressed item in a group
-- `options.metadata` (TMetadata): Custom data from `PressablesConfig`
-- `options.config` (PressableConfig): Pressable configuration values (activeOpacity, minScale, baseScale)
-
-**Example:**
-
-```jsx
-const MyButton = createAnimatedPressable((progress, { isToggled }) => {
-  'worklet';
-  return {
-    backgroundColor: isToggled ? '#4CAF50' : '#2196F3',
-    transform: [{ scale: 1 - progress * 0.05 }],
-  };
-});
-```
-
-### PressablesConfig
-
-Provides global configuration for all pressable components.
-
-**Props:**
-
-- `animationType?: 'timing' | 'spring'` - Animation type (default: 'timing')
-- `animationConfig?: WithTimingConfig | WithSpringConfig` - Animation timing/spring configuration
-- `config?: Partial<PressableConfig>` - Pressable configuration (activeOpacity, minScale, baseScale)
-- `globalHandlers?: { onPress?, onPressIn?, onPressOut? }` - Global event handlers
-- `metadata?: TMetadata` - Custom theme/config available in all pressables
-- `activateOnHover?: boolean` - Activate animations on hover (web only)
-
-**Example:**
-
-```jsx
-<PressablesConfig
-  animationType="spring"
-  animationConfig={{ damping: 30, stiffness: 200 }}
-  config={{ activeOpacity: 0.3, minScale: 0.95 }}
-  metadata={{ colors: { primary: '#6366F1' } }}
-  activateOnHover
->
-  <App />
+<PressablesConfig metadata={theme}>
+  <ThemedButton onPress={() => {}} />
 </PressablesConfig>
 ```
 
-### PressableConfig
+### Web Hover Support
 
-Configure default values for pressable animations. These values are automatically used by `PressableOpacity` and `PressableScale`:
-
-```typescript
-type PressableConfig = {
-  activeOpacity: number;  // Default: 0.5 - used by PressableOpacity
-  minScale: number;       // Default: 0.96 - used by PressableScale
-  baseScale: number;      // Default: 1 - used by PressableScale
-};
-```
-
-**Defaults:**
-```jsx
-{
-  activeOpacity: 0.5,   // Opacity when pressed (PressableOpacity)
-  minScale: 0.96,       // Scale when pressed (PressableScale)
-  baseScale: 1,         // Scale when idle (PressableScale)
-}
-```
-
-**Usage:**
+Activate animations on hover (web only):
 
 ```jsx
-<PressablesConfig
-  config={{
-    activeOpacity: 0.3,  // Override: more transparent
-    minScale: 0.9,       // Override: shrink more
-  }}
->
-  <PressableOpacity />  {/* Automatically uses activeOpacity: 0.3 */}
-  <PressableScale />    {/* Automatically uses minScale: 0.9, baseScale: 1 */}
+// Per component
+<PressableScale activateOnHover onPress={() => {}}>
+  <Text>Hover me!</Text>
+</PressableScale>
+
+// Or globally
+<PressablesConfig activateOnHover>
+  <YourApp />
 </PressablesConfig>
 ```
 
-Access in custom pressables via `options.config`:
+### ScrollView Integration
 
-```jsx
-const CustomButton = createAnimatedPressable((progress, { config }) => {
-  'worklet';
-  return {
-    opacity: interpolate(progress, [0, 1], [1, config.activeOpacity]),
-    transform: [{
-      scale: interpolate(progress, [0, 1], [config.baseScale, config.minScale])
-    }],
-  };
-});
-```
-
-## Migration Guide
-
-### Upgrading from 0.5.1 to 0.6.0
-
-**Breaking Changes:**
-
-1. **`PressablesConfig` prop renamed:** `config` → `animationConfig`
-2. **New `config` prop added:** For pressable configuration values
-
-```diff
-<PressablesConfig
-  animationType="spring"
-- config={{ damping: 30, stiffness: 200 }}
-+ animationConfig={{ damping: 30, stiffness: 200 }}
-+ config={{ activeOpacity: 0.3, minScale: 0.95 }}
->
-  <App />
-</PressablesConfig>
-```
-
-**What changed:**
-- `config` prop renamed to `animationConfig` (for timing/spring animation settings)
-- New `config` prop added for pressable values (`activeOpacity`, `minScale`, `baseScale`)
-- `createAnimatedPressable` now receives `config` in options parameter
-
-**New feature:** Customize default pressable values globally:
-
-```jsx
-<PressablesConfig
-  config={{
-    activeOpacity: 0.3,  // Custom opacity for PressableOpacity
-    minScale: 0.9,       // Custom pressed scale for PressableScale
-    baseScale: 1,        // Custom idle scale for PressableScale
-  }}
->
-  <PressableOpacity />  {/* Uses activeOpacity: 0.3 */}
-  <PressableScale />    {/* Scales from 1 to 0.9 */}
-</PressablesConfig>
-```
-
-**Using config in custom pressables:**
-
-```jsx
-const CustomButton = createAnimatedPressable((progress, { config }) => {
-  'worklet';
-  return {
-    opacity: interpolate(progress, [0, 1], [1, config.activeOpacity]),
-    transform: [{
-      scale: interpolate(progress, [0, 1], [config.baseScale, config.minScale])
-    }],
-  };
-});
-```
-
-### Upgrading from 0.3.x to 0.5.x
-
-**Breaking Change:** The `progress` parameter is now a plain `number` instead of `SharedValue<number>`.
-
-```diff
-const MyPressable = createAnimatedPressable((progress) => {
-  'worklet';
-  return {
--   opacity: progress.get() * 0.5,
-+   opacity: progress * 0.5,
--   scale: interpolate(progress.get(), [0, 1], [1, 0.95]),
-+   scale: interpolate(progress, [0, 1], [1, 0.95]),
-  };
-});
-```
-
-**What to do:** Remove all `.get()` / `.value` calls on the `progress` parameter.
-
-## Avoid highlight flicker effect in Scrollable List
-
-Since pressto is built on top of the BaseButton from react-native-gesture-handler, it handles tap conflict detection automatically when used with a FlatList imported from react-native-gesture-handler.
+Use `FlatList` from `react-native-gesture-handler` to prevent tap conflicts:
 
 ```jsx
 import { FlatList } from 'react-native-gesture-handler';
+import { PressableScale } from 'pressto';
 
 function App() {
   return (
     <FlatList
       data={data}
-      renderItem={({ item }) => <PressableRotate style={styles.box} />}
+      renderItem={({ item }) => (
+        <PressableScale onPress={() => console.log(item)}>
+          <Text>{item.title}</Text>
+        </PressableScale>
+      )}
     />
   );
 }
 ```
 
-You can also use whatever Scrollable component you want, as long as it supports the renderScrollComponent prop.
+---
 
-```jsx
-import { WhateverList } from 'your-favorite-list-package'
-import { ScrollView } from 'react-native-gesture-handler';
+## API Reference
 
-function App() {
-  return (
-    <WhateverList
-      data={data}
-      renderItem={({ item }) => <PressableRotate style={styles.box} />}
-      renderScrollComponent={(props) => <ScrollView {...props} />}
-  );
+### `createAnimatedPressable<TMetadata>(animatedStyle)`
+
+Creates a custom animated pressable.
+
+**Parameters:**
+- `animatedStyle`: Function that returns animated styles
+  - `progress`: number (0-1) - Animation progress
+  - `options.isPressed`: boolean - Currently being pressed
+  - `options.isToggled`: boolean - Toggle state (persistent)
+  - `options.isSelected`: boolean - Selected in group
+  - `options.metadata`: TMetadata - Custom theme data
+  - `options.config`: PressableConfig - Default values (minScale, activeOpacity, baseScale)
+
+### `PressablesConfig`
+
+Global configuration provider.
+
+**Props:**
+- `animationType`: 'timing' | 'spring' - Default: 'timing'
+- `animationConfig`: Timing/spring config object
+- `config`: { activeOpacity, minScale, baseScale }
+- `globalHandlers`: { onPress, onPressIn, onPressOut }
+- `metadata`: Custom theme/config (type-safe)
+- `activateOnHover`: boolean - Web only
+
+### `PressableConfig`
+
+Default animation values:
+
+```typescript
+{
+  activeOpacity: 0.5,   // PressableOpacity target
+  minScale: 0.96,       // PressableScale target
+  baseScale: 1          // PressableScale idle scale
 }
 ```
 
-## Repository Structure
+---
 
-This is a monorepo containing:
+## Migration Guide
 
-- **pressto** - The main library (root package)
-- **eslint-plugin-pressto** - Standalone ESLint plugin
-- **example** - Example app
+### v0.5.1 → v0.6.0
+
+`PressablesConfig` prop renamed: `config` → `animationConfig`
+
+```diff
+<PressablesConfig
+- config={{ damping: 30, stiffness: 200 }}
++ animationConfig={{ damping: 30, stiffness: 200 }}
+>
+```
+
+### v0.3.x → v0.5.x
+
+`progress` is now a plain `number` instead of `SharedValue<number>`:
+
+```diff
+- opacity: progress.get() * 0.5,
++ opacity: progress * 0.5,
+```
+
+---
 
 ## Contributing
 
-Contributions are welcome! Please see our [contributing guide](CONTRIBUTING.md) for more details.
+See [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## License
 
@@ -495,4 +333,4 @@ MIT
 
 ---
 
-Made with ❤️ using [create-react-native-library](https://github.com/callstack/react-native-builder-bob)
+Made with [create-react-native-library](https://github.com/callstack/react-native-builder-bob)
