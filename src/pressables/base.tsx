@@ -7,6 +7,7 @@ import Animated, {
   useSharedValue,
   withSpring,
   withTiming,
+  type AnimatableValue,
   type SharedValue,
 } from 'react-native-reanimated';
 import { useLastTouchedPressable, usePressablesConfig } from '../provider';
@@ -25,6 +26,14 @@ export type AnimatedPressableStyleOptions<TMetadata = unknown> = {
   isSelected: boolean;
   metadata: TMetadata;
   config: PressableConfig;
+  /**
+   * Pre-configured animation function (withTiming or withSpring with config already applied)
+   * Supports numbers, strings (colors), and other animatable values
+   * @example
+   * const opacity = withAnimation(isToggled ? 0.5 : 1);
+   * const backgroundColor = withAnimation(isPressed ? '#ff0000' : '#0000ff');
+   */
+  withAnimation: <T extends AnimatableValue>(value: T) => T;
 };
 
 export type PressableChildrenCallbackParams = {
@@ -46,10 +55,12 @@ export type PressableChildrenCallbackParams = {
   isSelected: SharedValue<boolean>;
   /**
    * Pre-configured animation function (withTiming or withSpring with config already applied)
+   * Supports numbers, strings (colors), and other animatable values
    * @example
    * const opacity = useDerivedValue(() => withAnimation(isPressed.value ? 0.5 : 1));
+   * const backgroundColor = useDerivedValue(() => withAnimation(isPressed.value ? '#ff0000' : '#0000ff'));
    */
-  withAnimation: (value: number) => number;
+  withAnimation: <T extends AnimatableValue>(value: T) => T;
 };
 
 export type BasePressableProps<TMetadata = unknown> = {
@@ -165,9 +176,9 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
 
     // Pre-configured animation function for children (config already applied)
     const withAnimationConfigured = useMemo(() => {
-      return (value: number) => {
+      return <T extends AnimatableValue>(value: T): T => {
         'worklet';
-        return withAnimation(value, animationConfig);
+        return withAnimation(value, animationConfig) as T;
       };
     }, [withAnimation, animationConfig]);
 
@@ -262,6 +273,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
             isSelected: lastTouchedPressable.get() === pressableId,
             metadata,
             config,
+            withAnimation: withAnimationConfigured,
           })
         : {};
     }, [
@@ -273,6 +285,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       pressableId,
       metadata,
       config,
+      withAnimationConfigured,
     ]);
 
     const hoverProps = useMemo(
