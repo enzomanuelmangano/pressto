@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-pressto",
-  "version": "0.5.1",
+  "version": "0.1.0",
   "description": "ESLint plugin for pressto - enforces worklet directives in createAnimatedPressable functions",
   "main": "index.js",
   "keywords": [
