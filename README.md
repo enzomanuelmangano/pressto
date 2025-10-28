@@ -208,9 +208,9 @@ Activate animations on hover (web only):
 </PressablesConfig>
 ```
 
-### ScrollView Integration
+### Avoid highlight flicker effect in Scrollable List
 
-Use `FlatList` from `react-native-gesture-handler` to prevent tap conflicts:
+Since pressto is built on top of the BaseButton from react-native-gesture-handler, it handles tap conflict detection automatically when used with a FlatList imported from react-native-gesture-handler.
 
 ```jsx
 import { FlatList } from 'react-native-gesture-handler';
@@ -225,6 +225,28 @@ function App() {
           <Text>{item.title}</Text>
         </PressableScale>
       )}
+    />
+  );
+}
+```
+
+You can also use whatever Scrollable component you want, as long as it supports the renderScrollComponent prop.
+
+```jsx
+import { WhateverList } from 'your-favorite-list-package'
+import { ScrollView } from 'react-native-gesture-handler';
+import { PressableScale } from 'pressto';
+
+function App() {
+  return (
+    <WhateverList
+      data={data}
+      renderItem={({ item }) => (
+        <PressableScale onPress={() => console.log(item)}>
+          <Text>{item.title}</Text>
+        </PressableScale>
+      )}
+      renderScrollComponent={(props) => <ScrollView {...props} />}
     />
   );
 }
