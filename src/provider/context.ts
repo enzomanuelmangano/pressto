@@ -5,7 +5,12 @@ import {
   type WithSpringConfig,
   type WithTimingConfig,
 } from 'react-native-reanimated';
-import { DefaultAnimationConfigs, DefaultPressableConfig, type PressableConfig } from './constants';
+import {
+  DefaultAnimationConfigs,
+  DefaultPressableConfig,
+  type DefaultPressableProps,
+  type PressableConfig,
+} from './constants';
 
 export type AnimationType = 'timing' | 'spring';
 
@@ -36,6 +41,11 @@ export type PressableContextType<
    * Pressable configuration values (opacity, scale, etc.)
    */
   config: PressableConfig;
+  /**
+   * Default props applied to all pressables.
+   * Individual pressable props will override these values.
+   */
+  defaultProps?: DefaultPressableProps;
 };
 
 export const PressablesContext = createContext<

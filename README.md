@@ -118,6 +118,32 @@ function App() {
 - `animationConfig`: Pass timing or spring configuration
 - `config`: Set default values for `minScale`, `activeOpacity`, `baseScale`
 
+### Default Props
+
+Set default props for all pressables globally. Useful for platform-specific behavior like disabling the Android ripple effect:
+
+```jsx
+import { PressablesConfig, PressableScale } from 'pressto';
+
+function App() {
+  return (
+    <PressablesConfig defaultProps={{ rippleColor: 'transparent' }}>
+      {/* All pressables will have ripple disabled */}
+      <PressableScale onPress={() => console.log('No ripple!')}>
+        <Text>Press me</Text>
+      </PressableScale>
+
+      {/* Individual pressables can still override */}
+      <PressableScale rippleColor="blue" onPress={() => {}}>
+        <Text>This one has blue ripple</Text>
+      </PressableScale>
+    </PressablesConfig>
+  );
+}
+```
+
+**Available props:** `rippleColor`, `rippleRadius`, `touchSoundDisabled`, `hitSlop`, accessibility props, and more.
+
 ### Global Handlers
 
 Add global handlers like haptic feedback:
@@ -279,6 +305,7 @@ Global configuration provider.
 - `animationType`: 'timing' | 'spring' - Default: 'timing'
 - `animationConfig`: Timing/spring config object
 - `config`: { activeOpacity, minScale, baseScale }
+- `defaultProps`: Default props applied to all pressables (e.g., `rippleColor`, `hitSlop`)
 - `globalHandlers`: { onPress, onPressIn, onPressOut }
 - `metadata`: Custom theme/config (type-safe)
 - `activateOnHover`: boolean - Web only

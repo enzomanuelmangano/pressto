@@ -5,7 +5,12 @@ import {
   type WithTimingConfig,
 } from 'react-native-reanimated';
 
-import { DefaultAnimationConfigs, DefaultPressableConfig, type PressableConfig } from './constants';
+import {
+  DefaultAnimationConfigs,
+  DefaultPressableConfig,
+  type DefaultPressableProps,
+  type PressableConfig,
+} from './constants';
 import {
   PressablesContext,
   PressablesGroupContext,
@@ -35,6 +40,17 @@ export type PressablesConfigProps<
    * Pressable configuration values (opacity, scale, etc.)
    */
   config?: Partial<PressableConfig>;
+  /**
+   * Default props applied to all pressables.
+   * Individual pressable props will override these values.
+   *
+   * @example
+   * // Disable ripple effect globally on Android
+   * <PressablesConfig defaultProps={{ rippleColor: 'transparent' }}>
+   *   ...
+   * </PressablesConfig>
+   */
+  defaultProps?: DefaultPressableProps;
 };
 
 export const PressablesGroup = ({ children }: PropsWithChildren) => {
@@ -61,6 +77,7 @@ export const PressablesConfig = <T extends AnimationType, TMetadata = unknown>({
   metadata,
   activateOnHover,
   config,
+  defaultProps,
 }: PressablesConfigProps<T, TMetadata>) => {
   const value = useMemo(() => {
     return {
@@ -70,8 +87,9 @@ export const PressablesConfig = <T extends AnimationType, TMetadata = unknown>({
       metadata,
       activateOnHover,
       config: { ...DefaultPressableConfig, ...config },
+      defaultProps,
     };
-  }, [animationType, animationConfig, globalHandlers, metadata, activateOnHover, config]);
+  }, [animationType, animationConfig, globalHandlers, metadata, activateOnHover, config, defaultProps]);
 
   return (
     <PressablesContext.Provider value={value}>
@@ -81,4 +99,4 @@ export const PressablesConfig = <T extends AnimationType, TMetadata = unknown>({
 };
 
 export * from './hooks';
-export type { PressableConfig } from './constants';
+export type { DefaultPressableProps, PressableConfig } from './constants';
