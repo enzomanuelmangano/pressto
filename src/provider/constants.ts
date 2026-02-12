@@ -1,4 +1,35 @@
+import type { ComponentProps } from 'react';
+import type { BaseButton } from 'react-native-gesture-handler';
 import { Easing } from 'react-native-reanimated';
+
+/**
+ * Props that can be set globally via PressablesConfig and applied to all pressables.
+ * These are "passthrough" props that don't conflict with internally managed props
+ * like style, enabled, animation settings, or event handlers.
+ */
+export type DefaultPressableProps = Partial<
+  Pick<
+    ComponentProps<typeof BaseButton>,
+    | 'hitSlop'
+    | 'testID'
+    | 'userSelect'
+    | 'activeCursor'
+    | 'shouldCancelWhenOutside'
+    | 'cancelsTouchesInView'
+    | 'enableContextMenu'
+    | 'rippleColor'
+    | 'rippleRadius'
+    | 'touchSoundDisabled'
+    | 'waitFor'
+    | 'simultaneousHandlers'
+    | 'accessibilityHint'
+    | 'accessibilityLabel'
+    | 'accessibilityRole'
+    | 'accessibilityState'
+    | 'accessibilityValue'
+    | 'accessibilityActions'
+  >
+>;
 
 /**
  * Configuration values for pressable visual feedback

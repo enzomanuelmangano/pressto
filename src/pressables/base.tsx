@@ -138,6 +138,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       metadata,
       activateOnHover: activateOnHoverProvider,
       config,
+      defaultProps,
     } = usePressablesConfig();
 
     const lastTouchedPressable = useLastTouchedPressable();
@@ -317,9 +318,15 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       return children;
     }, [children, childrenCallbackParams]);
 
+    // Merge defaultProps from context with component props (component props take precedence)
+    const mergedProps = useMemo(
+      () => ({ ...defaultProps, ...rest }),
+      [defaultProps, rest]
+    );
+
     return (
       <AnimatedBaseButton
-        {...rest}
+        {...mergedProps}
         {...(hoverProps as any)}
         style={[rest?.style ?? {}, rAnimatedStyle, cursorStyle]}
         enabled={enabled}
