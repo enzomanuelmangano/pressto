@@ -71,7 +71,13 @@ export type BasePressableProps<TMetadata = unknown> = {
     progress: number,
     options: AnimatedPressableStyleOptions<TMetadata>
   ) => ViewStyle;
+  /**
+   * Whether the pressable is interactive.
+   * @deprecated Use `disabled` instead.
+   */
   enabled?: boolean;
+  /** Disables the pressable. Takes precedence over `enabled`. */
+  disabled?: boolean;
   initialToggled?: boolean;
   /**
    * Activates the pressable animation on hover (web only)
@@ -127,6 +133,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     animationType: animationTypeProp,
     animationConfig: animationConfigProp,
     enabled = true,
+    disabled,
     initialToggled = false,
     activateOnHover: activateOnHoverProp,
     ...rest
@@ -140,6 +147,8 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       config,
       defaultProps,
     } = usePressablesConfig();
+
+    const isEnabled = disabled !== undefined ? !disabled : enabled;
 
     const lastTouchedPressable = useLastTouchedPressable();
     const pressableId = useId();
@@ -255,10 +264,10 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
 
     // Hover handlers for web
     const onMouseEnter = useCallback(() => {
-      if (shouldEnableHover && enabled) {
+      if (shouldEnableHover && isEnabled) {
         active.set(true);
       }
-    }, [shouldEnableHover, enabled, active]);
+    }, [shouldEnableHover, isEnabled, active]);
 
     const onMouseLeave = useCallback(() => {
       if (shouldEnableHover) {
@@ -329,7 +338,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
         {...mergedProps}
         {...(hoverProps as any)}
         style={[rest?.style ?? {}, rAnimatedStyle, cursorStyle]}
-        enabled={enabled}
+        enabled={isEnabled}
         onPress={onPressWrapper}
         onBegan={onPressInWrapper}
         onActivated={onPressInWrapper}
