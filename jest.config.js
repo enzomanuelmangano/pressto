@@ -9,7 +9,12 @@ module.exports = {
   ],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   testMatch: ['**/__tests__/**/*.test.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
-  testPathIgnorePatterns: ['/node_modules/', '/__tests__/__mocks__/'],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/__tests__/__mocks__/',
+    '/__tests__/setup.ts',
+  ],
+  setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
   moduleNameMapper: {
     '^react-native$': '<rootDir>/src/__tests__/__mocks__/react-native.ts',
     '^react-native-reanimated$':
