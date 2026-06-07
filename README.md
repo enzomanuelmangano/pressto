@@ -168,6 +168,26 @@ function App() {
 }
 ```
 
+Opt a single pressable out of the global handlers with `skipGlobalHandlers` — its own `onPress`/`onPressIn`/`onPressOut` still fire:
+
+```jsx
+{/* No global haptics for this one button */}
+<PressableScale skipGlobalHandlers onPress={() => {}} />
+```
+
+Identify which pressable fired inside a global handler with per-component `metadata`. It is passed to the handler options (and overrides the `metadata` set on `PressablesConfig`):
+
+```jsx
+<PressablesConfig
+  globalHandlers={{
+    onPress: ({ metadata }) => track('tap', metadata?.name),
+  }}
+>
+  <PressableScale metadata={{ name: 'checkout' }} />
+  <PressableScale metadata={{ name: 'cancel' }} />
+</PressablesConfig>
+```
+
 ---
 
 ## Advanced Features

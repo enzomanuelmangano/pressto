@@ -83,6 +83,18 @@ export type BasePressableProps<TMetadata = unknown> = {
    * Detox). Defaults to `testID` when omitted.
    */
   accessibilityIdentifier?: string;
+  /**
+   * Per-component metadata, surfaced to `animatedStyle` and to the press
+   * handler options (including globalHandlers). Overrides the metadata set on
+   * PressablesConfig. Use it to identify a pressable inside a global handler
+   * (e.g. analytics name) or carry flags it should react to.
+   */
+  metadata?: TMetadata;
+  /**
+   * Opt this pressable out of the globalHandlers defined on PressablesConfig.
+   * The component's own onPress/onPressIn/onPressOut still fire.
+   */
+  skipGlobalHandlers?: boolean;
   initialToggled?: boolean;
   /**
    * Activates the pressable animation on hover (web only)
@@ -122,9 +134,9 @@ export type BasePressableProps<TMetadata = unknown> = {
       | 'accessibilityActions'
     >
   > & {
-    onPress?: (options: AnimatedPressableOptions) => void;
-    onPressIn?: (options: AnimatedPressableOptions) => void;
-    onPressOut?: (options: AnimatedPressableOptions) => void;
+    onPress?: (options: AnimatedPressableOptions<TMetadata>) => void;
+    onPressIn?: (options: AnimatedPressableOptions<TMetadata>) => void;
+    onPressOut?: (options: AnimatedPressableOptions<TMetadata>) => void;
   };
 
 const cursorStyle = Platform.OS === 'web' ? { cursor: 'pointer' as const } : {};
@@ -141,6 +153,8 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     enabled = true,
     disabled,
     accessibilityIdentifier: accessibilityIdentifierProp,
+    metadata: metadataProp,
+    skipGlobalHandlers = false,
     initialToggled = false,
     activateOnHover: activateOnHoverProp,
     ...rest
@@ -149,7 +163,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       animationType: animationTypeProvider,
       animationConfig: animationConfigProvider,
       globalHandlers,
-      metadata,
+      metadata: metadataProvider,
       activateOnHover: activateOnHoverProvider,
       config,
       defaultProps,
@@ -157,14 +171,19 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
 
     const isEnabled = disabled !== undefined ? !disabled : enabled;
 
+    // Per-component metadata overrides the PressablesConfig metadata.
+    const metadata = metadataProp ?? metadataProvider;
+
     const lastTouchedPressable = useLastTouchedPressable();
     const pressableId = useId();
 
+    // skipGlobalHandlers opts this pressable out of the provider handlers,
+    // while its own onPress/onPressIn/onPressOut still fire.
     const {
       onPressIn: onPressInProvider,
       onPressOut: onPressOutProvider,
       onPress: onPressProvider,
-    } = globalHandlers ?? {};
+    } = skipGlobalHandlers ? {} : (globalHandlers ?? {});
 
     const active = useSharedValue(false);
     const isToggled = useSharedValue(initialToggled);
@@ -214,6 +233,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
         isPressed: active.get(),
         isToggled: isToggled.get(),
         isSelected: lastTouchedPressable.get() === pressableId,
+        metadata,
       };
       onPressInProvider?.(options);
       onPressIn?.(options);
@@ -224,6 +244,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       isToggled,
       lastTouchedPressable,
       pressableId,
+      metadata,
     ]);
 
     const onPressWrapper = useCallback(() => {
@@ -234,6 +255,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
         isPressed: active.get(),
         isToggled: isToggled.get(),
         isSelected: lastTouchedPressable.get() === pressableId,
+        metadata,
       };
       onPressProvider?.(options);
       onPress?.(options);
@@ -244,6 +266,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       isToggled,
       lastTouchedPressable,
       pressableId,
+      metadata,
     ]);
 
     const onPressOutWrapper = useCallback(() => {
@@ -252,6 +275,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
         isPressed: active.get(),
         isToggled: isToggled.get(),
         isSelected: lastTouchedPressable.get() === pressableId,
+        metadata,
       };
       onPressOutProvider?.(options);
       onPressOut?.(options);
@@ -262,6 +286,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       isToggled,
       lastTouchedPressable,
       pressableId,
+      metadata,
     ]);
 
     // Determine if hover should be enabled (web only)

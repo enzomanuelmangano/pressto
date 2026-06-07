@@ -14,10 +14,16 @@ import {
 
 export type AnimationType = 'timing' | 'spring';
 
-export type AnimatedPressableOptions = {
+export type AnimatedPressableOptions<TMetadata = unknown> = {
   isPressed: boolean;
   isToggled: boolean;
   isSelected: boolean;
+  /**
+   * Per-component metadata (falls back to the PressablesConfig metadata).
+   * Useful inside globalHandlers to identify which pressable fired.
+   * Optional: a pressable may not set it, so handlers should null-check.
+   */
+  metadata?: TMetadata;
 };
 
 export type PressableContextType<
@@ -27,9 +33,9 @@ export type PressableContextType<
   animationType: T;
   animationConfig: T extends 'timing' ? WithTimingConfig : WithSpringConfig;
   globalHandlers?: {
-    onPressIn?: (options: AnimatedPressableOptions) => void;
-    onPressOut?: (options: AnimatedPressableOptions) => void;
-    onPress?: (options: AnimatedPressableOptions) => void;
+    onPressIn?: (options: AnimatedPressableOptions<TMetadata>) => void;
+    onPressOut?: (options: AnimatedPressableOptions<TMetadata>) => void;
+    onPress?: (options: AnimatedPressableOptions<TMetadata>) => void;
   };
   metadata?: TMetadata;
   /**
