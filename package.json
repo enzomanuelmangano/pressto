@@ -73,6 +73,7 @@
     "@types/jest": "^29.5.5",
     "@types/minimatch": "^6.0.0",
     "@types/react": "^18.2.44",
+    "@types/react-test-renderer": "^19.1.0",
     "@typescript-eslint/eslint-plugin": "^8.46.0",
     "@typescript-eslint/parser": "^8.46.0",
     "commitlint": "^17.0.2",
@@ -95,7 +96,7 @@
     "react-native-gesture-handler": "~2.28.0",
     "react-native-reanimated": "~4.1.1",
     "react-native-worklets": "0.5.1",
-    "react-test-renderer": "^19.2.0",
+    "react-test-renderer": "19.1.0",
     "release-it": "^15.0.0",
     "typescript": "^5.2.2"
   },
