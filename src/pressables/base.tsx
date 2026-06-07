@@ -78,6 +78,11 @@ export type BasePressableProps<TMetadata = unknown> = {
   enabled?: boolean;
   /** Disables the pressable. Takes precedence over `enabled`. */
   disabled?: boolean;
+  /**
+   * Native accessibility identifier used by e2e runners (Maestro, XCUITest,
+   * Detox). Defaults to `testID` when omitted.
+   */
+  accessibilityIdentifier?: string;
   initialToggled?: boolean;
   /**
    * Activates the pressable animation on hover (web only)
@@ -98,6 +103,7 @@ export type BasePressableProps<TMetadata = unknown> = {
       | 'style'
       | 'hitSlop'
       | 'testID'
+      | 'accessible'
       | 'userSelect'
       | 'activeCursor'
       | 'shouldCancelWhenOutside'
@@ -134,6 +140,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     animationConfig: animationConfigProp,
     enabled = true,
     disabled,
+    accessibilityIdentifier: accessibilityIdentifierProp,
     initialToggled = false,
     activateOnHover: activateOnHoverProp,
     ...rest
@@ -333,9 +340,20 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       [defaultProps, rest]
     );
 
+    // Mirror RN convention (Pressable / TouchableOpacity): testID becomes the
+    // native accessibilityIdentifier on iOS, and tappable controls are
+    // accessibility elements by default. RNGH's BaseButton accepts testID but
+    // does NOT propagate it, so e2e runners (Maestro, XCUITest, Detox) can't
+    // locate pressto buttons by id without this. Both stay overridable.
+    const accessibilityIdentifier =
+      accessibilityIdentifierProp ?? mergedProps.testID;
+    const accessible = mergedProps.accessible ?? true;
+
     return (
       <AnimatedBaseButton
         {...mergedProps}
+        {...({ accessibilityIdentifier } as any)}
+        accessible={accessible}
         {...(hoverProps as any)}
         style={[rest?.style ?? {}, rAnimatedStyle, cursorStyle]}
         enabled={isEnabled}
