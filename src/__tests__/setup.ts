@@ -1,11 +1,13 @@
-// Tells React's act() it is running inside a test environment, silencing
-// "not wrapped in act(...)" warnings from react-test-renderer.
+// Marks this as a React act() environment, silencing "not wrapped in act(...)".
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
-// react-test-renderer logs a deprecation notice once per create() call under
-// React 19. It is the supported renderer for this lightweight (no-RN-preset)
-// setup, so filter just that message to keep CI logs readable. Any other
-// console.error still surfaces.
+// React 19 deprecated `react-test-renderer`, which logs a notice on every
+// render. This is NOT our usage to fix: @testing-library/react-native (the
+// supported RN testing tool) still depends on and renders through
+// react-test-renderer internally (see its act.js / render-act.js), so the
+// notice fires regardless of which API we call. Until RNTL migrates off it
+// there is no way to remove the warning — so we filter only this one exact
+// message to keep CI logs readable. Every other console.error still surfaces.
 const originalConsoleError = console.error;
 jest.spyOn(console, 'error').mockImplementation((...args: unknown[]) => {
   if (
@@ -16,3 +18,4 @@ jest.spyOn(console, 'error').mockImplementation((...args: unknown[]) => {
   }
   originalConsoleError(...args);
 });
+export {};

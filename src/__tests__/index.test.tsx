@@ -1,6 +1,4 @@
-import React from 'react';
-import { act, create } from 'react-test-renderer';
-import type ReactTestRenderer from 'react-test-renderer';
+import { render, screen, fireEvent } from '@testing-library/react-native';
 
 import {
   createAnimatedPressable,
@@ -10,22 +8,14 @@ import {
   PressableWithoutFeedback,
 } from '../index';
 
-function renderComponent(element: React.ReactElement) {
-  let instance!: ReactTestRenderer.ReactTestRenderer;
-  act(() => {
-    instance = create(element);
-  });
-  return instance;
-}
-
 describe('exports', () => {
   it.each([
     ['PressableScale', PressableScale],
     ['PressableOpacity', PressableOpacity],
     ['PressableWithoutFeedback', PressableWithoutFeedback],
   ])('%s renders without crashing', (_name, Component) => {
-    const instance = renderComponent(<Component />);
-    expect(instance.toJSON()).toBeTruthy();
+    render(<Component testID="p" />);
+    expect(screen.getByTestId('p')).toBeTruthy();
   });
 
   it('createAnimatedPressable creates a working component', () => {
@@ -33,26 +23,25 @@ describe('exports', () => {
       'worklet';
       return { opacity: progress };
     });
-    const instance = renderComponent(<CustomPressable />);
-    expect(instance.toJSON()).toBeTruthy();
+    render(<CustomPressable testID="custom" />);
+    expect(screen.getByTestId('custom')).toBeTruthy();
   });
 
   it('PressablesConfig renders children', () => {
-    const instance = renderComponent(
+    render(
       <PressablesConfig>
         <PressableScale testID="inner" />
       </PressablesConfig>
     );
-    expect(instance.root.findByProps({ testID: 'inner' })).toBeTruthy();
+    expect(screen.getByTestId('inner')).toBeTruthy();
   });
 });
 
 describe('press callbacks', () => {
   it('onPress receives options with isPressed/isToggled/isSelected', () => {
     const onPress = jest.fn();
-    const instance = renderComponent(<PressableScale onPress={onPress} />);
-    const button = instance.root.findByType('button' as any);
-    act(() => button.props.onClick?.());
+    render(<PressableScale testID="p" onPress={onPress} />);
+    fireEvent.press(screen.getByTestId('p'));
     expect(onPress).toHaveBeenCalledWith(
       expect.objectContaining({
         isPressed: expect.any(Boolean),
@@ -64,15 +53,13 @@ describe('press callbacks', () => {
 
   it('toggles isToggled on each press', () => {
     const onPress = jest.fn();
-    const instance = renderComponent(
-      <PressableScale initialToggled={false} onPress={onPress} />
-    );
-    const button = instance.root.findByType('button' as any);
-    act(() => button.props.onClick?.());
+    render(<PressableScale testID="p" initialToggled={false} onPress={onPress} />);
+    const button = screen.getByTestId('p');
+    fireEvent.press(button);
     expect(onPress).toHaveBeenLastCalledWith(
       expect.objectContaining({ isToggled: true })
     );
-    act(() => button.props.onClick?.());
+    fireEvent.press(button);
     expect(onPress).toHaveBeenLastCalledWith(
       expect.objectContaining({ isToggled: false })
     );
@@ -81,13 +68,12 @@ describe('press callbacks', () => {
   it('global handlers from PressablesConfig fire alongside component handlers', () => {
     const globalOnPress = jest.fn();
     const onPress = jest.fn();
-    const instance = renderComponent(
+    render(
       <PressablesConfig globalHandlers={{ onPress: globalOnPress }}>
-        <PressableScale onPress={onPress} />
+        <PressableScale testID="p" onPress={onPress} />
       </PressablesConfig>
     );
-    const button = instance.root.findByType('button' as any);
-    act(() => button.props.onClick?.());
+    fireEvent.press(screen.getByTestId('p'));
     expect(globalOnPress).toHaveBeenCalledTimes(1);
     expect(onPress).toHaveBeenCalledTimes(1);
   });

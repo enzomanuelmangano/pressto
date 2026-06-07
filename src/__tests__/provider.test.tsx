@@ -1,6 +1,4 @@
-import React from 'react';
-import { act, create } from 'react-test-renderer';
-import type ReactTestRenderer from 'react-test-renderer';
+import { render } from '@testing-library/react-native';
 
 import { PressablesConfig } from '../provider';
 import {
@@ -8,14 +6,6 @@ import {
   useLastTouchedPressable,
 } from '../provider/hooks';
 import { DefaultPressableConfig } from '../provider/constants';
-
-function renderComponent(element: React.ReactElement) {
-  let instance!: ReactTestRenderer.ReactTestRenderer;
-  act(() => {
-    instance = create(element);
-  });
-  return instance;
-}
 
 // Probe component that exposes a hook's return value via a captured ref
 function makeProbe<T>(useHook: () => T) {
@@ -30,7 +20,7 @@ function makeProbe<T>(useHook: () => T) {
 describe('usePressablesConfig', () => {
   it('returns sensible defaults with no provider', () => {
     const { Probe, captured } = makeProbe(usePressablesConfig);
-    renderComponent(<Probe />);
+    render(<Probe />);
     expect(captured.current).toMatchObject({
       animationType: 'timing',
       config: DefaultPressableConfig,
@@ -39,7 +29,7 @@ describe('usePressablesConfig', () => {
 
   it('reflects provider animationType', () => {
     const { Probe, captured } = makeProbe(usePressablesConfig);
-    renderComponent(
+    render(
       <PressablesConfig animationType="spring">
         <Probe />
       </PressablesConfig>
@@ -49,7 +39,7 @@ describe('usePressablesConfig', () => {
 
   it('merges partial config with defaults', () => {
     const { Probe, captured } = makeProbe(usePressablesConfig);
-    renderComponent(
+    render(
       <PressablesConfig config={{ activeOpacity: 0.1 }}>
         <Probe />
       </PressablesConfig>
@@ -64,7 +54,7 @@ describe('usePressablesConfig', () => {
 describe('useLastTouchedPressable', () => {
   it('returns a shared value with a null initial value', () => {
     const { Probe, captured } = makeProbe(useLastTouchedPressable);
-    renderComponent(
+    render(
       <PressablesConfig>
         <Probe />
       </PressablesConfig>

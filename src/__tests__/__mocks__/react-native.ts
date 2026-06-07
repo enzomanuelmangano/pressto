@@ -7,4 +7,22 @@ export const Platform = {
   select: (obj: any) => obj.ios ?? obj.default,
 };
 
-export default { View, Text, Platform };
+const flatten = (style: any): any => {
+  if (!style) return undefined;
+  if (Array.isArray(style)) {
+    return style.reduce(
+      (acc: any, s: any) => Object.assign(acc, flatten(s) ?? {}),
+      {}
+    );
+  }
+  return style;
+};
+
+export const StyleSheet = {
+  flatten,
+  create: (styles: any) => styles,
+  absoluteFill: {},
+  hairlineWidth: 1,
+};
+
+export default { View, Text, Platform, StyleSheet };
