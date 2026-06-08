@@ -24,6 +24,13 @@ export type AnimatedPressableStyleOptions<TMetadata = unknown> = {
   isPressed: boolean;
   isToggled: boolean;
   isSelected: boolean;
+  /**
+   * Required here (unlike the optional `metadata` in the press-handler
+   * options): the themed `animatedStyle` pattern assumes you set `metadata` on
+   * PressablesConfig, and typing it optional would force `?.` into every
+   * existing worklet. Handlers, by contrast, may run on a pressable that never
+   * set metadata, so there it is optional.
+   */
   metadata: TMetadata;
   config: PressableConfig;
   /**
@@ -227,67 +234,49 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       return lastTouchedPressable.get() === pressableId;
     }, [lastTouchedPressable, pressableId]);
 
-    const onPressInWrapper = useCallback(() => {
-      active.set(true);
-      const options: AnimatedPressableOptions = {
+    // Snapshot the current interaction state into the options object passed to
+    // every handler. Reads live shared values, so callers mutate state first
+    // (active/isToggled/lastTouchedPressable) and then build.
+    const buildOptions = useCallback(
+      (): AnimatedPressableOptions => ({
         isPressed: active.get(),
         isToggled: isToggled.get(),
         isSelected: lastTouchedPressable.get() === pressableId,
         metadata,
-      };
+      }),
+      [active, isToggled, lastTouchedPressable, pressableId, metadata]
+    );
+
+    const onPressInWrapper = useCallback(() => {
+      active.set(true);
+      const options = buildOptions();
       onPressInProvider?.(options);
       onPressIn?.(options);
-    }, [
-      active,
-      onPressIn,
-      onPressInProvider,
-      isToggled,
-      lastTouchedPressable,
-      pressableId,
-      metadata,
-    ]);
+    }, [active, buildOptions, onPressIn, onPressInProvider]);
 
     const onPressWrapper = useCallback(() => {
       active.set(false);
       isToggled.set(!isToggled.get());
       lastTouchedPressable.set(pressableId);
-      const options: AnimatedPressableOptions = {
-        isPressed: active.get(),
-        isToggled: isToggled.get(),
-        isSelected: lastTouchedPressable.get() === pressableId,
-        metadata,
-      };
+      const options = buildOptions();
       onPressProvider?.(options);
       onPress?.(options);
     }, [
       active,
-      onPress,
-      onPressProvider,
       isToggled,
       lastTouchedPressable,
       pressableId,
-      metadata,
+      buildOptions,
+      onPress,
+      onPressProvider,
     ]);
 
     const onPressOutWrapper = useCallback(() => {
       active.set(false);
-      const options: AnimatedPressableOptions = {
-        isPressed: active.get(),
-        isToggled: isToggled.get(),
-        isSelected: lastTouchedPressable.get() === pressableId,
-        metadata,
-      };
+      const options = buildOptions();
       onPressOutProvider?.(options);
       onPressOut?.(options);
-    }, [
-      active,
-      onPressOut,
-      onPressOutProvider,
-      isToggled,
-      lastTouchedPressable,
-      pressableId,
-      metadata,
-    ]);
+    }, [active, buildOptions, onPressOut, onPressOutProvider]);
 
     // Determine if hover should be enabled (web only)
     const shouldEnableHover =
