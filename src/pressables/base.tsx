@@ -92,9 +92,12 @@ export type BasePressableProps<TMetadata = unknown> = {
   accessibilityIdentifier?: string;
   /**
    * Per-component metadata, surfaced to `animatedStyle` and to the press
-   * handler options (including globalHandlers). Overrides the metadata set on
-   * PressablesConfig. Use it to identify a pressable inside a global handler
-   * (e.g. analytics name) or carry flags it should react to.
+   * handler options (including globalHandlers). Use it to identify a pressable
+   * inside a global handler (e.g. analytics name) or carry flags it reacts to.
+   *
+   * REPLACES (does not merge with) the `metadata` set on PressablesConfig.
+   * To combine both, spread them yourself:
+   * `metadata={{ ...theme, name: 'checkout' }}`.
    */
   metadata?: TMetadata;
   /**

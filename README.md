@@ -175,7 +175,7 @@ Opt a single pressable out of the global handlers with `skipGlobalHandlers` — 
 <PressableScale skipGlobalHandlers onPress={() => {}} />
 ```
 
-Identify which pressable fired inside a global handler with per-component `metadata`. It is passed to the handler options (and overrides the `metadata` set on `PressablesConfig`):
+Identify which pressable fired inside a global handler with per-component `metadata`. It is passed to the handler options. A component's `metadata` **replaces** (does not merge with) the `metadata` set on `PressablesConfig` — spread them yourself to combine: `metadata={{ ...theme, name: 'checkout' }}`.
 
 ```jsx
 <PressablesConfig
@@ -322,7 +322,7 @@ Every pressable (`PressableScale`, `PressableOpacity`, custom ones from `createA
 
 - `onPress` / `onPressIn` / `onPressOut`: `(options) => void` — `options` is `{ isPressed, isToggled, isSelected, metadata }`
 - `disabled`: boolean - Disables interaction (replaces the deprecated `enabled`)
-- `metadata`: TMetadata - Per-component metadata; passed to the handlers (incl. `globalHandlers`) and overrides the `PressablesConfig` metadata
+- `metadata`: TMetadata - Per-component metadata; passed to the handlers (incl. `globalHandlers`). Replaces (does not merge with) the `PressablesConfig` metadata
 - `skipGlobalHandlers`: boolean - Opt out of `PressablesConfig` `globalHandlers` (own handlers still fire)
 - `accessibilityIdentifier`: string - Native id for e2e runners; defaults to `testID`
 - `initialToggled`: boolean - Initial toggle state
