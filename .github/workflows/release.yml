@@ -1,0 +1,96 @@
+# Publish pressto to npm on a version tag.
+#
+# Triggers:
+#   - push: tags 'v*' (release: build + publish to npm)
+#
+# Auth: publish uses npm OIDC Trusted Publishing — NO long-lived
+# NPM_TOKEN. GitHub mints a short-lived signed identity token (the
+# `id-token: write` permission); npm verifies GitHub's signature and
+# matches it against the trusted-publisher config registered for
+# pressto (repo + this workflow file). Provenance is generated
+# automatically from the same identity.
+#
+# One-time npmjs.com setup (until done, publish 403s):
+#   pressto -> Settings -> Trusted Publisher -> add a GitHub Actions
+#   publisher:
+#     repository:  enzomanuelmangano/pressto
+#     workflow:    release.yml
+#     environment: release
+#
+# One-time GitHub setup: Settings -> Environments -> create `release`
+# and add yourself as a required reviewer. A pushed tag then waits for
+# manual approval before it can publish — a tag alone never ships
+# unattended.
+#
+# Cut a release (local version bump + changelog via release-it, publish
+# in CI):
+#   1. stable:  bun run release
+#      beta:    bun run release -- --preRelease=beta
+#      (release-it bumps "version", writes the changelog, commits
+#       `chore: release <version>`, tags `v<version>`, and pushes. It
+#       does NOT publish to npm — `npm.publish` is false; CI does.)
+#   2. approve the `release` environment in the Actions run.
+# Prerelease versions (contain a hyphen, e.g. 0.7.0-beta.1) publish to
+# the `beta` dist-tag; plain versions publish to `latest`.
+#
+# Every third-party action is pinned to a full commit SHA so a hijacked
+# tag can't inject code into the job that holds the OIDC grant.
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    name: Publish to npm (OIDC trusted publishing)
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    # `release` is a protected GitHub Environment: it requires a manual
+    # approval (reviewer) before this job runs, so a pushed tag alone
+    # never publishes unattended. Reviewers are configured in repo
+    # Settings -> Environments -> release.
+    environment: release
+    # `id-token: write` lets the runner request the OIDC identity token
+    # npm verifies. `contents: read` is all the checkout needs. No token
+    # secret is referenced anywhere in this job.
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: oven-sh/setup-bun@735343b667d3e6f658f44d0eca948eb6282f2b76 # v2.0.2
+        with:
+          bun-version: 1.2.19
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # Build the publishable output (lib/) with react-native-builder-bob.
+      - name: Build
+        run: bunx bob build
+
+      - name: npm publish (OIDC + provenance)
+        run: |
+          # OIDC Trusted Publishing requires npm >= 11.5.0. The Node 22
+          # toolchain ships an older npm, so upgrade in-job. No
+          # NODE_AUTH_TOKEN: `npm publish` performs the OIDC handshake
+          # itself when a trusted publisher is configured for this
+          # package, and emits provenance from the same identity.
+          npm install -g npm@latest
+          npm --version
+          # Route prerelease versions (0.7.0-beta.1, -rc.1, …) to the
+          # `beta` dist-tag so they never clobber `latest`. Plain
+          # versions go to `latest`. npm does NOT auto-route prereleases.
+          VERSION="$(node -p "require('./package.json').version")"
+          case "$VERSION" in
+            *-*) DIST_TAG=beta ;;
+            *)   DIST_TAG=latest ;;
+          esac
+          echo "Publishing $VERSION to dist-tag: $DIST_TAG"
+          npm publish --provenance --access public --tag "$DIST_TAG"
