@@ -39,6 +39,13 @@ export default function Page() {
       >
         <Text style={styles.buttonText}>Theme Metadata</Text>
       </PressableHighlight>
+
+      <PressableHighlight
+        onPress={() => router.navigate('/global-handlers-example')}
+        style={styles.button}
+      >
+        <Text style={styles.buttonText}>Global Handlers + Metadata</Text>
+      </PressableHighlight>
       {Platform.OS === 'web' && (
         <PressableHighlight
           onPress={() => console.log("won't activate on hover")}
