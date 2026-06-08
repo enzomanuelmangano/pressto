@@ -168,6 +168,26 @@ function App() {
 }
 ```
 
+Opt a single pressable out of the global handlers with `skipGlobalHandlers` — its own `onPress`/`onPressIn`/`onPressOut` still fire:
+
+```jsx
+{/* No global haptics for this one button */}
+<PressableScale skipGlobalHandlers onPress={() => {}} />
+```
+
+Identify which pressable fired inside a global handler with per-component `metadata`. It is passed to the handler options. A component's `metadata` **replaces** (does not merge with) the `metadata` set on `PressablesConfig` — spread them yourself to combine: `metadata={{ ...theme, name: 'checkout' }}`.
+
+```jsx
+<PressablesConfig
+  globalHandlers={{
+    onPress: ({ metadata }) => track('tap', metadata?.name),
+  }}
+>
+  <PressableScale metadata={{ name: 'checkout' }} />
+  <PressableScale metadata={{ name: 'cancel' }} />
+</PressablesConfig>
+```
+
 ---
 
 ## Advanced Features
@@ -293,8 +313,20 @@ Creates a custom animated pressable.
   - `options.isPressed`: boolean - Currently being pressed
   - `options.isToggled`: boolean - Toggle state (persistent)
   - `options.isSelected`: boolean - Selected in group
-  - `options.metadata`: TMetadata - Custom theme data
+  - `options.metadata`: TMetadata - Per-component metadata (falls back to PressablesConfig)
   - `options.config`: PressableConfig - Default values (minScale, activeOpacity, baseScale)
+
+### Per-pressable props
+
+Every pressable (`PressableScale`, `PressableOpacity`, custom ones from `createAnimatedPressable`) accepts:
+
+- `onPress` / `onPressIn` / `onPressOut`: `(options) => void` — `options` is `{ isPressed, isToggled, isSelected, metadata }`
+- `disabled`: boolean - Disables interaction (replaces the deprecated `enabled`)
+- `metadata`: TMetadata - Per-component metadata; passed to the handlers (incl. `globalHandlers`). Replaces (does not merge with) the `PressablesConfig` metadata
+- `skipGlobalHandlers`: boolean - Opt out of `PressablesConfig` `globalHandlers` (own handlers still fire)
+- `accessibilityIdentifier`: string - Native id for e2e runners; defaults to `testID`
+- `initialToggled`: boolean - Initial toggle state
+- `activateOnHover`: boolean - Web only
 
 ### `PressablesConfig`
 
@@ -306,8 +338,8 @@ Global configuration provider.
 - `animationConfig`: Timing/spring config object
 - `config`: { activeOpacity, minScale, baseScale }
 - `defaultProps`: Default props applied to all pressables (e.g., `rippleColor`, `hitSlop`)
-- `globalHandlers`: { onPress, onPressIn, onPressOut }
-- `metadata`: Custom theme/config (type-safe)
+- `globalHandlers`: { onPress, onPressIn, onPressOut } - Receive each pressable's `metadata`; opt a pressable out with `skipGlobalHandlers`
+- `metadata`: Default metadata for all pressables (type-safe); overridable per component
 - `activateOnHover`: boolean - Web only
 
 ### `PressableConfig`

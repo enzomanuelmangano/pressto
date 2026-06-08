@@ -24,6 +24,13 @@ export type AnimatedPressableStyleOptions<TMetadata = unknown> = {
   isPressed: boolean;
   isToggled: boolean;
   isSelected: boolean;
+  /**
+   * Required here (unlike the optional `metadata` in the press-handler
+   * options): the themed `animatedStyle` pattern assumes you set `metadata` on
+   * PressablesConfig, and typing it optional would force `?.` into every
+   * existing worklet. Handlers, by contrast, may run on a pressable that never
+   * set metadata, so there it is optional.
+   */
   metadata: TMetadata;
   config: PressableConfig;
   /**
@@ -83,6 +90,21 @@ export type BasePressableProps<TMetadata = unknown> = {
    * Detox). Defaults to `testID` when omitted.
    */
   accessibilityIdentifier?: string;
+  /**
+   * Per-component metadata, surfaced to `animatedStyle` and to the press
+   * handler options (including globalHandlers). Use it to identify a pressable
+   * inside a global handler (e.g. analytics name) or carry flags it reacts to.
+   *
+   * REPLACES (does not merge with) the `metadata` set on PressablesConfig.
+   * To combine both, spread them yourself:
+   * `metadata={{ ...theme, name: 'checkout' }}`.
+   */
+  metadata?: TMetadata;
+  /**
+   * Opt this pressable out of the globalHandlers defined on PressablesConfig.
+   * The component's own onPress/onPressIn/onPressOut still fire.
+   */
+  skipGlobalHandlers?: boolean;
   initialToggled?: boolean;
   /**
    * Activates the pressable animation on hover (web only)
@@ -122,9 +144,9 @@ export type BasePressableProps<TMetadata = unknown> = {
       | 'accessibilityActions'
     >
   > & {
-    onPress?: (options: AnimatedPressableOptions) => void;
-    onPressIn?: (options: AnimatedPressableOptions) => void;
-    onPressOut?: (options: AnimatedPressableOptions) => void;
+    onPress?: (options: AnimatedPressableOptions<TMetadata>) => void;
+    onPressIn?: (options: AnimatedPressableOptions<TMetadata>) => void;
+    onPressOut?: (options: AnimatedPressableOptions<TMetadata>) => void;
   };
 
 const cursorStyle = Platform.OS === 'web' ? { cursor: 'pointer' as const } : {};
@@ -141,6 +163,8 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     enabled = true,
     disabled,
     accessibilityIdentifier: accessibilityIdentifierProp,
+    metadata: metadataProp,
+    skipGlobalHandlers = false,
     initialToggled = false,
     activateOnHover: activateOnHoverProp,
     ...rest
@@ -149,7 +173,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       animationType: animationTypeProvider,
       animationConfig: animationConfigProvider,
       globalHandlers,
-      metadata,
+      metadata: metadataProvider,
       activateOnHover: activateOnHoverProvider,
       config,
       defaultProps,
@@ -157,14 +181,19 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
 
     const isEnabled = disabled !== undefined ? !disabled : enabled;
 
+    // Per-component metadata overrides the PressablesConfig metadata.
+    const metadata = metadataProp ?? metadataProvider;
+
     const lastTouchedPressable = useLastTouchedPressable();
     const pressableId = useId();
 
+    // skipGlobalHandlers opts this pressable out of the provider handlers,
+    // while its own onPress/onPressIn/onPressOut still fire.
     const {
       onPressIn: onPressInProvider,
       onPressOut: onPressOutProvider,
       onPress: onPressProvider,
-    } = globalHandlers ?? {};
+    } = skipGlobalHandlers ? {} : (globalHandlers ?? {});
 
     const active = useSharedValue(false);
     const isToggled = useSharedValue(initialToggled);
@@ -208,61 +237,49 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       return lastTouchedPressable.get() === pressableId;
     }, [lastTouchedPressable, pressableId]);
 
-    const onPressInWrapper = useCallback(() => {
-      active.set(true);
-      const options: AnimatedPressableOptions = {
+    // Snapshot the current interaction state into the options object passed to
+    // every handler. Reads live shared values, so callers mutate state first
+    // (active/isToggled/lastTouchedPressable) and then build.
+    const buildOptions = useCallback(
+      (): AnimatedPressableOptions => ({
         isPressed: active.get(),
         isToggled: isToggled.get(),
         isSelected: lastTouchedPressable.get() === pressableId,
-      };
+        metadata,
+      }),
+      [active, isToggled, lastTouchedPressable, pressableId, metadata]
+    );
+
+    const onPressInWrapper = useCallback(() => {
+      active.set(true);
+      const options = buildOptions();
       onPressInProvider?.(options);
       onPressIn?.(options);
-    }, [
-      active,
-      onPressIn,
-      onPressInProvider,
-      isToggled,
-      lastTouchedPressable,
-      pressableId,
-    ]);
+    }, [active, buildOptions, onPressIn, onPressInProvider]);
 
     const onPressWrapper = useCallback(() => {
       active.set(false);
       isToggled.set(!isToggled.get());
       lastTouchedPressable.set(pressableId);
-      const options: AnimatedPressableOptions = {
-        isPressed: active.get(),
-        isToggled: isToggled.get(),
-        isSelected: lastTouchedPressable.get() === pressableId,
-      };
+      const options = buildOptions();
       onPressProvider?.(options);
       onPress?.(options);
     }, [
       active,
-      onPress,
-      onPressProvider,
       isToggled,
       lastTouchedPressable,
       pressableId,
+      buildOptions,
+      onPress,
+      onPressProvider,
     ]);
 
     const onPressOutWrapper = useCallback(() => {
       active.set(false);
-      const options: AnimatedPressableOptions = {
-        isPressed: active.get(),
-        isToggled: isToggled.get(),
-        isSelected: lastTouchedPressable.get() === pressableId,
-      };
+      const options = buildOptions();
       onPressOutProvider?.(options);
       onPressOut?.(options);
-    }, [
-      active,
-      onPressOut,
-      onPressOutProvider,
-      isToggled,
-      lastTouchedPressable,
-      pressableId,
-    ]);
+    }, [active, buildOptions, onPressOut, onPressOutProvider]);
 
     // Determine if hover should be enabled (web only)
     const shouldEnableHover =

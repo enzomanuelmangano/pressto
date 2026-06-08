@@ -15,7 +15,10 @@ export type {
   PressableChildrenCallbackParams,
 };
 
-export type CustomPressableProps = Omit<BasePressableProps, 'animatedStyle'>;
+export type CustomPressableProps<TMetadata = unknown> = Omit<
+  BasePressableProps<TMetadata>,
+  'animatedStyle'
+>;
 
 const withAnimatedTapStyle = <TMetadata = unknown,>(
   WrappedComponent: React.ComponentType<BasePressableProps<TMetadata>>,
@@ -24,7 +27,7 @@ const withAnimatedTapStyle = <TMetadata = unknown,>(
     options: AnimatedPressableStyleOptions<TMetadata>
   ) => ViewStyle
 ) => {
-  return (props: CustomPressableProps) => {
+  return (props: CustomPressableProps<TMetadata>) => {
     return <WrappedComponent {...props} animatedStyle={animatedStyle} />;
   };
 };

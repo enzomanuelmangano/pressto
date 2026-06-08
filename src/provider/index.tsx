@@ -16,6 +16,7 @@ import {
   PressablesGroupContext,
   type AnimatedPressableOptions,
   type AnimationType,
+  type PressableContextType,
 } from './context';
 
 export type PressablesConfigProps<
@@ -26,9 +27,9 @@ export type PressablesConfigProps<
   animationType?: T;
   animationConfig?: T extends 'timing' ? WithTimingConfig : WithSpringConfig;
   globalHandlers?: {
-    onPressIn?: (options: AnimatedPressableOptions) => void;
-    onPressOut?: (options: AnimatedPressableOptions) => void;
-    onPress?: (options: AnimatedPressableOptions) => void;
+    onPressIn?: (options: AnimatedPressableOptions<TMetadata>) => void;
+    onPressOut?: (options: AnimatedPressableOptions<TMetadata>) => void;
+    onPress?: (options: AnimatedPressableOptions<TMetadata>) => void;
   };
   metadata?: TMetadata;
   /**
@@ -92,7 +93,11 @@ export const PressablesConfig = <T extends AnimationType, TMetadata = unknown>({
   }, [animationType, animationConfig, globalHandlers, metadata, activateOnHover, config, defaultProps]);
 
   return (
-    <PressablesContext.Provider value={value}>
+    // metadata-typed handlers are erased to `unknown` at the context boundary;
+    // BasePressable re-applies TMetadata via createAnimatedPressable<TMetadata>.
+    <PressablesContext.Provider
+      value={value as PressableContextType<AnimationType>}
+    >
       <PressablesGroup>{children}</PressablesGroup>
     </PressablesContext.Provider>
   );
