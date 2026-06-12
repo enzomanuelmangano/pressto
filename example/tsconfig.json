@@ -1,6 +1,10 @@
 {
   "extends": "../tsconfig",
   "compilerOptions": {
-    // Avoid expo-cli auto-generating a tsconfig
+    // Avoid expo-cli auto-generating a tsconfig.
+    // Expo SDK 56 ships TypeScript 6, which deprecates the root config's
+    // `moduleResolution: Node10`. Bundler resolution is the Metro-appropriate
+    // choice for the example app and avoids the deprecation.
+    "moduleResolution": "bundler"
   }
 }
