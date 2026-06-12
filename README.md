@@ -118,6 +118,15 @@ function App() {
 - `animationConfig`: Pass timing or spring configuration
 - `config`: Set default values for `minScale`, `activeOpacity`, `baseScale`
 
+Override the config on a single pressable with the `config` prop — it shallow-merges over the `PressablesConfig` values, so you can change just one:
+
+```jsx
+{/* Inherits the rest of the config, only changes activeOpacity */}
+<PressableOpacity config={{ activeOpacity: 0.7 }} />
+
+<PressableScale config={{ minScale: 0.9 }} />
+```
+
 ### Default Props
 
 Set default props for all pressables globally. Useful for platform-specific behavior like disabling the Android ripple effect:
@@ -324,6 +333,7 @@ Every pressable (`PressableScale`, `PressableOpacity`, custom ones from `createA
 - `disabled`: boolean - Disables interaction (replaces the deprecated `enabled`)
 - `metadata`: TMetadata - Per-component metadata; passed to the handlers (incl. `globalHandlers`). Replaces (does not merge with) the `PressablesConfig` metadata
 - `skipGlobalHandlers`: boolean - Opt out of `PressablesConfig` `globalHandlers` (own handlers still fire)
+- `config`: `Partial<{ activeOpacity, minScale, baseScale }>` - Per-component visual config; shallow-merges over the `PressablesConfig` config
 - `accessibilityIdentifier`: string - Native id for e2e runners; defaults to `testID`
 - `initialToggled`: boolean - Initial toggle state
 - `activateOnHover`: boolean - Web only
