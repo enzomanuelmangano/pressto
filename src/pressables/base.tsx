@@ -105,6 +105,13 @@ export type BasePressableProps<TMetadata = unknown> = {
    * The component's own onPress/onPressIn/onPressOut still fire.
    */
   skipGlobalHandlers?: boolean;
+  /**
+   * Per-component visual config (activeOpacity, minScale, baseScale).
+   * MERGES with (shallow, per key) the config from PressablesConfig, so you can
+   * override a single value: `config={{ activeOpacity: 0.7 }}`. Merge is safe
+   * here (unlike `metadata`) because the config shape is fixed and known.
+   */
+  config?: Partial<PressableConfig>;
   initialToggled?: boolean;
   /**
    * Activates the pressable animation on hover (web only)
@@ -165,6 +172,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     accessibilityIdentifier: accessibilityIdentifierProp,
     metadata: metadataProp,
     skipGlobalHandlers = false,
+    config: configProp,
     initialToggled = false,
     activateOnHover: activateOnHoverProp,
     ...rest
@@ -175,7 +183,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       globalHandlers,
       metadata: metadataProvider,
       activateOnHover: activateOnHoverProvider,
-      config,
+      config: configProvider,
       defaultProps,
     } = usePressablesConfig();
 
@@ -183,6 +191,13 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
 
     // Per-component metadata overrides the PressablesConfig metadata.
     const metadata = metadataProp ?? metadataProvider;
+
+    // Per-component config shallow-merges over the PressablesConfig config,
+    // so a single key (e.g. activeOpacity) can be overridden per pressable.
+    const config = useMemo(
+      () => ({ ...configProvider, ...configProp }),
+      [configProvider, configProp]
+    );
 
     const lastTouchedPressable = useLastTouchedPressable();
     const pressableId = useId();
