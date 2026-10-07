@@ -1,20 +1,28 @@
-import React, { useCallback, useId, useMemo, type ComponentProps } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  type ComponentProps,
+} from 'react';
 import { Platform, type ViewStyle } from 'react-native';
 import { BaseButton } from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedStyle,
-  useDerivedValue,
   useSharedValue,
   withSpring,
   withTiming,
   type AnimatableValue,
   type SharedValue,
 } from 'react-native-reanimated';
-import { useLastTouchedPressable, usePressablesConfig } from '../provider';
+import { usePressablesConfig } from '../provider';
 import type { PressableConfig } from '../provider/constants';
-import type {
-  AnimatedPressableOptions,
-  PressableContextType,
+import {
+  PressablesGroupContext,
+  type AnimatedPressableOptions,
+  type PressableContextType,
 } from '../provider/context';
 
 const AnimatedBaseButton = Animated.createAnimatedComponent(BaseButton);
@@ -199,8 +207,19 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       [configProvider, configProp]
     );
 
-    const lastTouchedPressable = useLastTouchedPressable();
+    const group = useContext(PressablesGroupContext);
     const pressableId = useId();
+
+    // Each pressable owns its `isSelected` value and the group flips only the
+    // previous and the new selected one on press. Worklets read this value, not
+    // `lastTouchedPressable`: a value captured by a worklet subscribes it, so
+    // reading the group value would re-run every pressable's animated style on
+    // every selection change.
+    const isSelected = useSharedValue(group.isSelected(pressableId));
+    useEffect(
+      () => group.register(pressableId, isSelected),
+      [group, pressableId, isSelected]
+    );
 
     // skipGlobalHandlers opts this pressable out of the provider handlers,
     // while its own onPress/onPressIn/onPressOut still fire.
@@ -210,6 +229,11 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       onPress: onPressProvider,
     } = skipGlobalHandlers ? {} : (globalHandlers ?? {});
 
+    // Interaction state is tracked on the JS thread, where presses are
+    // handled, and mirrored into shared values for the worklets: reading a
+    // shared value on JS right after writing it returns the previous value.
+    const pressedRef = useRef(false);
+    const toggledRef = useRef(initialToggled);
     const active = useSharedValue(false);
     const isToggled = useSharedValue(initialToggled);
 
@@ -243,46 +267,53 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       };
     }, [withAnimation, animationConfig]);
 
-    const progress = useDerivedValue<number>(() => {
-      return withAnimationConfigured(active.get() ? 1 : 0);
-    }, [withAnimationConfigured]);
-
-    // Derived SharedValue for isSelected (computed from comparison)
-    const isSelectedDerived = useDerivedValue(() => {
-      return lastTouchedPressable.get() === pressableId;
-    }, [lastTouchedPressable, pressableId]);
+    // `progress` animates towards `active` (0 idle, 1 pressed). It is driven
+    // from where `active` changes rather than derived from it: a derived value
+    // is one more mapper per pressable, and mappers dominate the mount cost.
+    const progress = useSharedValue(0);
+    const setActive = useCallback(
+      (next: boolean) => {
+        if (pressedRef.current === next) {
+          return;
+        }
+        pressedRef.current = next;
+        active.set(next);
+        progress.set(withAnimationConfigured(next ? 1 : 0));
+      },
+      [active, progress, withAnimationConfigured]
+    );
 
     // Snapshot the current interaction state into the options object passed to
-    // every handler. Reads live shared values, so callers mutate state first
-    // (active/isToggled/lastTouchedPressable) and then build.
+    // every handler. Callers update the state first and then build.
     const buildOptions = useCallback(
       (): AnimatedPressableOptions => ({
-        isPressed: active.get(),
-        isToggled: isToggled.get(),
-        isSelected: lastTouchedPressable.get() === pressableId,
+        isPressed: pressedRef.current,
+        isToggled: toggledRef.current,
+        isSelected: group.isSelected(pressableId),
         metadata,
       }),
-      [active, isToggled, lastTouchedPressable, pressableId, metadata]
+      [group, pressableId, metadata]
     );
 
     const onPressInWrapper = useCallback(() => {
-      active.set(true);
+      setActive(true);
       const options = buildOptions();
       onPressInProvider?.(options);
       onPressIn?.(options);
-    }, [active, buildOptions, onPressIn, onPressInProvider]);
+    }, [setActive, buildOptions, onPressIn, onPressInProvider]);
 
     const onPressWrapper = useCallback(() => {
-      active.set(false);
-      isToggled.set(!isToggled.get());
-      lastTouchedPressable.set(pressableId);
+      setActive(false);
+      toggledRef.current = !toggledRef.current;
+      isToggled.set(toggledRef.current);
+      group.select(pressableId);
       const options = buildOptions();
       onPressProvider?.(options);
       onPress?.(options);
     }, [
-      active,
+      setActive,
       isToggled,
-      lastTouchedPressable,
+      group,
       pressableId,
       buildOptions,
       onPress,
@@ -290,11 +321,11 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     ]);
 
     const onPressOutWrapper = useCallback(() => {
-      active.set(false);
+      setActive(false);
       const options = buildOptions();
       onPressOutProvider?.(options);
       onPressOut?.(options);
-    }, [active, buildOptions, onPressOut, onPressOutProvider]);
+    }, [setActive, buildOptions, onPressOut, onPressOutProvider]);
 
     // Determine if hover should be enabled (web only)
     const shouldEnableHover =
@@ -304,22 +335,22 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     // Hover handlers for web
     const onMouseEnter = useCallback(() => {
       if (shouldEnableHover && isEnabled) {
-        active.set(true);
+        setActive(true);
       }
-    }, [shouldEnableHover, isEnabled, active]);
+    }, [shouldEnableHover, isEnabled, setActive]);
 
     const onMouseLeave = useCallback(() => {
       if (shouldEnableHover) {
-        active.set(false);
+        setActive(false);
       }
-    }, [shouldEnableHover, active]);
+    }, [shouldEnableHover, setActive]);
 
     const rAnimatedStyle = useAnimatedStyle(() => {
       return animatedStyle
         ? animatedStyle(progress.get(), {
             isPressed: active.get(),
             isToggled: isToggled.get(),
-            isSelected: lastTouchedPressable.get() === pressableId,
+            isSelected: isSelected.get(),
             metadata,
             config,
             withAnimation: withAnimationConfigured,
@@ -330,8 +361,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       progress,
       active,
       isToggled,
-      lastTouchedPressable,
-      pressableId,
+      isSelected,
       metadata,
       config,
       withAnimationConfigured,
@@ -353,10 +383,10 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
         progress,
         isPressed: active,
         isToggled,
-        isSelected: isSelectedDerived,
+        isSelected,
         withAnimation: withAnimationConfigured,
       }),
-      [progress, active, isToggled, isSelectedDerived, withAnimationConfigured]
+      [progress, active, isToggled, isSelected, withAnimationConfigured]
     );
 
     const renderedChildren = useMemo(() => {

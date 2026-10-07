@@ -1,9 +1,11 @@
 import { useMemo, type PropsWithChildren } from 'react';
 import {
+  useAnimatedReaction,
   useSharedValue,
   type WithSpringConfig,
   type WithTimingConfig,
 } from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
 
 import {
   DefaultAnimationConfigs,
@@ -12,6 +14,7 @@ import {
   type PressableConfig,
 } from './constants';
 import {
+  createPressablesGroup,
   PressablesContext,
   PressablesGroupContext,
   type AnimatedPressableOptions,
@@ -57,11 +60,25 @@ export type PressablesConfigProps<
 export const PressablesGroup = ({ children }: PropsWithChildren) => {
   const lastTouchedPressable = useSharedValue<string | null>(null);
 
-  const groupValue = useMemo(() => {
-    return {
-      lastTouchedPressable: lastTouchedPressable,
-    };
-  }, [lastTouchedPressable]);
+  const groupValue = useMemo(
+    () => createPressablesGroup(lastTouchedPressable),
+    [lastTouchedPressable]
+  );
+
+  // Presses go through `select`. This reaction catches writes to
+  // `lastTouchedPressable` from outside (e.g. via useLastTouchedPressable());
+  // it runs on every change of either value and `sync` drops the stale ones.
+  const { selectCount, sync } = groupValue;
+  useAnimatedReaction(
+    () => ({
+      next: lastTouchedPressable.get(),
+      count: selectCount.get(),
+    }),
+    ({ next, count }) => {
+      scheduleOnRN(sync, next, count);
+    },
+    [sync]
+  );
 
   return (
     <PressablesGroupContext.Provider value={groupValue}>
