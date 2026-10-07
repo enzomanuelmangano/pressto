@@ -65,16 +65,17 @@ export const PressablesGroup = ({ children }: PropsWithChildren) => {
     [lastTouchedPressable]
   );
 
-  // Presses go through `select`, which updates the affected pressables
-  // directly; this single reaction covers writes to `lastTouchedPressable`
-  // from outside (e.g. via useLastTouchedPressable). Updates are idempotent.
-  const { sync } = groupValue;
+  // Presses go through `select`. This reaction catches writes to
+  // `lastTouchedPressable` from outside (e.g. via useLastTouchedPressable());
+  // it runs on every change of either value and `sync` drops the stale ones.
+  const { selectCount, sync } = groupValue;
   useAnimatedReaction(
-    () => lastTouchedPressable.get(),
-    (next, previous) => {
-      if (next !== previous) {
-        scheduleOnRN(sync, previous, next);
-      }
+    () => ({
+      next: lastTouchedPressable.get(),
+      count: selectCount.get(),
+    }),
+    ({ next, count }) => {
+      scheduleOnRN(sync, next, count);
     },
     [sync]
   );

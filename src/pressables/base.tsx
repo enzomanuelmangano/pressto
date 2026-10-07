@@ -4,6 +4,7 @@ import React, {
   useEffect,
   useId,
   useMemo,
+  useRef,
   type ComponentProps,
 } from 'react';
 import { Platform, type ViewStyle } from 'react-native';
@@ -207,7 +208,6 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     );
 
     const group = useContext(PressablesGroupContext);
-    const { lastTouchedPressable } = group;
     const pressableId = useId();
 
     // Each pressable owns its `isSelected` value and the group flips only the
@@ -215,9 +215,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     // `lastTouchedPressable`: a value captured by a worklet subscribes it, so
     // reading the group value would re-run every pressable's animated style on
     // every selection change.
-    const isSelected = useSharedValue(
-      lastTouchedPressable.get() === pressableId
-    );
+    const isSelected = useSharedValue(group.isSelected(pressableId));
     useEffect(
       () => group.register(pressableId, isSelected),
       [group, pressableId, isSelected]
@@ -231,6 +229,11 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       onPress: onPressProvider,
     } = skipGlobalHandlers ? {} : (globalHandlers ?? {});
 
+    // Interaction state is tracked on the JS thread, where presses are
+    // handled, and mirrored into shared values for the worklets: reading a
+    // shared value on JS right after writing it returns the previous value.
+    const pressedRef = useRef(false);
+    const toggledRef = useRef(initialToggled);
     const active = useSharedValue(false);
     const isToggled = useSharedValue(initialToggled);
 
@@ -270,9 +273,10 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     const progress = useSharedValue(0);
     const setActive = useCallback(
       (next: boolean) => {
-        if (active.get() === next) {
+        if (pressedRef.current === next) {
           return;
         }
+        pressedRef.current = next;
         active.set(next);
         progress.set(withAnimationConfigured(next ? 1 : 0));
       },
@@ -280,16 +284,15 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     );
 
     // Snapshot the current interaction state into the options object passed to
-    // every handler. Reads live shared values, so callers mutate state first
-    // (active/isToggled/lastTouchedPressable) and then build.
+    // every handler. Callers update the state first and then build.
     const buildOptions = useCallback(
       (): AnimatedPressableOptions => ({
-        isPressed: active.get(),
-        isToggled: isToggled.get(),
-        isSelected: isSelected.get(),
+        isPressed: pressedRef.current,
+        isToggled: toggledRef.current,
+        isSelected: group.isSelected(pressableId),
         metadata,
       }),
-      [active, isToggled, isSelected, metadata]
+      [group, pressableId, metadata]
     );
 
     const onPressInWrapper = useCallback(() => {
@@ -301,7 +304,8 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
 
     const onPressWrapper = useCallback(() => {
       setActive(false);
-      isToggled.set(!isToggled.get());
+      toggledRef.current = !toggledRef.current;
+      isToggled.set(toggledRef.current);
       group.select(pressableId);
       const options = buildOptions();
       onPressProvider?.(options);

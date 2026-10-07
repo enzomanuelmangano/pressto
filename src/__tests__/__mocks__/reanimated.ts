@@ -1,18 +1,38 @@
 import React from 'react';
 
+// With async writes on, shared values behave as they do on the JS thread: a
+// write is applied later on the UI thread (`__flushUI`) and a read right after
+// a write still returns the previous value.
+let asyncWrites = false;
+const pendingWrites: (() => void)[] = [];
+export const __setAsyncWrites = (enabled: boolean) => {
+  asyncWrites = enabled;
+};
+export const __flushUI = () => {
+  pendingWrites.splice(0).forEach((write) => write());
+};
+
 const makeSharedValue = (init: any) => {
   let val = init;
+  const set = (v: any) => {
+    const write = () => {
+      val = typeof v === 'function' ? v(val) : v;
+    };
+    if (asyncWrites) {
+      pendingWrites.push(write);
+    } else {
+      write();
+    }
+  };
   return {
     get value() {
       return val;
     },
     set value(v: any) {
-      val = v;
+      set(v);
     },
     get: () => val,
-    set: (v: any) => {
-      val = typeof v === 'function' ? v(val) : v;
-    },
+    set,
   };
 };
 
