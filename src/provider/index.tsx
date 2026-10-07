@@ -1,5 +1,7 @@
 import { useMemo, type PropsWithChildren } from 'react';
 import {
+  runOnJS,
+  useAnimatedReaction,
   useSharedValue,
   type WithSpringConfig,
   type WithTimingConfig,
@@ -12,6 +14,7 @@ import {
   type PressableConfig,
 } from './constants';
 import {
+  createPressablesGroup,
   PressablesContext,
   PressablesGroupContext,
   type AnimatedPressableOptions,
@@ -57,11 +60,24 @@ export type PressablesConfigProps<
 export const PressablesGroup = ({ children }: PropsWithChildren) => {
   const lastTouchedPressable = useSharedValue<string | null>(null);
 
-  const groupValue = useMemo(() => {
-    return {
-      lastTouchedPressable: lastTouchedPressable,
-    };
-  }, [lastTouchedPressable]);
+  const groupValue = useMemo(
+    () => createPressablesGroup(lastTouchedPressable),
+    [lastTouchedPressable]
+  );
+
+  // Presses go through `select`, which updates the affected pressables
+  // directly; this single reaction covers writes to `lastTouchedPressable`
+  // from outside (e.g. via useLastTouchedPressable). Updates are idempotent.
+  const { sync } = groupValue;
+  useAnimatedReaction(
+    () => lastTouchedPressable.get(),
+    (next, previous) => {
+      if (next !== previous) {
+        runOnJS(sync)(previous, next);
+      }
+    },
+    [sync]
+  );
 
   return (
     <PressablesGroupContext.Provider value={groupValue}>

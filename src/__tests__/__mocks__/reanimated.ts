@@ -25,6 +25,12 @@ export const useDerivedValue = (fn: () => any) => {
 };
 
 export const useAnimatedStyle = (fn: () => any) => fn();
+// Reactions only mirror external writes in the library; not driven in tests.
+export const useAnimatedReaction = () => {};
+export const runOnJS =
+  (fn: (...args: any[]) => any) =>
+  (...args: any[]) =>
+    fn(...args);
 export const withTiming = (v: any) => v;
 export const withSpring = (v: any) => v;
 
