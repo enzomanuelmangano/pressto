@@ -21,5 +21,6 @@ module.exports = {
       '<rootDir>/src/__tests__/__mocks__/reanimated.ts',
     '^react-native-gesture-handler$':
       '<rootDir>/src/__tests__/__mocks__/gesture-handler.ts',
+    '^react-native-worklets$': '<rootDir>/src/__tests__/__mocks__/worklets.ts',
   },
 };

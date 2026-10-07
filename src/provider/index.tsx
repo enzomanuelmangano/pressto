@@ -1,11 +1,11 @@
 import { useMemo, type PropsWithChildren } from 'react';
 import {
-  runOnJS,
   useAnimatedReaction,
   useSharedValue,
   type WithSpringConfig,
   type WithTimingConfig,
 } from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
 
 import {
   DefaultAnimationConfigs,
@@ -73,7 +73,7 @@ export const PressablesGroup = ({ children }: PropsWithChildren) => {
     () => lastTouchedPressable.get(),
     (next, previous) => {
       if (next !== previous) {
-        runOnJS(sync)(previous, next);
+        scheduleOnRN(sync, previous, next);
       }
     },
     [sync]
