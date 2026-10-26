@@ -26,7 +26,9 @@ describe('component handlers', () => {
   it('fires onPressOut on press end', () => {
     const onPressOut = jest.fn();
     render(<PressableScale testID="p" onPressOut={onPressOut} />);
-    pressOut(screen.getByTestId('p'));
+    const button = screen.getByTestId('p');
+    pressIn(button);
+    pressOut(button);
     expect(onPressOut).toHaveBeenCalledTimes(1);
   });
 
@@ -52,6 +54,29 @@ describe('component handlers', () => {
   });
 });
 
+describe('RNGH 2 state events', () => {
+  it('reports press-in once when the button reports BEGAN and ACTIVE', () => {
+    const onPressIn = jest.fn();
+    render(<PressableScale testID="p" onPressIn={onPressIn} />);
+    const button = screen.getByTestId('p');
+    pressIn(button);
+    fireEvent(button, 'activated');
+    expect(onPressIn).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports press-out once per press, and not without a press-in', () => {
+    const onPressOut = jest.fn();
+    render(<PressableScale testID="p" onPressOut={onPressOut} />);
+    const button = screen.getByTestId('p');
+    pressOut(button);
+    expect(onPressOut).not.toHaveBeenCalled();
+    pressIn(button);
+    pressOut(button);
+    pressOut(button);
+    expect(onPressOut).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('global handlers', () => {
   it('fires global onPressIn alongside component onPressIn', () => {
     const globalOnPressIn = jest.fn();
@@ -74,7 +99,9 @@ describe('global handlers', () => {
         <PressableScale testID="p" onPressOut={onPressOut} />
       </PressablesConfig>
     );
-    pressOut(screen.getByTestId('p'));
+    const button = screen.getByTestId('p');
+    pressIn(button);
+    pressOut(button);
     expect(globalOnPressOut).toHaveBeenCalledTimes(1);
     expect(onPressOut).toHaveBeenCalledTimes(1);
   });

@@ -5,7 +5,7 @@ import { View } from 'react-native';
  * Mocks RNGH's BaseButton as a host View that forwards the gesture
  * callbacks as props, so React Native Testing Library can:
  * - find it via queries (testID is forwarded)
- * - drive it via fireEvent(node, 'press' | 'began' | 'ended')
+ * - drive it via fireEvent(node, 'press' | 'began' | 'activated' | 'ended')
  *
  * When enabled === false the gesture callbacks are dropped, mirroring
  * RNGH ignoring touches on a disabled button.
@@ -29,6 +29,7 @@ export const BaseButton = ({
       enabled,
       onPress: active ? onPress : undefined,
       onBegan: active ? (onBegan ?? onActivated) : undefined,
+      onActivated: active ? onActivated : undefined,
       onEnded: active ? (onEnded ?? onFailed ?? onCancelled) : undefined,
     },
     children

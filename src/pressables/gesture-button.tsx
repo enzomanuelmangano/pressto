@@ -1,4 +1,4 @@
-import React, { forwardRef, type ComponentType } from 'react';
+import React, { forwardRef, useRef, type ComponentType } from 'react';
 import type { ColorValue, ViewProps } from 'react-native';
 import * as GestureHandler from 'react-native-gesture-handler';
 
@@ -70,20 +70,37 @@ type GestureButtonProps = {
 };
 
 const LegacyGestureButton = forwardRef<unknown, GestureButtonProps>(
-  ({ onPressIn, onPressOut, onHoverIn, onHoverOut, ...rest }, ref) => (
-    <BaseButton
-      {...rest}
-      ref={ref}
-      onMouseEnter={onHoverIn}
-      onMouseLeave={onHoverOut}
-      onBegan={onPressIn}
-      onActivated={onPressIn}
-      onEnded={onPressOut}
-      onFailed={onPressOut}
-      onCancelled={onPressOut}
-      exclusive={false}
-    />
-  )
+  ({ onPressIn, onPressOut, onHoverIn, onHoverOut, ...rest }, ref) => {
+    // A press can report both BEGAN and ACTIVE (Android does), and END after
+    // FAIL/CANCEL; report press-in and press-out once per press.
+    const isPressed = useRef(false);
+    const pressIn = () => {
+      if (!isPressed.current) {
+        isPressed.current = true;
+        onPressIn();
+      }
+    };
+    const pressOut = () => {
+      if (isPressed.current) {
+        isPressed.current = false;
+        onPressOut();
+      }
+    };
+    return (
+      <BaseButton
+        {...rest}
+        ref={ref}
+        onMouseEnter={onHoverIn}
+        onMouseLeave={onHoverOut}
+        onBegan={pressIn}
+        onActivated={pressIn}
+        onEnded={pressOut}
+        onFailed={pressOut}
+        onCancelled={pressOut}
+        exclusive={false}
+      />
+    );
+  }
 );
 
 const TouchableGestureButton = forwardRef<unknown, GestureButtonProps>(
