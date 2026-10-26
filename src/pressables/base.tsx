@@ -1,6 +1,5 @@
 import React, { useCallback, useId, useMemo, type ComponentProps } from 'react';
 import { Platform, type ViewStyle } from 'react-native';
-import { BaseButton } from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedStyle,
   useDerivedValue,
@@ -16,9 +15,13 @@ import type {
   AnimatedPressableOptions,
   PressableContextType,
 } from '../provider/context';
+import {
+  GestureButton,
+  type GestureButtonPassthroughProps,
+} from './gesture-button';
 
-const AnimatedBaseButton = Animated.createAnimatedComponent(BaseButton);
-type AnimatedPressableProps = ComponentProps<typeof AnimatedBaseButton>;
+const AnimatedGestureButton = Animated.createAnimatedComponent(GestureButton);
+type AnimatedViewProps = ComponentProps<typeof Animated.View>;
 
 export type AnimatedPressableStyleOptions<TMetadata = unknown> = {
   isPressed: boolean;
@@ -123,34 +126,9 @@ export type BasePressableProps<TMetadata = unknown> = {
   'metadata' | 'config'
 > &
   Partial<
-    Pick<
-      AnimatedPressableProps,
-      | 'layout'
-      | 'onLongPress'
-      | 'entering'
-      | 'exiting'
-      | 'style'
-      | 'hitSlop'
-      | 'testID'
-      | 'accessible'
-      | 'userSelect'
-      | 'activeCursor'
-      | 'shouldCancelWhenOutside'
-      | 'cancelsTouchesInView'
-      | 'enableContextMenu'
-      | 'rippleColor'
-      | 'rippleRadius'
-      | 'touchSoundDisabled'
-      | 'waitFor'
-      | 'simultaneousHandlers'
-      | 'accessibilityHint'
-      | 'accessibilityLabel'
-      | 'accessibilityRole'
-      | 'accessibilityState'
-      | 'accessibilityValue'
-      | 'accessibilityActions'
-    >
-  > & {
+    Pick<AnimatedViewProps, 'layout' | 'entering' | 'exiting' | 'style'>
+  > &
+  GestureButtonPassthroughProps & {
     onPress?: (options: AnimatedPressableOptions<TMetadata>) => void;
     onPressIn?: (options: AnimatedPressableOptions<TMetadata>) => void;
     onPressOut?: (options: AnimatedPressableOptions<TMetadata>) => void;
@@ -302,13 +280,13 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       (activateOnHoverProp ?? activateOnHoverProvider ?? false);
 
     // Hover handlers for web
-    const onMouseEnter = useCallback(() => {
+    const onHoverIn = useCallback(() => {
       if (shouldEnableHover && isEnabled) {
         active.set(true);
       }
     }, [shouldEnableHover, isEnabled, active]);
 
-    const onMouseLeave = useCallback(() => {
+    const onHoverOut = useCallback(() => {
       if (shouldEnableHover) {
         active.set(false);
       }
@@ -341,11 +319,11 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       () =>
         shouldEnableHover
           ? {
-              onMouseEnter,
-              onMouseLeave,
+              onHoverIn,
+              onHoverOut,
             }
           : {},
-      [shouldEnableHover, onMouseEnter, onMouseLeave]
+      [shouldEnableHover, onHoverIn, onHoverOut]
     );
 
     const childrenCallbackParams = useMemo<PressableChildrenCallbackParams>(
@@ -382,23 +360,19 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     const accessible = mergedProps.accessible ?? true;
 
     return (
-      <AnimatedBaseButton
+      <AnimatedGestureButton
         {...mergedProps}
-        {...({ accessibilityIdentifier } as any)}
+        accessibilityIdentifier={accessibilityIdentifier}
         accessible={accessible}
-        {...(hoverProps as any)}
+        {...hoverProps}
         style={[rest?.style ?? {}, rAnimatedStyle, cursorStyle]}
         enabled={isEnabled}
         onPress={onPressWrapper}
-        onBegan={onPressInWrapper}
-        onActivated={onPressInWrapper}
-        onEnded={onPressOutWrapper}
-        onFailed={onPressOutWrapper}
-        onCancelled={onPressOutWrapper}
-        exclusive={false}
+        onPressIn={onPressInWrapper}
+        onPressOut={onPressOutWrapper}
       >
         {renderedChildren}
-      </AnimatedBaseButton>
+      </AnimatedGestureButton>
     );
   }
 );
