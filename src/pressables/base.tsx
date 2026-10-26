@@ -1,4 +1,10 @@
-import React, { useCallback, useId, useMemo, type ComponentProps } from 'react';
+import React, {
+  useCallback,
+  useId,
+  useMemo,
+  useRef,
+  type ComponentProps,
+} from 'react';
 import { Platform, type ViewStyle } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -190,6 +196,11 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
 
     const active = useSharedValue(false);
     const isToggled = useSharedValue(initialToggled);
+    // JS-side mirror of isToggled. A shared value written from the JS thread
+    // is applied on the UI thread asynchronously, so a JS read right after the
+    // write can return the previous value. Handlers must see the state they
+    // just produced, so it is tracked here.
+    const isToggledRef = useRef(initialToggled);
 
     const { animationType, animationConfig } = useMemo(() => {
       if (animationTypeProp != null) {
@@ -230,31 +241,37 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       return lastTouchedPressable.get() === pressableId;
     }, [lastTouchedPressable, pressableId]);
 
-    // Snapshot the current interaction state into the options object passed to
-    // every handler. Reads live shared values, so callers mutate state first
-    // (active/isToggled/lastTouchedPressable) and then build.
+    // Snapshot the interaction state into the options object passed to every
+    // handler. Callers pass the state they just wrote (isPressed, and on press
+    // isSelected) instead of reading it back from the shared values, whose
+    // JS-thread writes land asynchronously.
     const buildOptions = useCallback(
-      (): AnimatedPressableOptions => ({
-        isPressed: active.get(),
-        isToggled: isToggled.get(),
-        isSelected: lastTouchedPressable.get() === pressableId,
+      (
+        state: Pick<AnimatedPressableOptions, 'isPressed'> &
+          Partial<Pick<AnimatedPressableOptions, 'isSelected'>>
+      ): AnimatedPressableOptions => ({
+        isPressed: state.isPressed,
+        isToggled: isToggledRef.current,
+        isSelected:
+          state.isSelected ?? lastTouchedPressable.get() === pressableId,
         metadata,
       }),
-      [active, isToggled, lastTouchedPressable, pressableId, metadata]
+      [lastTouchedPressable, pressableId, metadata]
     );
 
     const onPressInWrapper = useCallback(() => {
       active.set(true);
-      const options = buildOptions();
+      const options = buildOptions({ isPressed: true });
       onPressInProvider?.(options);
       onPressIn?.(options);
     }, [active, buildOptions, onPressIn, onPressInProvider]);
 
     const onPressWrapper = useCallback(() => {
       active.set(false);
-      isToggled.set(!isToggled.get());
+      isToggledRef.current = !isToggledRef.current;
+      isToggled.set(isToggledRef.current);
       lastTouchedPressable.set(pressableId);
-      const options = buildOptions();
+      const options = buildOptions({ isPressed: false, isSelected: true });
       onPressProvider?.(options);
       onPress?.(options);
     }, [
@@ -269,7 +286,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
 
     const onPressOutWrapper = useCallback(() => {
       active.set(false);
-      const options = buildOptions();
+      const options = buildOptions({ isPressed: false });
       onPressOutProvider?.(options);
       onPressOut?.(options);
     }, [active, buildOptions, onPressOut, onPressOutProvider]);
