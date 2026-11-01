@@ -1,5 +1,6 @@
 import React, {
   useCallback,
+  useContext,
   useId,
   useMemo,
   useRef,
@@ -15,11 +16,12 @@ import Animated, {
   type AnimatableValue,
   type SharedValue,
 } from 'react-native-reanimated';
-import { useLastTouchedPressable, usePressablesConfig } from '../provider';
+import { usePressablesConfig } from '../provider';
 import type { PressableConfig } from '../provider/constants';
-import type {
-  AnimatedPressableOptions,
-  PressableContextType,
+import {
+  PressablesGroupContext,
+  type AnimatedPressableOptions,
+  type PressableContextType,
 } from '../provider/context';
 import {
   GestureButton,
@@ -183,7 +185,9 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       [configProvider, configProp]
     );
 
-    const lastTouchedPressable = useLastTouchedPressable();
+    const { lastTouchedPressable, lastTouchedPressableRef } = useContext(
+      PressablesGroupContext
+    );
     const pressableId = useId();
 
     // skipGlobalHandlers opts this pressable out of the provider handlers,
@@ -242,26 +246,22 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     }, [lastTouchedPressable, pressableId]);
 
     // Snapshot the interaction state into the options object passed to every
-    // handler. Callers pass the state they just wrote (isPressed, and on press
-    // isSelected) instead of reading it back from the shared values, whose
-    // JS-thread writes land asynchronously.
+    // handler. isToggled and isSelected come from JS-side mirrors and isPressed
+    // from the caller, never from the shared values: their JS-thread writes
+    // land asynchronously, so reading them back here could see stale state.
     const buildOptions = useCallback(
-      (
-        state: Pick<AnimatedPressableOptions, 'isPressed'> &
-          Partial<Pick<AnimatedPressableOptions, 'isSelected'>>
-      ): AnimatedPressableOptions => ({
-        isPressed: state.isPressed,
+      (isPressed: boolean): AnimatedPressableOptions => ({
+        isPressed,
         isToggled: isToggledRef.current,
-        isSelected:
-          state.isSelected ?? lastTouchedPressable.get() === pressableId,
+        isSelected: lastTouchedPressableRef.current === pressableId,
         metadata,
       }),
-      [lastTouchedPressable, pressableId, metadata]
+      [lastTouchedPressableRef, pressableId, metadata]
     );
 
     const onPressInWrapper = useCallback(() => {
       active.set(true);
-      const options = buildOptions({ isPressed: true });
+      const options = buildOptions(true);
       onPressInProvider?.(options);
       onPressIn?.(options);
     }, [active, buildOptions, onPressIn, onPressInProvider]);
@@ -270,14 +270,16 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       active.set(false);
       isToggledRef.current = !isToggledRef.current;
       isToggled.set(isToggledRef.current);
+      lastTouchedPressableRef.current = pressableId;
       lastTouchedPressable.set(pressableId);
-      const options = buildOptions({ isPressed: false, isSelected: true });
+      const options = buildOptions(false);
       onPressProvider?.(options);
       onPress?.(options);
     }, [
       active,
       isToggled,
       lastTouchedPressable,
+      lastTouchedPressableRef,
       pressableId,
       buildOptions,
       onPress,
@@ -286,7 +288,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
 
     const onPressOutWrapper = useCallback(() => {
       active.set(false);
-      const options = buildOptions({ isPressed: false });
+      const options = buildOptions(false);
       onPressOutProvider?.(options);
       onPressOut?.(options);
     }, [active, buildOptions, onPressOut, onPressOutProvider]);

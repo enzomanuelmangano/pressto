@@ -65,6 +65,14 @@ export const PressablesContext = createContext<
 
 export const PressablesGroupContext = createContext<{
   lastTouchedPressable: SharedValue<string | null>;
+  /**
+   * JS-side mirror of lastTouchedPressable, read by press handlers. A shared
+   * value written from the JS thread is applied on the UI thread
+   * asynchronously, so reading it back right after a press can return the
+   * previous pressable.
+   */
+  lastTouchedPressableRef: { current: string | null };
 }>({
   lastTouchedPressable: makeMutable<string | null>(null),
+  lastTouchedPressableRef: { current: null },
 });
