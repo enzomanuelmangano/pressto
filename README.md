@@ -251,7 +251,7 @@ const ThemedButton = createAnimatedPressable<Theme>((progress, { metadata }) => 
 
 ### Web Hover Support
 
-Activate animations on hover (web only):
+Activate animations on hover (web only). With react-native-gesture-handler 3.x this needs 3.2 or later; earlier 3.x releases don't report hover.
 
 ```jsx
 // Per component
