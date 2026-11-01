@@ -83,6 +83,42 @@ describe('handler options with asynchronous shared value writes', () => {
     );
   });
 
+  it('reports the selection in onPressOut when it runs after onPress (RNGH 2 order)', () => {
+    const onPressOut = jest.fn();
+    render(
+      <PressablesConfig>
+        <PressableScale testID="p" onPressOut={onPressOut} />
+      </PressablesConfig>
+    );
+    const button = screen.getByTestId('p');
+    pressIn(button);
+    fireEvent.press(button);
+    pressOut(button);
+    expect(onPressOut).toHaveBeenLastCalledWith(
+      expect.objectContaining({ isPressed: false, isSelected: true })
+    );
+  });
+
+  it('moves the selection to the last pressed pressable', () => {
+    const onPressInA = jest.fn();
+    const onPressB = jest.fn();
+    render(
+      <PressablesConfig>
+        <PressableScale testID="a" onPressIn={onPressInA} />
+        <PressableScale testID="b" onPress={onPressB} />
+      </PressablesConfig>
+    );
+    fireEvent.press(screen.getByTestId('a'));
+    fireEvent.press(screen.getByTestId('b'));
+    expect(onPressB).toHaveBeenLastCalledWith(
+      expect.objectContaining({ isSelected: true })
+    );
+    pressIn(screen.getByTestId('a'));
+    expect(onPressInA).toHaveBeenLastCalledWith(
+      expect.objectContaining({ isSelected: false })
+    );
+  });
+
   it('flips the toggle on presses faster than the UI thread applies writes', () => {
     const onPress = jest.fn();
     render(<PressableScale testID="p" onPress={onPress} />);

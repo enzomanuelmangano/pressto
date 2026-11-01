@@ -50,10 +50,14 @@ export type GestureButtonPassthroughProps = Pick<
 // relied on (onBegan, onActivated, onEnded, ...) are gone, so press-in /
 // press-out never fire. RNGH 3 also ships `Touchable`, which reports
 // onPressIn / onPressOut / onPress natively. Detect it at runtime so the same
-// build works with both majors. The namespace import avoids a named import of
-// `Touchable`, which doesn't exist on RNGH 2.
-const Touchable: ComponentType<any> | undefined = (GestureHandler as any)
-  .Touchable;
+// build works with both majors. `Touchable` doesn't exist on RNGH 2, so it is
+// read with Reflect.get rather than a named import or `GestureHandler.Touchable`:
+// webpack and Rollup (Vite) check static accesses on a namespace import and
+// warn "export 'Touchable' was not found" when building against RNGH 2.
+const Touchable: ComponentType<any> | undefined = Reflect.get(
+  GestureHandler,
+  'Touchable'
+);
 const BaseButton: ComponentType<any> = (GestureHandler as any).BaseButton;
 
 export const isGestureHandlerV3 = Touchable != null;

@@ -1,4 +1,4 @@
-import { useMemo, type PropsWithChildren } from 'react';
+import { useMemo, useRef, type PropsWithChildren } from 'react';
 import {
   useSharedValue,
   type WithSpringConfig,
@@ -56,10 +56,12 @@ export type PressablesConfigProps<
 
 export const PressablesGroup = ({ children }: PropsWithChildren) => {
   const lastTouchedPressable = useSharedValue<string | null>(null);
+  const lastTouchedPressableRef = useRef<string | null>(null);
 
   const groupValue = useMemo(() => {
     return {
-      lastTouchedPressable: lastTouchedPressable,
+      lastTouchedPressable,
+      lastTouchedPressableRef,
     };
   }, [lastTouchedPressable]);
 
