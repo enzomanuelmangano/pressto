@@ -12,6 +12,8 @@ Built on [react-native-gesture-handler](https://docs.swmansion.com/react-native-
 bun add pressto react-native-reanimated react-native-gesture-handler react-native-worklets
 ```
 
+Works with react-native-gesture-handler 2.x and 3.x. On 3.x pressto uses RNGH's native `Touchable`; on 2.x it uses `BaseButton`. The `waitFor` and `simultaneousHandlers` props only apply on 2.x.
+
 ## Quickstart
 
 ```jsx
@@ -265,7 +267,7 @@ Activate animations on hover (web only):
 
 ### Avoid highlight flicker effect in Scrollable List
 
-Since pressto is built on top of the BaseButton from react-native-gesture-handler, it handles tap conflict detection automatically when used with a FlatList imported from react-native-gesture-handler.
+Since pressto is built on top of react-native-gesture-handler's buttons, it handles tap conflict detection automatically when used with a FlatList imported from react-native-gesture-handler.
 
 ```jsx
 import { FlatList } from 'react-native-gesture-handler';

@@ -1,5 +1,4 @@
-import type { ComponentProps } from 'react';
-import type { BaseButton } from 'react-native-gesture-handler';
+import type { GestureButtonPassthroughProps } from '../pressables/gesture-button';
 import { Easing } from 'react-native-reanimated';
 
 /**
@@ -9,7 +8,7 @@ import { Easing } from 'react-native-reanimated';
  */
 export type DefaultPressableProps = Partial<
   Pick<
-    ComponentProps<typeof BaseButton>,
+    GestureButtonPassthroughProps,
     | 'hitSlop'
     | 'testID'
     | 'userSelect'

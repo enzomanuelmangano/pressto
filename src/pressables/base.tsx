@@ -1,6 +1,11 @@
-import React, { useCallback, useId, useMemo, type ComponentProps } from 'react';
+import React, {
+  useCallback,
+  useId,
+  useMemo,
+  useRef,
+  type ComponentProps,
+} from 'react';
 import { Platform, type ViewStyle } from 'react-native';
-import { BaseButton } from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedStyle,
   useDerivedValue,
@@ -16,9 +21,13 @@ import type {
   AnimatedPressableOptions,
   PressableContextType,
 } from '../provider/context';
+import {
+  GestureButton,
+  type GestureButtonPassthroughProps,
+} from './gesture-button';
 
-const AnimatedBaseButton = Animated.createAnimatedComponent(BaseButton);
-type AnimatedPressableProps = ComponentProps<typeof AnimatedBaseButton>;
+const AnimatedGestureButton = Animated.createAnimatedComponent(GestureButton);
+type AnimatedViewProps = ComponentProps<typeof Animated.View>;
 
 export type AnimatedPressableStyleOptions<TMetadata = unknown> = {
   isPressed: boolean;
@@ -123,34 +132,9 @@ export type BasePressableProps<TMetadata = unknown> = {
   'metadata' | 'config'
 > &
   Partial<
-    Pick<
-      AnimatedPressableProps,
-      | 'layout'
-      | 'onLongPress'
-      | 'entering'
-      | 'exiting'
-      | 'style'
-      | 'hitSlop'
-      | 'testID'
-      | 'accessible'
-      | 'userSelect'
-      | 'activeCursor'
-      | 'shouldCancelWhenOutside'
-      | 'cancelsTouchesInView'
-      | 'enableContextMenu'
-      | 'rippleColor'
-      | 'rippleRadius'
-      | 'touchSoundDisabled'
-      | 'waitFor'
-      | 'simultaneousHandlers'
-      | 'accessibilityHint'
-      | 'accessibilityLabel'
-      | 'accessibilityRole'
-      | 'accessibilityState'
-      | 'accessibilityValue'
-      | 'accessibilityActions'
-    >
-  > & {
+    Pick<AnimatedViewProps, 'layout' | 'entering' | 'exiting' | 'style'>
+  > &
+  GestureButtonPassthroughProps & {
     onPress?: (options: AnimatedPressableOptions<TMetadata>) => void;
     onPressIn?: (options: AnimatedPressableOptions<TMetadata>) => void;
     onPressOut?: (options: AnimatedPressableOptions<TMetadata>) => void;
@@ -212,6 +196,11 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
 
     const active = useSharedValue(false);
     const isToggled = useSharedValue(initialToggled);
+    // JS-side mirror of isToggled. A shared value written from the JS thread
+    // is applied on the UI thread asynchronously, so a JS read right after the
+    // write can return the previous value. Handlers must see the state they
+    // just produced, so it is tracked here.
+    const isToggledRef = useRef(initialToggled);
 
     const { animationType, animationConfig } = useMemo(() => {
       if (animationTypeProp != null) {
@@ -252,31 +241,37 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       return lastTouchedPressable.get() === pressableId;
     }, [lastTouchedPressable, pressableId]);
 
-    // Snapshot the current interaction state into the options object passed to
-    // every handler. Reads live shared values, so callers mutate state first
-    // (active/isToggled/lastTouchedPressable) and then build.
+    // Snapshot the interaction state into the options object passed to every
+    // handler. Callers pass the state they just wrote (isPressed, and on press
+    // isSelected) instead of reading it back from the shared values, whose
+    // JS-thread writes land asynchronously.
     const buildOptions = useCallback(
-      (): AnimatedPressableOptions => ({
-        isPressed: active.get(),
-        isToggled: isToggled.get(),
-        isSelected: lastTouchedPressable.get() === pressableId,
+      (
+        state: Pick<AnimatedPressableOptions, 'isPressed'> &
+          Partial<Pick<AnimatedPressableOptions, 'isSelected'>>
+      ): AnimatedPressableOptions => ({
+        isPressed: state.isPressed,
+        isToggled: isToggledRef.current,
+        isSelected:
+          state.isSelected ?? lastTouchedPressable.get() === pressableId,
         metadata,
       }),
-      [active, isToggled, lastTouchedPressable, pressableId, metadata]
+      [lastTouchedPressable, pressableId, metadata]
     );
 
     const onPressInWrapper = useCallback(() => {
       active.set(true);
-      const options = buildOptions();
+      const options = buildOptions({ isPressed: true });
       onPressInProvider?.(options);
       onPressIn?.(options);
     }, [active, buildOptions, onPressIn, onPressInProvider]);
 
     const onPressWrapper = useCallback(() => {
       active.set(false);
-      isToggled.set(!isToggled.get());
+      isToggledRef.current = !isToggledRef.current;
+      isToggled.set(isToggledRef.current);
       lastTouchedPressable.set(pressableId);
-      const options = buildOptions();
+      const options = buildOptions({ isPressed: false, isSelected: true });
       onPressProvider?.(options);
       onPress?.(options);
     }, [
@@ -291,7 +286,7 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
 
     const onPressOutWrapper = useCallback(() => {
       active.set(false);
-      const options = buildOptions();
+      const options = buildOptions({ isPressed: false });
       onPressOutProvider?.(options);
       onPressOut?.(options);
     }, [active, buildOptions, onPressOut, onPressOutProvider]);
@@ -302,13 +297,13 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       (activateOnHoverProp ?? activateOnHoverProvider ?? false);
 
     // Hover handlers for web
-    const onMouseEnter = useCallback(() => {
+    const onHoverIn = useCallback(() => {
       if (shouldEnableHover && isEnabled) {
         active.set(true);
       }
     }, [shouldEnableHover, isEnabled, active]);
 
-    const onMouseLeave = useCallback(() => {
+    const onHoverOut = useCallback(() => {
       if (shouldEnableHover) {
         active.set(false);
       }
@@ -341,11 +336,11 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       () =>
         shouldEnableHover
           ? {
-              onMouseEnter,
-              onMouseLeave,
+              onHoverIn,
+              onHoverOut,
             }
           : {},
-      [shouldEnableHover, onMouseEnter, onMouseLeave]
+      [shouldEnableHover, onHoverIn, onHoverOut]
     );
 
     const childrenCallbackParams = useMemo<PressableChildrenCallbackParams>(
@@ -382,23 +377,19 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
     const accessible = mergedProps.accessible ?? true;
 
     return (
-      <AnimatedBaseButton
+      <AnimatedGestureButton
         {...mergedProps}
-        {...({ accessibilityIdentifier } as any)}
+        accessibilityIdentifier={accessibilityIdentifier}
         accessible={accessible}
-        {...(hoverProps as any)}
+        {...hoverProps}
         style={[rest?.style ?? {}, rAnimatedStyle, cursorStyle]}
         enabled={isEnabled}
         onPress={onPressWrapper}
-        onBegan={onPressInWrapper}
-        onActivated={onPressInWrapper}
-        onEnded={onPressOutWrapper}
-        onFailed={onPressOutWrapper}
-        onCancelled={onPressOutWrapper}
-        exclusive={false}
+        onPressIn={onPressInWrapper}
+        onPressOut={onPressOutWrapper}
       >
         {renderedChildren}
-      </AnimatedBaseButton>
+      </AnimatedGestureButton>
     );
   }
 );
