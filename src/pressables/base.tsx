@@ -144,6 +144,12 @@ export type BasePressableProps<TMetadata = unknown> = {
 
 const cursorStyle = Platform.OS === 'web' ? { cursor: 'pointer' as const } : {};
 
+// Reanimated only reads hook dependency arrays on web. On native it ignores
+// them and logs "Dependencies should only be used on the web" once per call
+// site, so pass them on web only.
+const webOnlyDeps = <T extends unknown[]>(deps: T): T | undefined =>
+  Platform.OS === 'web' ? deps : undefined;
+
 const BasePressable: React.FC<BasePressableProps> = React.memo(
   ({
     children,
@@ -236,14 +242,20 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       };
     }, [withAnimation, animationConfig]);
 
-    const progress = useDerivedValue<number>(() => {
-      return withAnimationConfigured(active.get() ? 1 : 0);
-    }, [withAnimationConfigured]);
+    const progress = useDerivedValue<number>(
+      () => {
+        return withAnimationConfigured(active.get() ? 1 : 0);
+      },
+      webOnlyDeps([withAnimationConfigured])
+    );
 
     // Derived SharedValue for isSelected (computed from comparison)
-    const isSelectedDerived = useDerivedValue(() => {
-      return lastTouchedPressable.get() === pressableId;
-    }, [lastTouchedPressable, pressableId]);
+    const isSelectedDerived = useDerivedValue(
+      () => {
+        return lastTouchedPressable.get() === pressableId;
+      },
+      webOnlyDeps([lastTouchedPressable, pressableId])
+    );
 
     // Snapshot the interaction state into the options object passed to every
     // handler. isToggled and isSelected come from JS-side mirrors and isPressed
@@ -311,28 +323,31 @@ const BasePressable: React.FC<BasePressableProps> = React.memo(
       }
     }, [shouldEnableHover, active]);
 
-    const rAnimatedStyle = useAnimatedStyle(() => {
-      return animatedStyle
-        ? animatedStyle(progress.get(), {
-            isPressed: active.get(),
-            isToggled: isToggled.get(),
-            isSelected: lastTouchedPressable.get() === pressableId,
-            metadata,
-            config,
-            withAnimation: withAnimationConfigured,
-          })
-        : {};
-    }, [
-      animatedStyle,
-      progress,
-      active,
-      isToggled,
-      lastTouchedPressable,
-      pressableId,
-      metadata,
-      config,
-      withAnimationConfigured,
-    ]);
+    const rAnimatedStyle = useAnimatedStyle(
+      () => {
+        return animatedStyle
+          ? animatedStyle(progress.get(), {
+              isPressed: active.get(),
+              isToggled: isToggled.get(),
+              isSelected: lastTouchedPressable.get() === pressableId,
+              metadata,
+              config,
+              withAnimation: withAnimationConfigured,
+            })
+          : {};
+      },
+      webOnlyDeps([
+        animatedStyle,
+        progress,
+        active,
+        isToggled,
+        lastTouchedPressable,
+        pressableId,
+        metadata,
+        config,
+        withAnimationConfigured,
+      ])
+    );
 
     const hoverProps = useMemo(
       () =>
